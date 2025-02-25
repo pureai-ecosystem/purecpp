@@ -1,0 +1,6 @@
+# Windows
+include my_package/win_module.pyd
+include my_package/win_dependency.dll
+
+# Linux
+# include pureai/*.so

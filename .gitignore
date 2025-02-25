@@ -1,0 +1,74 @@
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+### Python ###
+pycache/
+__pycache__/
+.pytest_cache/
+
+.pyd
+
+### Others ###
+CMakeUserPresets.json
+CMakeFiles/
+
+bkp/
+build/
+models/
+libs/libtorch
+libs/tokenizers-cpp
+libs/openai-cpp
+
+libtorch*.zip
+libtorch-cxx11-abi-shared*
+libtorch-cxx11-abi-shared-with-deps-2.5.1+cpu.zip
+
+models
+conan.lock
+libtorch/
+extern/*
+
+openai_api_key*
+
+package/build/
+package/dist/
+packer
+package/*.egg-info
+
+.venv/
+.venv*/
+.vscode/
+.vs/
+
+tests/
