@@ -4,7 +4,6 @@
 
 #include <re2/re2.h>
 #include <torch/torch.h>
-
 #include <vector>
 
 

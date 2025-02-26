@@ -6,51 +6,50 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "FileUtils.h"
+#include "FileUtilsLocal.h"
 
 namespace TXTLoader
 {
-    TXTLoader::TXTLoader(const std::vector<RAGLibrary::DataExtractRequestStruct>& filePaths, const unsigned int& numThreads) :
-        DataLoader::BaseDataLoader(numThreads)
+    TXTLoader::TXTLoader(const std::vector<RAGLibrary::DataExtractRequestStruct> &filePaths, const unsigned int &numThreads) : DataLoader::BaseDataLoader(numThreads)
     {
-        if(!filePaths.empty())
+        if (!filePaths.empty())
         {
             InsertDataToExtract(filePaths);
         }
 
-        AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct filePath){
-            ExtractTextFromTXT(filePath);
-        });
+        AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct filePath)
+                           { ExtractTextFromTXT(filePath); });
     }
 
-    void TXTLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct>& dataPaths)
+    void TXTLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths)
     {
         LocalFileReader(dataPaths, ".txt");
     }
 
-    void TXTLoader::ExtractTextFromTXT(const RAGLibrary::DataExtractRequestStruct& path)
+    void TXTLoader::ExtractTextFromTXT(const RAGLibrary::DataExtractRequestStruct &path)
     {
         auto verifyWhiteSpace = [](std::string str)
         {
-            return std::all_of(str.begin(), str.end(), 
-                [](auto ch) { 
-                    return std::isspace(ch); 
-                });
+            return std::all_of(str.begin(), str.end(),
+                               [](auto ch)
+                               {
+                                   return std::isspace(ch);
+                               });
         };
 
         auto txtContent = RAGLibrary::FileReader(path.targetIdentifier);
         std::vector<std::string> result, cleanResult;
 
         boost::split(result, txtContent, boost::is_any_of("\n"));
-        for(auto elem : result)
+        for (auto elem : result)
         {
-    	    if(!verifyWhiteSpace(elem))
+            if (!verifyWhiteSpace(elem))
             {
                 cleanResult.push_back(elem);
             }
         }
 
-        if(!cleanResult.empty())
+        if (!cleanResult.empty())
         {
             std::lock_guard lock(m_mutex);
             std::filesystem::path filePath(path.targetIdentifier);

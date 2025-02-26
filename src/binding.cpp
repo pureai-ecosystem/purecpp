@@ -20,7 +20,7 @@
 #include "RagException.h"
 #include "ThreadSafeQueue.h"
 #include "StringUtils.h"
-#include "FileUtils.h"
+#include "FileUtilsLocal.h"
 #include "CommonStructs.h"
 
 #include "IBaseLoader.h"
@@ -70,7 +70,7 @@ void bind_RagException(py::module &m)
     py::register_exception<RagException>(m, "RagException");
 }
 
-void bind_FileUtils(py::module &m)
+void bind_FileUtilsLocal(py::module &m)
 {
     m.def("FileReader", &RAGLibrary::FileReader,
           py::arg("filePath"),
@@ -237,7 +237,7 @@ void bind_IBaseDataLoader(py::module &m)
         .def("GetKeywordOccurences", &IBaseDataLoader::GetKeywordOccurences, py::arg("keyword"));
 }
 // --------------------------------------------------------------------------
-// Binding for FileUtils.
+// Binding for FileUtilsLocal.
 // --------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------
@@ -470,7 +470,7 @@ void bind_ChunkCount(py::module &m)
     py::class_<Chunk::ChunkCount>(m, "ChunkCount")
         .def(py::init<const std::string &, const int, const int>(),
              py::arg("count_unit"), py::arg("overlap") = 600, py::arg("count_threshold") = 1)
-        .def(py::init<>()) 
+        .def(py::init<>())
         .def("ProcessSingleDocument", &Chunk::ChunkCount::ProcessSingleDocument, py::arg("item"))
         .def("ProcessDocuments", &Chunk::ChunkCount::ProcessDocuments,
              py::arg("items"), py::arg("max_workers") = 4);
@@ -482,7 +482,7 @@ void bind_ChunkCount(py::module &m)
 /**
  * Creates the binding for the ChunkSimilarity class, responsible for splitting
  *text into chunks and generating embeddings for similarity analysis.
-*/
+ */
 void bind_ChunkSimilarity(py::module &m)
 {
     // First, we create the binding for the EmbeddingModel enum (if it hasn't been created yet).
@@ -811,11 +811,10 @@ public:
 };
 
 /**
- * Creates the binding for the `IMetadataHFExtractor` interface. Since it is a 
- * purely virtual class, we need the `PyIMetadataHFExtractor` trampoline 
+ * Creates the binding for the `IMetadataHFExtractor` interface. Since it is a
+ * purely virtual class, we need the `PyIMetadataHFExtractor` trampoline
  * to allow methods to be overridden in Python.
  */
-
 
 void bind_IMetadataHFExtractor(py::module &m)
 {
@@ -1005,8 +1004,8 @@ void bind_EmbeddingDocument(py::module &m)
 // --------------------------------------------------------------------------
 
 /**
-* Trampoline class (Python wrapper) for IBaseEmbedding, allowing
-* the overriding of pure virtual methods in Python.
+ * Trampoline class (Python wrapper) for IBaseEmbedding, allowing
+ * the overriding of pure virtual methods in Python.
  */
 class PyIBaseEmbedding : public Embedding::IBaseEmbedding
 {
@@ -1130,33 +1129,30 @@ public:
     std::vector<float> GenerateEmbeddings(const std::vector<std::string> &text) override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::vector<float>,       
-            Embedding::BaseEmbedding, 
-            GenerateEmbeddings,       
-            text                      
-        );
+            std::vector<float>,
+            Embedding::BaseEmbedding,
+            GenerateEmbeddings,
+            text);
     }
 
     Embedding::Document ProcessDocument(Embedding::Document document) override
     {
         PYBIND11_OVERRIDE(
-            Embedding::Document,      
-            Embedding::BaseEmbedding, 
-            ProcessDocument,          
-            document                  
-        );
+            Embedding::Document,
+            Embedding::BaseEmbedding,
+            ProcessDocument,
+            document);
     }
 
     // Overriding the virtual method ProcessDocuments (not pure)
     std::vector<Embedding::Document> ProcessDocuments(std::vector<Embedding::Document> documents, const int &maxWorkers) override
     {
         PYBIND11_OVERRIDE(
-            std::vector<Embedding::Document>, 
-            Embedding::BaseEmbedding,        
-            ProcessDocuments,                 
-            documents,                        
-            maxWorkers                        
-        );
+            std::vector<Embedding::Document>,
+            Embedding::BaseEmbedding,
+            ProcessDocuments,
+            documents,
+            maxWorkers);
     }
 };
 
@@ -1507,7 +1503,7 @@ PYBIND11_MODULE(RagPUREAI, m)
 {
     m.doc() = "Unified bindings for RagPUREAI.";
     bind_RagException(m);
-    bind_FileUtils(m);
+    bind_FileUtilsLocal(m);
     bind_StringUtils(m);
 
     bind_CommonStructs(m);

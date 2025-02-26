@@ -67,7 +67,7 @@ std::vector<RAGLibrary::Document> ChunkQuery::ProcessSingleDocument(const RAGLib
         auto chunks = Chunk::SplitText(item.textContent, m_overlap, m_chunk_size);
         auto chunksEmbeddings = GenerateEmbeddings(chunks);
         auto queryEmbeddingTensor = torch::from_blob(const_cast<float *>(query_embedding.data()), {int64_t(query_embedding.size())}, torch::kFloat32);
-        for (size_t i = 0; i < chunks.size(); i++)
+        for (int i = 0; i < chunks.size(); i++)
         {
             auto &chunk = chunks[i];
             auto &embedding = chunksEmbeddings[i];
@@ -107,12 +107,12 @@ std::vector<RAGLibrary::Document> ChunkQuery::ProcessDocuments(const std::vector
         auto query_embedding = GenerateEmbeddings({query}).front();
 
         omp_set_num_threads(max_threads);
-        #pragma omp parallel for
-        for (size_t i = 0; i < items.size(); i++)
+#pragma omp parallel for
+        for (int i = 0; i < items.size(); i++)
         {
             auto &item = items[i];
             auto docs = ProcessSingleDocument(item, query_embedding, similarity_threshold);
-            #pragma omp critical
+#pragma omp critical
             {
                 documents.reserve(documents.size() + docs.size());
                 documents.insert(documents.end(), docs.begin(), docs.end());

@@ -60,7 +60,7 @@ std::vector<RAGLibrary::Document> ChunkDefault::ProcessDocuments(const std::vect
 
         omp_set_num_threads(max_threads);
         #pragma omp parallel for
-        for (size_t i = 0; i < items.size(); i++)
+        for (int i = 0; i < items.size(); i++)
         {
             auto &item = items[i];
             auto chunks = Chunk::SplitText(item.textContent, m_overlap, m_chunk_size);

@@ -53,11 +53,11 @@ std::vector<float> Chunk::MeanPooling(const std::vector<float> &token_embeddings
     size_t num_tokens = token_embeddings.size() / embedding_size;
     std::vector<float> pooled_embeddings(embedding_size, 0.0f);
 
-    for (size_t i = 0; i < num_tokens; ++i)
+    for (int i = 0; i < num_tokens; ++i)
     {
         if (attention_mask[i] == 1)
         {
-            for (size_t j = 0; j < embedding_size; ++j)
+            for (int j = 0; j < embedding_size; ++j)
             {
                 pooled_embeddings[j] += token_embeddings[i * embedding_size + j];
             }
@@ -65,7 +65,7 @@ std::vector<float> Chunk::MeanPooling(const std::vector<float> &token_embeddings
     }
 
     int valid_tokens = std::accumulate(attention_mask.begin(), attention_mask.end(), 0);
-    for (size_t j = 0; j < embedding_size; ++j)
+    for (int j = 0; j < embedding_size; ++j)
     {
         pooled_embeddings[j] /= std::max(valid_tokens, 1);
     }
@@ -99,7 +99,7 @@ std::vector<std::vector<float>> Chunk::EmbeddingModelBatch(const std::vector<std
     Ort::AllocatorWithDefaultOptions allocator;
 
     std::vector<std::vector<float>> results;
-    for (size_t start_idx = 0; start_idx < chunks.size(); start_idx += batch_size)
+    for (int start_idx = 0; start_idx < chunks.size(); start_idx += batch_size)
     {
         size_t end_idx = std::min(start_idx + batch_size, chunks.size());
         std::vector<std::string> texts(chunks.begin() + start_idx, chunks.begin() + end_idx);
@@ -114,7 +114,7 @@ std::vector<std::vector<float>> Chunk::EmbeddingModelBatch(const std::vector<std
         std::vector<int64_t> inputIds(total_size, 0);
         std::vector<int64_t> attentionMask(total_size, 0);
         size_t ii = 0;
-        for (size_t i = 0; i < encode_batch.size(); ++i)
+        for (int i = 0; i < encode_batch.size(); ++i)
         {
             for (auto index = 0; index < encode_batch[i].size(); ++index)
             {
@@ -145,7 +145,7 @@ std::vector<std::vector<float>> Chunk::EmbeddingModelBatch(const std::vector<std
         results.reserve(results.size() + encode_batch.size());
         ii = 0;
         size_t numLabels = outputSize / total_size;
-        for (size_t i = 0; i < encode_batch.size(); i++)
+        for (int i = 0; i < encode_batch.size(); i++)
         {
             std::vector<float> tokenLogits(logits + ii * numLabels, logits + (ii + encode_batch[i].size()) * numLabels);
             results.push_back(std::move(tokenLogits));
@@ -161,7 +161,7 @@ std::vector<std::vector<float>> Chunk::EmbeddingOpeanAI(const std::vector<std::s
     std::vector<std::vector<float>> results;
     openai::start(openai_api_key);
     results.reserve(chunks.size());
-    for (size_t i = 0; i < chunks.size(); i++)
+    for (int i = 0; i < chunks.size(); i++)
     {
         auto &chunk = chunks[i];
         auto startTime = std::chrono::high_resolution_clock::now();
@@ -199,7 +199,7 @@ std::vector<std::string> Chunk::SplitText(const std::vector<std::string> &inputs
     size_t chunk_sizes = (size_t)std::ceil((long double)text.size() / (long double)(step));
 
     std::vector<std::string> chunks(chunk_sizes);
-    for (size_t i = 0; i < chunk_sizes; ++i)
+    for (int i = 0; i < chunk_sizes; ++i)
     {
         size_t start_index = i * step;
         size_t end_index = start_index + chunk_size;
@@ -232,7 +232,7 @@ std::vector<std::string> Chunk::SplitTextByCount(const std::vector<std::string> 
     }
 
     size_t start_idx = size_t(0);
-    for (size_t i = 0; i < matches.size(); i += count_threshold)
+    for (int i = 0; i < matches.size(); i += count_threshold)
     {
         size_t j = i + count_threshold;
         size_t end_idx = text.size() + 1;
