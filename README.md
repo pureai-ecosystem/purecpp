@@ -9,14 +9,15 @@ RagPUREAI is the C++ backend for architectural code that will feed the RAG
 * RUST
 
 # How to build
+The following command executes the cleand_and_build.sh script, which performs the following actions:
+
+- Creates a folder required for the project build.
+- Runs CMake to configure and generate the build files.
+- Creates the build folder, where the compiled files will be stored.
+- Installs Conan dependencies, ensuring all necessary libraries and packages are available.
 ```bash
-cd RagPUREAI
-sudo apt-get install protobuf-compiler
-conan profile detect
-sudo sed -i s/compiler.version=.*/compiler.version=11/g ~/.conan2/profiles/default
-conan install . --build=missing
-cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -S$(pwd) -DSPM_USE_BUILTIN_PROTOBUF=OFF -B$(pwd)/build/Release -G "Unix Makefiles"
-cmake --build $(pwd)/build/Release --parallel $(nproc) --target RagPUREAI --
+chmod +x cleand_and_build.sh
+./cleand_and_build.sh
 ```
 
 # Download Model
