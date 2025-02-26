@@ -163,7 +163,7 @@ namespace DataLoader
         {
             if (std::filesystem::is_regular_file(dir) && dir.extension().string() == extension)
             {
-                std::cout << std::format("IsRegularFile: {}", dir.c_str()) << std::endl;
+                std::cout << std::format("IsRegularFile: {}", dir.string()) << std::endl;
                 workQueue.emplace_back(std::string(dir.string()), pdfPageLimit);
             }
         };

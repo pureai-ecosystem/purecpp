@@ -11,6 +11,22 @@
 
 #include "RagException.h"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h> 
+#undef min
+#undef max
+#undef format
+
+std::wstring to_wstring_utf16(const std::string& utf8) {
+    int needed_size = MultiByteToWideChar(CP_UTF8, 0, utf8.data(), (int)utf8.size(), nullptr, 0);
+    std::wstring wstr(needed_size, 0);
+    MultiByteToWideChar(CP_UTF8, 0, utf8.data(), (int)utf8.size(), wstr.data(), needed_size);
+    return wstr;
+}
+#endif
+
 namespace PDFLoader
 {
     PDFLoader::PDFLoader(const std::vector<RAGLibrary::DataExtractRequestStruct>& filePaths, const unsigned int& numThreads) :
@@ -34,7 +50,29 @@ namespace PDFLoader
 
     void PDFLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct>& dataPaths)
     {
-        LocalFileReader(dataPaths, ".pdf");
+        std::vector<RAGLibrary::DataExtractRequestStruct> workQueue; 
+        auto regularFileProcessor = [this, &workQueue](const std::filesystem::path& dir, const unsigned int& pdfPageLimit){
+            if(std::filesystem::is_regular_file(dir) && dir.extension().string() == ".pdf")
+            {
+                std::cout << std::format("IsRegularFile: {}", dir.string()) << std::endl;
+                workQueue.emplace_back(std::string(dir.string()), pdfPageLimit);
+            }
+        };
+        std::for_each(dataPaths.begin(), dataPaths.end(), [this, regularFileProcessor](auto& str_path){
+            auto path = std::filesystem::path(str_path.targetIdentifier);
+            if(std::filesystem::is_directory(path))
+            {
+                for(auto dir : std::filesystem::recursive_directory_iterator{path})
+                {
+                    regularFileProcessor(dir.path(), str_path.extractContentLimit);
+                }
+            }
+            else if(std::filesystem::is_regular_file(path))
+            {
+                regularFileProcessor(path, str_path.extractContentLimit);
+            }
+        });
+        InsertWorkIntoThreads(workQueue);
     }
 
     void PDFLoader::ExtractPDFData(const RAGLibrary::DataExtractRequestStruct& path)

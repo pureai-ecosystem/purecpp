@@ -69,9 +69,9 @@ std::vector<RAGLibrary::Document> ChunkSimilarity::ProcessSingleDocument(const R
         auto sorted_indices = torch::argsort(-similarity_matrix.sum(1));
 
         documents.reserve(documents.size() + chunks.size());
-        for (size_t i = 0; i < sorted_indices.size(0); i++)
+        for (int i = 0; i < sorted_indices.size(0); i++)
         {
-            auto j = sorted_indices[i].item<long>();
+            auto j = sorted_indices[i].item<int64_t>();
             documents.push_back(RAGLibrary::Document(item.metadata, chunks[j]));
         }
     }
@@ -96,12 +96,12 @@ std::vector<RAGLibrary::Document> ChunkSimilarity::ProcessDocuments(const std::v
         }
 
         omp_set_num_threads(max_threads);
-        #pragma omp parallel for
-        for (size_t i = 0; i < items.size(); i++)
+#pragma omp parallel for
+        for (int i = 0; i < items.size(); i++)
         {
             auto &item = items[i];
             auto docs = ProcessSingleDocument(item);
-            #pragma omp critical
+#pragma omp critical
             {
                 documents.reserve(documents.size() + docs.size());
                 documents.insert(documents.end(), docs.begin(), docs.end());
