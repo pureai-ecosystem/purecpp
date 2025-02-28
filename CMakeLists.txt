@@ -116,7 +116,7 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/libs/ThreadSafeQueue
     ${CMAKE_SOURCE_DIR}/libs/CommonStructs
     ${CMAKE_SOURCE_DIR}/libs/StringUtils
-    ${CMAKE_SOURCE_DIR}/libs/FileUtilsLocal
+    ${CMAKE_SOURCE_DIR}/libs/FileUtils
     ${TOKENIZERS_PATH}/include
     ${OPEANAI_CPP_PATH}/include
     ${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include

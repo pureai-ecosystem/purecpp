@@ -101,7 +101,7 @@ std::vector<std::vector<float>> Chunk::EmbeddingModelBatch(const std::vector<std
     std::vector<std::vector<float>> results;
     for (int start_idx = 0; start_idx < chunks.size(); start_idx += batch_size)
     {
-        size_t end_idx = std::min(start_idx + batch_size, chunks.size());
+        size_t end_idx = std::min<ptrdiff_t>(start_idx + batch_size, chunks.size());
         std::vector<std::string> texts(chunks.begin() + start_idx, chunks.begin() + end_idx);
         auto encode_batch = tokenizer->EncodeBatch(chunks);
 

@@ -37,15 +37,12 @@ def load_libtorch():
         else:
             os.system(f"unzip {LIBTORCH_CPU_ZIP} -d {LIBTORCH_DIR}")
 
-        print("AQUI")
         shutil.move(os.path.join(LIBTORCH_DIR, "libtorch"), LIBTORCH_CPU_PATH)
-        print("A")
 
     if platform.system() == "Windows":
         os.environ["PATH"] = LIBTORCH_BIN_PATH + \
             ";" + os.environ.get("PATH", "")
     else:
-        print("B")
         os.environ["LD_LIBRARY_PATH"] = LIBTORCH_LIB_PATH + \
             ":" + os.environ.get("LD_LIBRARY_PATH", "")
 

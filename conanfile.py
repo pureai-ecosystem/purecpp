@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, Cmake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 
 
