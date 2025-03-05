@@ -114,7 +114,7 @@ mv ./libs/libtorch/libtorch/ ./libs/libtorch/cuda
 ---
 
 ## 📌 Next Steps
-![Next Steps](../community/release.jpg)
+![Next Steps](community/release.jpg)
 
 Stay tuned for updates! 🚀
 
