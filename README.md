@@ -15,7 +15,7 @@ For detailed installation and setup instructions, please refer to our official d
 
 We welcome contributions to **PureCPP**! If you would like to contribute, please read our contribution guide before opening an issue or submitting a pull request:
 
-👉 [Contribution Guide](../community/CONTRIBUTING.md)
+👉 [Contribution Guide](/community/CONTRIBUTING.md)
 
 ---
 
