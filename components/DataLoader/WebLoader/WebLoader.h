@@ -4,32 +4,30 @@
 #include <string>
 #include <memory>
 #include <optional>
+#include <mutex>
 
 #include "BaseLoader.h"
-
 #include "lexbor/html/html.h"
-#include "re2/re2.h"
+#include "beauty/beauty.hpp"
 
 namespace WebLoader
 {
-    const RE2 fontSizeRegex("font-size:\\s*([\\d\\.]+\\w+%?);?");
-    
     class WebLoader : public DataLoader::BaseDataLoader
     {
     public:
         WebLoader() = delete;
-        WebLoader(const std::vector<RAGLibrary::DataExtractRequestStruct>& urlsToScrap = {}, const int& numThreads = 0);
+        WebLoader(const std::vector<RAGLibrary::DataExtractRequestStruct> &urlsToScrap = {}, const int &numThreads = 0);
         ~WebLoader() = default;
 
-        void InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct>& dataPaths) final;
+        void InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths) final;
+
     private:
-        std::optional<std::string> ScrapURL(const std::string& url);
-        void URLFontTextExtractor(const std::string& urlData, const std::string& urlPath);
-        void ExtractPageTextElements(lxb_dom_node_t* node);
-        void GetFontSize(lxb_dom_node_t* node, std::string& fontSize);
+        std::optional<std::string> ScrapURL(const std::string &url);
+        void ExtractTextFromHTML(const std::string &urlPath, const std::string &htmlData);
+        void ExtractBodyText(lxb_dom_node_t *node, std::vector<std::string> &textContent);
 
         mutable std::mutex m_mutex;
-        std::vector<std::string> m_extractedText;
+        std::vector<RAGLibrary::LoaderDataStruct> m_dataVector;
     };
     using WebLoaderPtr = std::shared_ptr<WebLoader>;
 }
