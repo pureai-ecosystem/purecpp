@@ -1,16 +1,25 @@
+import os
+
 from conan import ConanFile
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 
 
 class RagPureAIConan(ConanFile):
     name = "RagPureAI"
     version = "1.0"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [
-        True, False], "CURL_STATIC_LINKING": [True, False]}
-    default_options = {"shared": True,
-                       "fPIC": True, "CURL_STATIC_LINKING": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "CURL_STATIC_LINKING": [True, False]
+    }
+    default_options = {
+        "shared": True,
+        "fPIC": True,
+        "CURL_STATIC_LINKING": False
+    }
     generators = "CMakeDeps", "CMakeToolchain", "PkgConfigDeps"
 
     def layout(self):
@@ -34,3 +43,11 @@ class RagPureAIConan(ConanFile):
     def configure(self):
         if self.options.CURL_STATIC_LINKING:
             self.options["libcurl"].shared = False
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+    def build(self):
+        cmake.configure()
+        cmake.build()

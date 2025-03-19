@@ -12,7 +12,7 @@ constexpr std::string extraSpaces = "\\s+";
 constexpr std::string nonAsciiCharacters = "[^\\x00-\\x7F]+";
 constexpr std::string symbolsBeginningOrEndOfLines = "^\\W+|\\W+$";
 
-static void trim(std::string& text)
+static void trim(std::string &text)
 {
     auto isNoSpace = [](unsigned char ch)
     {
@@ -24,8 +24,8 @@ static void trim(std::string& text)
     text.erase(std::find_if(text.rbegin(), text.rend(), isNoSpace).base(), text.end());
 }
 
-ContentCleaner::ContentCleaner(const std::vector<std::string>& default_patterns)
-: m_default_patterns(default_patterns)
+ContentCleaner::ContentCleaner(const std::vector<std::string> &default_patterns)
+    : m_default_patterns(default_patterns)
 {
     if (m_default_patterns.empty())
     {
@@ -38,25 +38,25 @@ ContentCleaner::ContentCleaner(const std::vector<std::string>& default_patterns)
     ValidatePatterns(m_default_patterns);
 }
 
-void ContentCleaner::ValidatePatterns(const std::vector<std::string>& patterns)
+void ContentCleaner::ValidatePatterns(const std::vector<std::string> &patterns)
 {
-    for(auto& pattern : patterns)
+    for (auto &pattern : patterns)
     {
         re2::RE2 re2(pattern);
-        if(!re2.ok())
+        if (!re2.ok())
         {
             throw RAGLibrary::RagException(std::format("IsRegularPattern: {} error: {}", pattern.c_str(), re2.error().c_str()));
         }
     }
 }
 
-std::string ContentCleaner::CleanContent(const std::string& text, const std::vector<std::string>& custom_patterns)
+std::string ContentCleaner::CleanContent(const std::string &text, const std::vector<std::string> &custom_patterns)
 {
     ValidatePatterns(custom_patterns);
     std::vector<std::shared_ptr<re2::RE2>> regexs;
     regexs.reserve(m_default_patterns.size() + custom_patterns.size());
 
-    auto appendRegex = [&regexs](const std::string& pattern)
+    auto appendRegex = [&regexs](const std::string &pattern)
     {
         regexs.push_back(std::make_shared<re2::RE2>(pattern));
     };
@@ -66,7 +66,7 @@ std::string ContentCleaner::CleanContent(const std::string& text, const std::vec
 
     std::string replacedText = text;
 
-    for(auto& regex : regexs)
+    for (auto &regex : regexs)
     {
         re2::RE2::GlobalReplace(&replacedText, *regex, " ");
     }
@@ -76,20 +76,20 @@ std::string ContentCleaner::CleanContent(const std::string& text, const std::vec
     return replacedText;
 }
 
-RAGLibrary::Document ContentCleaner::ProcessDocument(const RAGLibrary::Document& doc, const std::vector<std::string>& custom_patterns)
+RAGLibrary::Document ContentCleaner::ProcessDocument(const RAGLibrary::Document &doc, const std::vector<std::string> &custom_patterns)
 {
     try
     {
         return RAGLibrary::Document(doc.metadata, CleanContent(doc.page_content, custom_patterns));
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
         throw;
     }
 }
 
-std::vector<RAGLibrary::Document> ContentCleaner::ProcessDocuments(const std::vector<RAGLibrary::Document>& docs, const std::vector<std::string>& custom_patterns, int max_workers)
+std::vector<RAGLibrary::Document> ContentCleaner::ProcessDocuments(const std::vector<RAGLibrary::Document> &docs, const std::vector<std::string> &custom_patterns, int max_workers)
 {
     std::vector<RAGLibrary::Document> documents(docs.size());
     int max_threads = omp_get_max_threads();
@@ -99,8 +99,8 @@ std::vector<RAGLibrary::Document> ContentCleaner::ProcessDocuments(const std::ve
     }
 
     omp_set_num_threads(max_threads);
-    #pragma omp parallel for
-    for (size_t i = 0; i < docs.size(); i++)
+#pragma omp parallel for
+    for (int i = 0; i < docs.size(); i++)
     {
         documents[i] = ProcessDocument(docs[i], custom_patterns);
     }

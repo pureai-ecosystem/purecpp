@@ -1,8 +1,8 @@
 #include "DOCXLoader.h"
+#include <format>
 
 #include "miniz.h"
 #include "rapidxml.hpp"
-
 #include "RagException.h"
 
 namespace DOCXLoader
@@ -22,9 +22,32 @@ namespace DOCXLoader
             } });
     }
 
-    void DOCXLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths)
+    void DOCXLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct>& dataPaths)
     {
-        LocalFileReader(dataPaths, ".docx");
+        std::vector<RAGLibrary::DataExtractRequestStruct> workQueue; 
+        auto regularFileProcessor = [this, &workQueue](const std::filesystem::path& dir, const unsigned int& docxPageLimit){
+            if(std::filesystem::is_regular_file(dir) && dir.extension().string() == ".docx")
+            {
+                std::cout << std::format("IsRegularFile: {}", dir.string()) << std::endl;
+
+                workQueue.emplace_back(std::string(dir.string()), docxPageLimit);
+            }
+        };
+        std::for_each(dataPaths.begin(), dataPaths.end(), [this, regularFileProcessor](auto& str_path){
+            auto path = std::filesystem::path(str_path.targetIdentifier);
+            if(std::filesystem::is_directory(path))
+            {
+                for(auto dir : std::filesystem::recursive_directory_iterator{path})
+                {
+                    regularFileProcessor(dir.path(), str_path.extractContentLimit);
+                }
+            }
+            else if(std::filesystem::is_regular_file(path))
+            {
+                regularFileProcessor(path, str_path.extractContentLimit);
+            }
+        });
+        InsertWorkIntoThreads(workQueue);
     }
 
     std::optional<std::pair<std::string, int>> DOCXLoader::ExtractZIPFile(const RAGLibrary::DataExtractRequestStruct &path)
