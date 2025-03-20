@@ -1,4 +1,4 @@
-#include "VectorDatabase.h"
+#include "VectorStore.h"
 
 std::string generate_uuid()
 {
