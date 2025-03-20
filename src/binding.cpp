@@ -52,6 +52,8 @@
 #include "EmbeddingOpenAI/IEmbeddingOpenAI.h"
 #include "EmbeddingOpenAI/EmbeddingOpenAI.h"
 
+#include "VectorDatabase/VectorStore.h"
+
 namespace py = pybind11;
 using namespace RAGLibrary;
 using namespace DataLoader;
@@ -1494,6 +1496,25 @@ void bind_ChunkQuery(py::module &m)
 
                 list[RAGLibrary.Document]: List of documents that meet the similarity criteria.
              )doc");
+}
+
+//--------------------------------------------------------------------------
+//  Binding function for VectorDatabase
+//--------------------------------------------------------------------------
+void bind_VectorStore(py::module &m)
+{
+    //--------------------------------------------------------------------------
+    // Binding for the Chunk::VectorStore class.
+    //--------------------------------------------------------------------------
+
+    py::class_<VectorStore>(m, "VectorStore")
+        .def(py::init<int>(), py::arg("dim") = 384)
+        .def("insert_documents", &VectorStore::insert_documents)
+        .def("insert_document", &VectorStore::insert_document)
+        .def("query_by_embedding", &VectorStore::query_by_embedding, py::arg("embedding"), py::arg("top_k") = 5)
+        .def("hybrid_query", &VectorStore::hybrid_query, py::arg("query_text"), py::arg("embedding") = std::vector<float>{}, py::arg("top_k") = 5);
+
+    m.def("generate_uuid", &generate_uuid);
 }
 
 //--------------------------------------------------------------------------
