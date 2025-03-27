@@ -44,7 +44,7 @@ namespace TXTLoader
         for (auto elem : result)
         {
             if (!verifyWhiteSpace(elem))
-            {
+            {   
                 cleanResult.push_back(elem);
             }
         }

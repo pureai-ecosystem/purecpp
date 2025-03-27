@@ -24,10 +24,10 @@ namespace WebLoader
     private:
         std::optional<std::string> ScrapURL(const std::string &url);
         void ExtractTextFromHTML(const std::string &urlPath, const std::string &htmlData);
-        void ExtractBodyText(lxb_dom_node_t *node, std::vector<std::string> &textContent);
+        void ExtractBodyText(lxb_dom_node_t *node);
 
         mutable std::mutex m_mutex;
-        std::vector<RAGLibrary::LoaderDataStruct> m_dataVector;
+        std::vector<std::string> m_extractedText;
     };
     using WebLoaderPtr = std::shared_ptr<WebLoader>;
 }
