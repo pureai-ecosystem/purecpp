@@ -25,7 +25,7 @@ namespace WebLoader
         void ExtractBodyText(lxb_dom_node_t *node);
 
         mutable std::mutex m_mutex;
-        std::vector<std::string> m_extractedText;
+        std::string m_extractedText;
     };
     using WebLoaderPtr = std::shared_ptr<WebLoader>;
 }

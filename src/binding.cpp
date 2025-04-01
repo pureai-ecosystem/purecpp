@@ -144,6 +144,12 @@ void bind_CommonStructs(py::module &m)
             o << data; // Uses the overloaded << operator
             return o.str(); });
 
+    py::class_<RAGLibrary::DataStruct>(m, "DataStruct")
+        .def(py::init<const RAGLibrary::Metadata &, const std::string &>(),
+             py::arg("metadata"), py::arg("textContent"))
+        .def_readwrite("metadata", &RAGLibrary::DataStruct::metadata)
+        .def_readwrite("textContent", &RAGLibrary::DataStruct::textContent);
+
     py::class_<RAGLibrary::ThreadStruct>(m, "ThreadStruct")
         .def(py::init<>())
         .def(py::init<std::shared_ptr<std::future<void>>, RAGLibrary::ThreadSafeQueueDataRequest, unsigned int>(),
@@ -199,10 +205,10 @@ public:
             fileIdentifier);
     }
 
-    std::optional<LoaderDataStruct> Load() override
+    std::optional<DataStruct> Load() override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::optional<LoaderDataStruct>,
+            std::optional<DataStruct>,
             IBaseDataLoader,
             Load);
     }

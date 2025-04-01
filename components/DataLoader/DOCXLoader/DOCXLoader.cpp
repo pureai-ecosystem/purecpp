@@ -64,8 +64,8 @@ namespace DOCXLoader
         std::cout << "Extracting text from XML" << std::endl;
         try
         {
-            RAGLibrary::Metadata metadata = {{"fileIdentifier", filePath.filename().replace_extension("").string()}};
-            RAGLibrary::LoaderDataStruct dataStruct(metadata, {});
+            RAGLibrary::Metadata metadata = {{"source", filePath.string()}};
+            RAGLibrary::DataStruct dataStruct(metadata, "");
 
             rapidxml::xml_document<> document;
             std::vector<char> xmlCopy(data.first.begin(), data.first.end());
@@ -85,30 +85,27 @@ namespace DOCXLoader
                 throw RAGLibrary::RagException("Invalid XML: Missing 'w:body' node");
             }
 
-            std::string page("");
+            std::string fullText;
             for (rapidxml::xml_node<> *pNode = bodyNode->first_node("w:p"); pNode; pNode = pNode->next_sibling("w:p"))
             {
+                std::string paragraph;
                 for (rapidxml::xml_node<> *textNode = pNode->first_node("w:r"); textNode; textNode = textNode->next_sibling("w:r"))
                 {
                     rapidxml::xml_node<> *tNode = textNode->first_node("w:t");
-
-                    std::string line("");
                     while (tNode)
                     {
-                        line += tNode->value() + std::string("\n");
+                        paragraph += tNode->value();
                         tNode = tNode->next_sibling("w:t");
                     }
-                    if (!line.empty())
-                    {
-                        page += line;
-                    }
                 }
-                if (!page.empty())
+                if (!paragraph.empty())
                 {
-                    dataStruct.textContent.push_back(page);
-                    page = "";
+                    fullText += paragraph + "\n";
                 }
             }
+
+            dataStruct.textContent = fullText;
+        
             {
                 std::lock_guard lock(m_mutex);
                 m_dataVector.push_back(dataStruct);

@@ -58,6 +58,7 @@ namespace WebLoader
         try
         {
             auto status = lxb_html_document_parse(document, reinterpret_cast<unsigned char *>(const_cast<char *>(htmlData.c_str())), htmlData.size());
+
             if (status != LXB_STATUS_OK)
             {
                 lxb_html_document_destroy(document);
@@ -67,9 +68,8 @@ namespace WebLoader
             if (auto *body = lxb_html_document_body_element(document); body != nullptr)
             {
                 ExtractBodyText(lxb_dom_interface_node(body));
-                RAGLibrary::Metadata metadata = {{"fileIdentifier", urlPath}};
+                RAGLibrary::Metadata metadata = {{"source", urlPath}};
                 m_dataVector.emplace_back(metadata, m_extractedText);
-                m_extractedText.clear();
             }
 
             lxb_html_document_destroy(document);
@@ -91,7 +91,7 @@ namespace WebLoader
                 std::string textStr(reinterpret_cast<char *>(text));
                 if (!textStr.empty() && !std::all_of(textStr.begin(), textStr.end(), isspace))
                 {
-                    m_extractedText.push_back(textStr);
+                    m_extractedText += textStr + " ";
                 }
             }
         }

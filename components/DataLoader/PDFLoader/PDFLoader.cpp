@@ -51,7 +51,7 @@ namespace PDFLoader
 
     void PDFLoader::ExtractPDFData(const RAGLibrary::DataExtractRequestStruct &path)
     {
-        std::vector<std::string> extractedText;
+        std::string extractedText;
         try
         {
             FPDF_DOCUMENT document;
@@ -63,7 +63,7 @@ namespace PDFLoader
                 {
                     throw RAGLibrary::RagException("Failed to open PDF file");
                 }
-
+    
                 auto pageCount = FPDF_GetPageCount(document);
                 pageLimit = path.extractContentLimit;
                 if (pageLimit > pageCount)
@@ -76,6 +76,7 @@ namespace PDFLoader
                 }
                 std::cout << std::format("Number of pages: {}", pageCount) << std::endl;
             }
+            
             int numChars;
             FPDF_PAGE page;
             FPDF_TEXTPAGE textPage;
@@ -87,16 +88,16 @@ namespace PDFLoader
                 {
                     throw RAGLibrary::RagException("Failed to load page");
                 }
-
+    
                 textPage = FPDFText_LoadPage(page);
                 if (!textPage)
                 {
                     FPDF_ClosePage(page);
                     throw RAGLibrary::RagException("Failed to load text page");
                 }
-
+    
                 numChars = FPDFText_CountChars(textPage);
-
+    
                 std::string tmpPage;
                 icu::UnicodeString unicodeStr;
                 unsigned int unicodeChar;
@@ -105,19 +106,19 @@ namespace PDFLoader
                     unicodeChar = FPDFText_GetUnicode(textPage, charIndex);
                     unicodeStr += static_cast<UChar32>(unicodeChar);
                 }
-
+    
                 unicodeStr.toUTF8String(tmpPage);
-                extractedText.push_back(tmpPage);
-
+                extractedText += tmpPage + "\n";
+    
                 FPDFText_ClosePage(textPage);
                 FPDF_ClosePage(page);
             }
-
+    
             {
                 std::scoped_lock lock(m_mutex);
                 FPDF_CloseDocument(document);
                 std::filesystem::path file(path.targetIdentifier);
-                RAGLibrary::Metadata metadata = {{"fileIdentifier", file.filename().replace_extension("").c_str()}};
+                RAGLibrary::Metadata metadata = {{"source", file.string()}};
                 m_dataVector.emplace_back(metadata, extractedText);
             }
         }
@@ -127,4 +128,5 @@ namespace PDFLoader
             throw;
         }
     }
+    
 }

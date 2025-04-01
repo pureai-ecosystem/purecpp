@@ -95,13 +95,13 @@ namespace DataLoader
         }
     }
 
-    std::optional<RAGLibrary::LoaderDataStruct> BaseDataLoader::Load()
+    std::optional<RAGLibrary::DataStruct> BaseDataLoader::Load()
     {
         std::cout << "Load" << std::endl;
         WaitFinishWorkload();
         for (auto &elem : m_dataVector)
         {
-            std::cout << "Load: " << std::any_cast<std::string>(elem.metadata["fileIdentifier"]) << std::endl;
+            std::cout << "Load: " << std::any_cast<std::string>(elem.metadata["source"]) << std::endl;
             return elem;
         }
         return std::nullopt;
@@ -112,9 +112,11 @@ namespace DataLoader
         WaitFinishWorkload();
         for (auto &elem : m_dataVector)
         {
-            if (std::any_cast<std::string>(elem.metadata["fileIdentifier"]) == fileName)
+            if (std::any_cast<std::string>(elem.metadata["source"]) == fileName)
             {
-                return elem;
+                const auto &metadata = elem.metadata;
+                const auto &textContent = elem.textContent;
+                return RAGLibrary::LoaderDataStruct(metadata, {textContent});
             }
         }
         return std::nullopt;
@@ -126,13 +128,12 @@ namespace DataLoader
 
         for (const auto &elem : m_dataVector)
         {
-            auto it = elem.metadata.find("fileIdentifier");
+            auto it = elem.metadata.find("source");
             if (it == elem.metadata.end() || std::any_cast<std::string>(it->second) != fileName)
                 continue;
 
-            for (const auto &page : elem.textContent)
-                if (page.find(keyword) != std::string::npos)
-                    return true;
+            if (elem.textContent.find(keyword))
+                return true;
         }
 
         return false;
@@ -145,18 +146,18 @@ namespace DataLoader
         RAGLibrary::UpperKeywordData upperKeywordData;
         std::for_each(m_dataVector.begin(), m_dataVector.end(), [&upperKeywordData, keyword](auto &elem)
                       {
-            for(auto line = 0; line < elem.textContent.size(); ++line)
+            auto pos = elem.textContent.find(keyword, 0);
+            std::string fileIdentifier = std::any_cast<std::string>(elem.metadata["source"]);
+            
+            while (pos != std::string::npos)
             {
-                auto pos = elem.textContent[line].find(keyword,0);
-                std::string fileIdentifier = std::any_cast<std::string>(elem.metadata["fileIdentifier"]);
-                while(pos != std::string::npos)
-                {
-                    upperKeywordData.totalOccurences++;
-
-                    upperKeywordData.keywordDataPerFile[fileIdentifier].occurrences++;
-                    upperKeywordData.keywordDataPerFile[fileIdentifier].position.emplace_back(line, static_cast<int>(pos));
-                    pos = elem.textContent[line].find(keyword,pos + 1);
-                } 
+                upperKeywordData.totalOccurences++;
+                upperKeywordData.keywordDataPerFile[fileIdentifier].occurrences++;
+                
+                int line = std::count(elem.textContent.begin(), elem.textContent.begin() + pos, '\n');
+                
+                upperKeywordData.keywordDataPerFile[fileIdentifier].position.emplace_back(line, static_cast<int>(pos));
+                pos = elem.textContent.find(keyword, pos + 1);
             } });
         return upperKeywordData;
     }

@@ -62,6 +62,20 @@ namespace RAGLibrary
         std::vector<std::string> textContent;
     };
 
+    struct DataStruct
+    {
+        DataStruct(const Metadata &_metadata, const std::string &_textContent) : metadata(_metadata),
+                                                                                 textContent(_textContent)
+        {
+        }
+
+        DataStruct(const DataStruct &other) = default;
+        DataStruct &operator=(const DataStruct &other) = default;
+
+        Metadata metadata;
+        std::string textContent;
+    };
+
     struct ThreadStruct
     {
         ThreadStruct() = default;
