@@ -208,6 +208,14 @@ public:
             fileIdentifier);
     }
 
+    std::optional<LoaderDataStruct> Load() override
+    {
+        PYBIND11_OVERRIDE_PURE(
+            std::optional<LoaderDataStruct>,
+            IBaseDataLoader,
+            Load);
+    }
+
     bool KeywordExists(const std::string &fileName, const std::string &keyword) override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -233,6 +241,7 @@ void bind_IBaseDataLoader(py::module &m)
         .def(py::init<>())
         .def("InsertDataToExtract", &IBaseDataLoader::InsertDataToExtract, py::arg("dataPaths"))
         .def("GetTextContent", &IBaseDataLoader::GetTextContent, py::arg("fileIdentifier"))
+        .def("Load", &IBaseDataLoader::Load)
         .def("KeywordExists", &IBaseDataLoader::KeywordExists, py::arg("fileName"), py::arg("keyword"))
         .def("GetKeywordOccurences", &IBaseDataLoader::GetKeywordOccurences, py::arg("keyword"));
 }
@@ -265,6 +274,7 @@ void bind_BaseDataLoader(py::module &m)
         .def(py::init<unsigned int>(), py::arg("threadsNum"))
         .def("InsertDataToExtract", &BaseDataLoader::InsertDataToExtract, py::arg("dataPaths"))
         .def("GetTextContent", &BaseDataLoader::GetTextContent, py::arg("pdfFileName"))
+        .def("Load", &BaseDataLoader::Load)
         .def("KeywordExists", &BaseDataLoader::KeywordExists, py::arg("pdfFileName"), py::arg("keyword"))
         .def("GetKeywordOccurences", &BaseDataLoader::GetKeywordOccurences, py::arg("keyword"));
 }
@@ -563,16 +573,16 @@ void bind_PDFLoader(py::module &m)
              py::arg("numThreads") = 0)
         .def("InsertDataToExtract", &::PDFLoader::PDFLoader::InsertDataToExtract, py::arg("dataPaths"));
 }
-// The bind_DOCXLoader function is similar to bind_PDFLoader
+// The function for DOCXLoader
 void bind_DOCXLoader(py::module &m)
 {
     py::class_<::DOCXLoader::DOCXLoader, std::shared_ptr<::DOCXLoader::DOCXLoader>, DataLoader::BaseDataLoader>(m, "DOCXLoader")
-        .def(py::init<const std::vector<DataExtractRequestStruct> &, const unsigned int &>(),
-             py::arg("filePaths") = std::vector<DataExtractRequestStruct>{},
-             py::arg("numThreads") = 0,
-             "Creates a DOCXLoader, optionally with initial paths and a defined number of threads.")
-        .def("InsertDataToExtract", &::DOCXLoader::DOCXLoader::InsertDataToExtract, py::arg("dataPaths"),
-             "Inserts paths for extracting data from DOCX files.");
+        .def(py::init<const std::string &, const unsigned int &>(),
+             py::arg("filePath"),
+             py::arg("numThreads") = 1,
+             "Creates a DOCXLoader with a file path and an optional number of threads.")
+        .def("InsertDataToExtract", &::DOCXLoader::DOCXLoader::InsertDataToExtract, py::arg("filePath"),
+             "Inserts a file path for extracting data from a DOCX file.");
 }
 
 // Binding function for TXTLoader

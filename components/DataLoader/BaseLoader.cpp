@@ -93,6 +93,18 @@ namespace DataLoader
         }
     }
 
+    std::optional<RAGLibrary::LoaderDataStruct> BaseDataLoader::Load()
+    {
+        std::cout << "Load" << std::endl;
+        WaitFinishWorkload();
+        for (auto &elem : m_dataVector)
+        {
+            std::cout << "Load: " << std::any_cast<std::string>(elem.metadata["fileIdentifier"]) << std::endl;
+            return elem;
+        }
+        return std::nullopt;
+    }
+
     std::optional<RAGLibrary::LoaderDataStruct> BaseDataLoader::GetTextContent(const std::string &fileName)
     {
         WaitFinishWorkload();

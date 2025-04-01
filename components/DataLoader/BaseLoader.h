@@ -27,6 +27,7 @@ namespace DataLoader
         virtual ~BaseDataLoader();
         virtual void InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths) = 0;
         std::optional<RAGLibrary::LoaderDataStruct> GetTextContent(const std::string &pdfFileName) final;
+        std::optional<RAGLibrary::LoaderDataStruct> Load() final;
         bool KeywordExists(const std::string &pdfFileName, const std::string &keyword) final;
         RAGLibrary::UpperKeywordData GetKeywordOccurences(const std::string &keyword) final;
 
