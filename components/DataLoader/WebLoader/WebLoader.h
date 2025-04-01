@@ -16,10 +16,8 @@ namespace WebLoader
     {
     public:
         WebLoader() = delete;
-        WebLoader(const std::vector<RAGLibrary::DataExtractRequestStruct> &urlsToScrap = {}, const int &numThreads = 0);
+        WebLoader(const std::string url, const int &numThreads = 1);
         ~WebLoader() = default;
-
-        void InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths) final;
 
     private:
         std::optional<std::string> ScrapURL(const std::string &url);

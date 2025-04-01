@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <iostream>
 
+namespace fs = std::filesystem;
+
 namespace DataLoader
 {
     BaseDataLoader::BaseDataLoader(unsigned int threadsNum)
@@ -168,32 +170,31 @@ namespace DataLoader
         }
     }
 
-    void BaseDataLoader::LocalFileReader(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths, const std::string &extension)
+    void BaseDataLoader::LocalFileReader(const std::string &filePath, const std::string &extension)
     {
         std::vector<RAGLibrary::DataExtractRequestStruct> workQueue;
-        auto regularFileProcessor = [this, &workQueue, extension](const std::filesystem::path &dir, const unsigned int &pdfPageLimit)
+        auto regularFileProcessor = [this, &workQueue, extension](const fs::path &file)
         {
-            if (std::filesystem::is_regular_file(dir) && dir.extension().string() == extension)
+            if (fs::is_regular_file(file) && file.extension() == extension)
             {
-                std::cout << std::format("IsRegularFile: {}", dir.string()) << std::endl;
-                workQueue.emplace_back(std::string(dir.string()), pdfPageLimit);
+                workQueue.emplace_back(file.string(), 0);
             }
         };
-        std::for_each(dataPaths.begin(), dataPaths.end(), [this, regularFileProcessor](auto &str_path)
-                      {
-            auto path = std::filesystem::path(str_path.targetIdentifier);
-            if(std::filesystem::is_directory(path))
+        {
+            auto path = fs::path(filePath);
+            if (fs::is_directory(path))
             {
-                for(auto dir : std::filesystem::recursive_directory_iterator{path})
+                for (auto file : fs::recursive_directory_iterator(path))
                 {
-                    regularFileProcessor(dir.path(), str_path.extractContentLimit);
+                    regularFileProcessor(file.path());
                 }
             }
-            else if(std::filesystem::is_regular_file(path))
+            else if (fs::is_regular_file(path))
             {
-                regularFileProcessor(path, str_path.extractContentLimit);
-            } });
-        InsertWorkIntoThreads(workQueue);
+                regularFileProcessor(path);
+            }
+            InsertWorkIntoThreads(workQueue);
+        }
     }
 
     void BaseDataLoader::WaitThreadsStartup()
@@ -204,5 +205,4 @@ namespace DataLoader
                 ;
         }
     }
-
 }

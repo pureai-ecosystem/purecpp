@@ -10,20 +10,15 @@
 
 namespace TXTLoader
 {
-    TXTLoader::TXTLoader(const std::vector<RAGLibrary::DataExtractRequestStruct> &filePaths, const unsigned int &numThreads) : DataLoader::BaseDataLoader(numThreads)
+    TXTLoader::TXTLoader(const std::string filePath, const unsigned int &numThreads) : DataLoader::BaseDataLoader(numThreads)
     {
-        if (!filePaths.empty())
+        AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct value)
+                           { ExtractTextFromTXT(value); });
+
+        if (!filePath.empty())
         {
-            InsertDataToExtract(filePaths);
+            LocalFileReader(filePath, ".txt");
         }
-
-        AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct filePath)
-                           { ExtractTextFromTXT(filePath); });
-    }
-
-    void TXTLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths)
-    {
-        LocalFileReader(dataPaths, ".txt");
     }
 
     void TXTLoader::ExtractTextFromTXT(const RAGLibrary::DataExtractRequestStruct &path)
@@ -44,7 +39,7 @@ namespace TXTLoader
         for (auto elem : result)
         {
             if (!verifyWhiteSpace(elem))
-            {   
+            {
                 cleanResult.push_back(elem);
             }
         }

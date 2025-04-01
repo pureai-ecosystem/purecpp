@@ -8,75 +8,15 @@
 namespace fs = std::filesystem;
 namespace DOCXLoader
 {
-    DOCXLoader::DOCXLoader(const std::string &filePath, const unsigned int &numThreads) : DataLoader::BaseDataLoader(numThreads)
+    DOCXLoader::DOCXLoader(const std::string filePath, const unsigned int &numThreads) : DataLoader::BaseDataLoader(numThreads)
     {
-        if (filePath.empty())
-            throw RAGLibrary::RagException("Empty file path");
+        AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct value)
+                           {
+            if (auto documentPath = ExtractZIPFile(value))
+                ExtractTextFromXML(value.targetIdentifier, *documentPath); });
 
-        InsertData(filePath);
-        try
-        {
-            AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct value)
-                               {
-                std::cout << "Extracting ZIP file" << std::endl;
-                if (auto documentPath = ExtractZIPFile(value))
-                {
-                    std::cout << "Extracting text from XML" << std::endl;
-                    ExtractTextFromXML(value.targetIdentifier, *documentPath);
-                } });
-        }
-        catch (const RAGLibrary::RagException &e)
-        {
-            std::cerr << e.what() << std::endl;
-            throw;
-        }
-        catch (const std::exception &e)
-        {
-            std::cerr << e.what() << std::endl;
-            throw;
-        }
-    }
-
-    void DOCXLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths)
-    {
-        InsertData(dataPaths[0].targetIdentifier);
-    }
-
-    void DOCXLoader::InsertData(const std::string &filePath)
-    {
-        std::vector<RAGLibrary::DataExtractRequestStruct> workQueue;
-
-        auto processFile = [this, &workQueue](const fs::path &dataPath, const unsigned int &limit)
-        {
-            if (fs::is_regular_file(dataPath) && dataPath.extension() == ".docx")
-            {
-                std::cout << std::format("Insert file on WorkQueue: {}", dataPath.string()) << std::endl;
-                workQueue.emplace_back(std::string(dataPath.string()), limit);
-            }
-        };
-
-        fs::path path(filePath);
-        if (fs::is_directory(path))
-        {
-            for (const auto &entry : fs::recursive_directory_iterator(path))
-            {
-                std::cout << std::format("Process directory: {}", entry.path().string()) << std::endl;
-                processFile(entry.path(), 0);
-            }
-        }
-        else if (fs::is_regular_file(path))
-        {
-            std::cout << std::format("Process file: {}", path.string()) << std::endl;
-            processFile(path, 0);
-        }
-
-        std::cout << std::format(". Inserting {} files on WorkQueue", workQueue.size()) << std::endl;
-        for (auto &file : workQueue)
-        {
-            std::cout << std::format("File: {}", file.targetIdentifier) << std::endl;
-        }
-        std::cout << "WorkQueue inserted" << std::endl;
-        InsertWorkIntoThreads(workQueue);
+        if (!filePath.empty())
+            LocalFileReader(filePath, ".docx");
     }
 
     std::optional<std::pair<std::string, int>> DOCXLoader::ExtractZIPFile(const RAGLibrary::DataExtractRequestStruct &path)

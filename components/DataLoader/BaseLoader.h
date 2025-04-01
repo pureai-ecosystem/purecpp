@@ -17,15 +17,13 @@ namespace DataLoader
         void AddThreadsCallback(std::function<void(RAGLibrary::DataExtractRequestStruct)> callback, std::function<void()> prefix = []() {}, std::function<void()> suffix = []() {});
         void InsertWorkIntoThreads(const std::vector<RAGLibrary::DataExtractRequestStruct> &workload);
         void WaitFinishWorkload();
-        void LocalFileReader(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths, const std::string &extension);
-
+        void LocalFileReader(const std::string &dataPaths, const std::string &extension);
         std::vector<RAGLibrary::LoaderDataStruct> m_dataVector;
 
     public:
         BaseDataLoader() = delete;
         BaseDataLoader(unsigned int threadsNum);
         virtual ~BaseDataLoader();
-        virtual void InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths) = 0;
         std::optional<RAGLibrary::LoaderDataStruct> GetTextContent(const std::string &pdfFileName) final;
         std::optional<RAGLibrary::LoaderDataStruct> Load() final;
         bool KeywordExists(const std::string &pdfFileName, const std::string &keyword) final;

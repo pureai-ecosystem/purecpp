@@ -5,24 +5,18 @@
 
 namespace WebLoader
 {
-    WebLoader::WebLoader(const std::vector<RAGLibrary::DataExtractRequestStruct> &urlsToScrap, const int &numThreads) : DataLoader::BaseDataLoader(numThreads)
+    WebLoader::WebLoader(const std::string url, const int &numThreads) : DataLoader::BaseDataLoader(numThreads)
     {
-        if (!urlsToScrap.empty())
-        {
-            InsertDataToExtract(urlsToScrap);
-        }
-
         AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct url)
                            {
             if (auto pageData = ScrapURL(url.targetIdentifier))
-            {
-                ExtractTextFromHTML(url.targetIdentifier, *pageData);
-            } });
-    }
+                ExtractTextFromHTML(url.targetIdentifier, *pageData); });
 
-    void WebLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths)
-    {
-        InsertWorkIntoThreads(dataPaths);
+        if (!url.empty())
+        {
+            const auto urlsToScrap = std::vector<RAGLibrary::DataExtractRequestStruct>{{url}};
+            InsertWorkIntoThreads(urlsToScrap);
+        }
     }
 
     std::optional<std::string> WebLoader::ScrapURL(const std::string &url)
