@@ -15,7 +15,7 @@ namespace PDFLoader
     {
     public:
         PDFLoader() = delete;
-        PDFLoader(const std::vector<RAGLibrary::DataExtractRequestStruct>& filePaths = {}, const unsigned int& numThreads = 0);
+        PDFLoader(const std::string filePath, const unsigned int &numThreads = 1);
         ~PDFLoader() = default;
 
         void InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct>& dataPaths);

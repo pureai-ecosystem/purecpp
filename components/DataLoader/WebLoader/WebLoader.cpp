@@ -5,28 +5,21 @@
 
 namespace WebLoader
 {
-    WebLoader::WebLoader(const std::vector<RAGLibrary::DataExtractRequestStruct>& urlsToScrap, const int& numThreads) :
-        DataLoader::BaseDataLoader(numThreads)
+    WebLoader::WebLoader(const std::string url, const int &numThreads) : DataLoader::BaseDataLoader(numThreads)
     {
-        if(!urlsToScrap.empty())
-        {
-            InsertDataToExtract(urlsToScrap);
-        }
-
-        AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct url){
+        AddThreadsCallback([this](RAGLibrary::DataExtractRequestStruct url)
+                           {
             if (auto pageData = ScrapURL(url.targetIdentifier))
-            {
-                ExtractTextFromHTML(url.targetIdentifier, *pageData);
-            }
-        });
+                ExtractTextFromHTML(url.targetIdentifier, *pageData); });
+
+        if (!url.empty())
+        {
+            const auto urlsToScrap = std::vector<RAGLibrary::DataExtractRequestStruct>{{url}};
+            InsertWorkIntoThreads(urlsToScrap);
+        }
     }
 
-    void WebLoader::InsertDataToExtract(const std::vector<RAGLibrary::DataExtractRequestStruct>& dataPaths)
-    {
-        InsertWorkIntoThreads(dataPaths);
-    }
-
-    std::optional<std::string> WebLoader::ScrapURL(const std::string& url)
+    std::optional<std::string> WebLoader::ScrapURL(const std::string &url)
     {
         beauty::client client;
         beauty::request req;
@@ -54,54 +47,58 @@ namespace WebLoader
         return std::nullopt;
     }
 
-    void WebLoader::ExtractTextFromHTML(const std::string& urlPath, const std::string& htmlData)
+    void WebLoader::ExtractTextFromHTML(const std::string &urlPath, const std::string &htmlData)
     {
-        lxb_html_document_t* document = lxb_html_document_create();
+        lxb_html_document_t *document = lxb_html_document_create();
         if (!document)
         {
             throw RAGLibrary::RagException("Failed to create HTML document");
         }
 
-        auto status = lxb_html_document_parse(document, reinterpret_cast<unsigned char*>(const_cast<char*>(htmlData.c_str())), htmlData.size());
-        if (status != LXB_STATUS_OK)
+        try
+        {
+            auto status = lxb_html_document_parse(document, reinterpret_cast<unsigned char *>(const_cast<char *>(htmlData.c_str())), htmlData.size());
+
+            if (status != LXB_STATUS_OK)
+            {
+                lxb_html_document_destroy(document);
+                throw RAGLibrary::RagException(std::format("Failed to parse HTML document with status: {}", status));
+            }
+
+            if (auto *body = lxb_html_document_body_element(document); body != nullptr)
+            {
+                ExtractBodyText(lxb_dom_interface_node(body));
+                RAGLibrary::Metadata metadata = {{"source", urlPath}};
+                m_dataVector.emplace_back(metadata, m_extractedText);
+            }
+
+            lxb_html_document_destroy(document);
+        }
+        catch (const std::exception &e)
         {
             lxb_html_document_destroy(document);
-            throw RAGLibrary::RagException(std::format("Failed to parse HTML document with status: {}", status));
-        }
-
-        RAGLibrary::Metadata metadata = { {"fileIdentifier", urlPath} };
-        RAGLibrary::LoaderDataStruct dataStruct(metadata, {});
-
-        if (auto* body = lxb_html_document_body_element(document); body != nullptr)
-        {
-            ExtractBodyText(lxb_dom_interface_node(body), dataStruct.textContent);
-        }
-        
-        lxb_html_document_destroy(document);
-        
-        {
-            std::lock_guard lock(m_mutex);
-            m_dataVector.push_back(dataStruct);
+            std::cerr << e.what() << '\n';
         }
     }
 
-    void WebLoader::ExtractBodyText(lxb_dom_node_t* node, std::vector<std::string>& textContent)
+    void WebLoader::ExtractBodyText(lxb_dom_node_t *node)
     {
         if (node->type == LXB_DOM_NODE_TYPE_TEXT)
         {
-            auto* text = lxb_dom_node_text_content(node, nullptr);
+            auto *text = lxb_dom_node_text_content(node, nullptr);
             if (text && *text != '\0')
             {
-                std::string textStr(reinterpret_cast<char*>(text));
+                std::string textStr(reinterpret_cast<char *>(text));
                 if (!textStr.empty() && !std::all_of(textStr.begin(), textStr.end(), isspace))
                 {
-                    textContent.push_back(textStr);
+                    m_extractedText += textStr + " ";
                 }
             }
         }
-        for (auto* child = lxb_dom_node_first_child(node); child; child = lxb_dom_node_next(child))
+
+        for (auto *child = lxb_dom_node_first_child(node); child; child = lxb_dom_node_next(child))
         {
-            ExtractBodyText(child, textContent);
+            ExtractBodyText(child);
         }
     }
 }

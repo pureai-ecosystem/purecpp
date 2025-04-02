@@ -8,10 +8,12 @@
 #include <sstream>
 #include <map>
 #include <any>
+#include <nlohmann/json.hpp>
 
 #include "ThreadSafeQueue.h"
 #include "StringUtils.h"
 
+using json = nlohmann::json;
 namespace RAGLibrary
 {
     struct DataExtractRequestStruct;
@@ -60,6 +62,49 @@ namespace RAGLibrary
 
         Metadata metadata;
         std::vector<std::string> textContent;
+    };
+
+    struct DataStruct
+    {
+        DataStruct(const Metadata &_metadata, const std::string &_textContent) : metadata(_metadata),
+                                                                                 textContent(_textContent)
+        {
+        }
+
+        DataStruct(const DataStruct &other) = default;
+        DataStruct &operator=(const DataStruct &other) = default;
+
+        Metadata metadata;
+        std::string textContent;
+
+        json to_json() const
+        {
+            return json{{"metadata", metadata}, {"textContent", textContent}};
+        }
+
+        friend std::ostream &operator<<(std::ostream &os, const DataStruct &data)
+        {
+            os << data.to_json().dump(); // Retorna JSON como string
+            return os;
+        }
+
+        // friend std::ostream &operator<<(std::ostream &os, const DataStruct &data)
+        // {
+        //     os << "(metadata={";
+
+        //     auto it = data.metadata.begin();
+        //     while (it != data.metadata.end())
+        //     {
+        //         os << it->first << ": " << it->second;
+        //         if (++it != data.metadata.end())
+        //         {
+        //             os << ", ";
+        //         }
+        //     }
+
+        //     os << "}, textContent=\"" << data.textContent << "\")";
+        //     return os;
+        // }
     };
 
     struct ThreadStruct
