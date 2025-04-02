@@ -21,7 +21,6 @@ namespace DOCXLoader
 
     std::optional<std::pair<std::string, int>> DOCXLoader::ExtractZIPFile(const RAGLibrary::DataExtractRequestStruct &path)
     {
-        std::cout << "Extracting ZIP(mehtod) file: " << path.targetIdentifier << std::endl;
         try
         {
             mz_zip_archive zipArchive = {};
@@ -61,7 +60,6 @@ namespace DOCXLoader
 
     void DOCXLoader::ExtractTextFromXML(fs::path filePath, const std::pair<std::string, int> &data)
     {
-        std::cout << "Extracting text from XML" << std::endl;
         try
         {
             RAGLibrary::Metadata metadata = {{"source", filePath.string()}};
@@ -105,7 +103,7 @@ namespace DOCXLoader
             }
 
             dataStruct.textContent = fullText;
-        
+
             {
                 std::lock_guard lock(m_mutex);
                 m_dataVector.push_back(dataStruct);

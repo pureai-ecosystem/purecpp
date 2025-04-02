@@ -95,16 +95,10 @@ namespace DataLoader
         }
     }
 
-    std::optional<RAGLibrary::DataStruct> BaseDataLoader::Load()
+    std::vector<RAGLibrary::DataStruct> BaseDataLoader::Load()
     {
-        std::cout << "Load" << std::endl;
         WaitFinishWorkload();
-        for (auto &elem : m_dataVector)
-        {
-            std::cout << "Load: " << std::any_cast<std::string>(elem.metadata["source"]) << std::endl;
-            return elem;
-        }
-        return std::nullopt;
+        return m_dataVector;
     }
 
     std::optional<RAGLibrary::LoaderDataStruct> BaseDataLoader::GetTextContent(const std::string &fileName)
@@ -177,9 +171,7 @@ namespace DataLoader
         auto regularFileProcessor = [this, &workQueue, extension](const fs::path &file)
         {
             if (fs::is_regular_file(file) && file.extension() == extension)
-            {
                 workQueue.emplace_back(file.string(), 0);
-            }
         };
         {
             auto path = fs::path(filePath);

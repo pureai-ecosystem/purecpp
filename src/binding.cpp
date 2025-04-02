@@ -148,7 +148,11 @@ void bind_CommonStructs(py::module &m)
         .def(py::init<const RAGLibrary::Metadata &, const std::string &>(),
              py::arg("metadata"), py::arg("textContent"))
         .def_readwrite("metadata", &RAGLibrary::DataStruct::metadata)
-        .def_readwrite("textContent", &RAGLibrary::DataStruct::textContent);
+        .def_readwrite("textContent", &RAGLibrary::DataStruct::textContent)
+        .def("__str__", [](const RAGLibrary::DataStruct &data)
+             { return data.to_json().dump(); })
+        .def("__repr__", [](const RAGLibrary::DataStruct &data)
+             { return data.to_json().dump(); });
 
     py::class_<RAGLibrary::ThreadStruct>(m, "ThreadStruct")
         .def(py::init<>())
@@ -205,10 +209,10 @@ public:
             fileIdentifier);
     }
 
-    std::optional<DataStruct> Load() override
+    std::vector<RAGLibrary::DataStruct> Load() override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::optional<DataStruct>,
+            std::vector<RAGLibrary::DataStruct>,
             IBaseDataLoader,
             Load);
     }
