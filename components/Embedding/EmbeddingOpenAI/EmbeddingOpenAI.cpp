@@ -6,30 +6,29 @@
 
 namespace EmbeddingOpenAI
 {
-    void EmbeddingOpenAI::SetAPIKey(const std::string& apiKey)
+    void EmbeddingOpenAI::SetAPIKey(const std::string &apiKey)
     {
         m_ApiKey = apiKey;
         openai::start(m_ApiKey);
     }
 
-    std::vector<float> EmbeddingOpenAI::GenerateEmbeddings(const std::vector<std::string>& text)
+    std::vector<float> EmbeddingOpenAI::GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents)
     {
-        std::string embeddingString;
-        for(auto& elem : text)
+        for (auto &doc : documents)
         {
-            embeddingString += elem + " ";
-        }
+            auto text = doc.page_content;
+            if (text.empty())
+                throw RAGLibrary::RagException("Document content is empty.");
 
-        auto res = openai::embedding().create({
-            {"model", "text-embedding-ada-002"},
-            {"input", embeddingString}
-        });
+            auto values = openai::embedding().create(openai::_detail::Json{
+                {"input", std::vector<std::string>{text}},
+                {"model", "text-embedding-ada-002"},
+            })["data"][0]["embedding"];
 
-        if(res.is_null()) 
-        {
-            throw RAGLibrary::RagException("JSON Response is null.");
+            if (values.is_array())
+            {
+                doc.embedding = values.get<std::vector<float>>();
+            }
         }
-        
-        return res["data"][0]["embedding"];
     }
 }

@@ -210,12 +210,32 @@ namespace RAGLibrary
 
         Metadata metadata;
         std::string page_content;
+        std::optional<std::vector<float>> embedding;
 
         friend std::ostream &operator<<(std::ostream &o, const Document &data)
         {
-            const auto &page_content = data.page_content;
-            o << "Document(" << "metadata=" << meta2str(data.metadata) << ", page_content=\"" << StringUtils::ellipsis(page_content) << "\""
-                                                                                                                                        ")";
+            o << "Document(metadata=" << meta2str(data.metadata)
+              << ", page_content=\"" << StringUtils::ellipsis(data.page_content) << "\"";
+
+            if (data.embedding)
+            {
+                o << ", embedding=[";
+                const auto &emb = *data.embedding;
+                for (size_t i = 0; i < emb.size(); ++i)
+                {
+                    if (i > 0)
+                        o << ", ";
+                    o << emb[i];
+                    if (i >= 4)
+                    { // Limit to first 4 elements
+                        o << ", ...";
+                        break;
+                    }
+                }
+                o << "]";
+            }
+
+            o << ")";
             return o;
         }
     };
