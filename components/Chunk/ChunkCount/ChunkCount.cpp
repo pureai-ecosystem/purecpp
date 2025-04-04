@@ -42,12 +42,12 @@ void ChunkCount::ValidateCountUnit()
     }
 }
 
-std::vector<RAGLibrary::Document> ChunkCount::ProcessSingleDocument(RAGLibrary::LoaderDataStruct &item)
+std::vector<RAGLibrary::Document> ChunkCount::ProcessSingleDocument(RAGLibrary::Document &item)
 {
     std::vector<RAGLibrary::Document> documents;
     try
     {
-        auto chunks = Chunk::SplitTextByCount(item.textContent, m_overlap, m_count_threshold, m_regex);
+        auto chunks = Chunk::SplitTextByCount(item.page_content, m_overlap, m_count_threshold, m_regex);
         documents.reserve(documents.size() + chunks.size());
         for (auto &chunk : chunks)
         {
@@ -63,7 +63,7 @@ std::vector<RAGLibrary::Document> ChunkCount::ProcessSingleDocument(RAGLibrary::
     return documents;
 }
 
-std::vector<RAGLibrary::Document> ChunkCount::ProcessDocuments(const std::vector<RAGLibrary::LoaderDataStruct> &items, int max_workers)
+std::vector<RAGLibrary::Document> ChunkCount::ProcessDocuments(const std::vector<RAGLibrary::Document> &items, int max_workers)
 {
     std::vector<RAGLibrary::Document> documents;
     try
@@ -75,13 +75,13 @@ std::vector<RAGLibrary::Document> ChunkCount::ProcessDocuments(const std::vector
         }
 
         omp_set_num_threads(max_threads);
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < items.size(); i++)
         {
             auto &item = items[i];
-            auto chunks = Chunk::SplitTextByCount(item.textContent, m_overlap, m_count_threshold, m_regex);
+            auto chunks = Chunk::SplitTextByCount(item.page_content, m_overlap, m_count_threshold, m_regex);
 
-        #pragma omp critical
+#pragma omp critical
             {
                 documents.reserve(documents.size() + chunks.size());
                 for (auto &chunk : chunks)

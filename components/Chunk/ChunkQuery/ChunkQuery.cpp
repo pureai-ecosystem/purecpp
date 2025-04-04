@@ -57,14 +57,14 @@ std::vector<std::vector<float>> ChunkQuery::GenerateEmbeddings(const std::vector
     return results;
 }
 
-std::vector<RAGLibrary::Document> ChunkQuery::ProcessSingleDocument(const RAGLibrary::LoaderDataStruct &item,
+std::vector<RAGLibrary::Document> ChunkQuery::ProcessSingleDocument(const RAGLibrary::Document &item,
                                                                     const std::vector<float> &query_embedding,
                                                                     const float similarity_threshold)
 {
     std::vector<RAGLibrary::Document> documents;
     try
     {
-        auto chunks = Chunk::SplitText(item.textContent, m_overlap, m_chunk_size);
+        auto chunks = Chunk::SplitText(item.page_content, m_overlap, m_chunk_size);
         auto chunksEmbeddings = GenerateEmbeddings(chunks);
         auto queryEmbeddingTensor = torch::from_blob(const_cast<float *>(query_embedding.data()), {int64_t(query_embedding.size())}, torch::kFloat32);
         for (int i = 0; i < chunks.size(); i++)
@@ -90,7 +90,7 @@ std::vector<RAGLibrary::Document> ChunkQuery::ProcessSingleDocument(const RAGLib
     return documents;
 }
 
-std::vector<RAGLibrary::Document> ChunkQuery::ProcessDocuments(const std::vector<RAGLibrary::LoaderDataStruct> &items,
+std::vector<RAGLibrary::Document> ChunkQuery::ProcessDocuments(const std::vector<RAGLibrary::Document> &items,
                                                                const std::string &query,
                                                                const float similarity_threshold,
                                                                int max_workers)

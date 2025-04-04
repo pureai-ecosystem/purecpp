@@ -63,7 +63,7 @@ namespace DOCXLoader
         try
         {
             RAGLibrary::Metadata metadata = {{"source", filePath.string()}};
-            RAGLibrary::DataStruct dataStruct(metadata, "");
+            RAGLibrary::Document doc(metadata, "");
 
             rapidxml::xml_document<> document;
             std::vector<char> xmlCopy(data.first.begin(), data.first.end());
@@ -102,11 +102,11 @@ namespace DOCXLoader
                 }
             }
 
-            dataStruct.textContent = fullText;
+            doc.page_content = fullText;
 
             {
                 std::lock_guard lock(m_mutex);
-                m_dataVector.push_back(dataStruct);
+                m_dataVector.push_back(doc);
             }
         }
         catch (const RAGLibrary::RagException &e)

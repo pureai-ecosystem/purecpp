@@ -133,27 +133,6 @@ void bind_CommonStructs(py::module &m)
     bindThreadSafeQueue<RAGLibrary::DataExtractRequestStruct>(m, "ThreadSafeQueueDataRequest");
     bindThreadSafeQueue<std::string>(m, "ThreadSafeQueueString");
 
-    py::class_<RAGLibrary::LoaderDataStruct>(m, "LoaderDataStruct")
-        .def(py::init<const RAGLibrary::Metadata &, const std::vector<std::string> &>(),
-             py::arg("metadata"), py::arg("textContent"))
-        .def_readwrite("metadata", &RAGLibrary::LoaderDataStruct::metadata)
-        .def_readwrite("textContent", &RAGLibrary::LoaderDataStruct::textContent)
-        .def("__str__", [](const RAGLibrary::LoaderDataStruct &data)
-             {
-            std::ostringstream o;
-            o << data; // Uses the overloaded << operator
-            return o.str(); });
-
-    py::class_<RAGLibrary::DataStruct>(m, "DataStruct")
-        .def(py::init<const RAGLibrary::Metadata &, const std::string &>(),
-             py::arg("metadata"), py::arg("textContent"))
-        .def_readwrite("metadata", &RAGLibrary::DataStruct::metadata)
-        .def_readwrite("textContent", &RAGLibrary::DataStruct::textContent)
-        .def("__str__", [](const RAGLibrary::DataStruct &data)
-             { return data.to_json().dump(); })
-        .def("__repr__", [](const RAGLibrary::DataStruct &data)
-             { return data.to_json().dump(); });
-
     py::class_<RAGLibrary::ThreadStruct>(m, "ThreadStruct")
         .def(py::init<>())
         .def(py::init<std::shared_ptr<std::future<void>>, RAGLibrary::ThreadSafeQueueDataRequest, unsigned int>(),
@@ -206,19 +185,10 @@ void bind_CommonStructs(py::module &m)
 class PyIBaseDataLoader : public IBaseDataLoader
 {
 public:
-    std::optional<LoaderDataStruct> GetTextContent(const std::string &fileIdentifier) override
+    std::vector<RAGLibrary::Document> Load() override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::optional<LoaderDataStruct>,
-            IBaseDataLoader,
-            GetTextContent,
-            fileIdentifier);
-    }
-
-    std::vector<RAGLibrary::DataStruct> Load() override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            std::vector<RAGLibrary::DataStruct>,
+            std::vector<RAGLibrary::Document>,
             IBaseDataLoader,
             Load);
     }
@@ -246,7 +216,6 @@ void bind_IBaseDataLoader(py::module &m)
 {
     py::class_<IBaseDataLoader, PyIBaseDataLoader, IBaseDataLoaderPtr>(m, "IBaseDataLoader")
         .def(py::init<>())
-        .def("GetTextContent", &IBaseDataLoader::GetTextContent, py::arg("fileIdentifier"))
         .def("Load", &IBaseDataLoader::Load)
         .def("KeywordExists", &IBaseDataLoader::KeywordExists, py::arg("fileName"), py::arg("keyword"))
         .def("GetKeywordOccurences", &IBaseDataLoader::GetKeywordOccurences, py::arg("keyword"));
@@ -269,7 +238,6 @@ void bind_BaseDataLoader(py::module &m)
 {
     py::class_<BaseDataLoader, PyBaseDataLoader, std::shared_ptr<BaseDataLoader>, IBaseDataLoader>(m, "BaseDataLoader")
         .def(py::init<unsigned int>(), py::arg("threadsNum"))
-        .def("GetTextContent", &BaseDataLoader::GetTextContent, py::arg("pdfFileName"))
         .def("Load", &BaseDataLoader::Load)
         .def("KeywordExists", &BaseDataLoader::KeywordExists, py::arg("pdfFileName"), py::arg("keyword"))
         .def("GetKeywordOccurences", &BaseDataLoader::GetKeywordOccurences, py::arg("keyword"));
@@ -496,7 +464,7 @@ void bind_ChunkSimilarity(py::module &m)
     // but keeping it here may be more convenient.
 
     py::class_<Chunk::ChunkSimilarity>(m, "ChunkSimilarity", R"doc(
-        Class for processing LoaderDataStruct and generating chunks and embeddings,
+        Class for processing Document and generating chunks and embeddings,
         allowing document similarity evaluation. It includes options to define chunk size,
         overlap, embedding model (HuggingFace or OpenAI), and an API key for OpenAI if needed.
     )doc")
@@ -521,13 +489,13 @@ void bind_ChunkSimilarity(py::module &m)
             &Chunk::ChunkSimilarity::ProcessSingleDocument,
             py::arg("item"),
             R"doc(
-                Given a single LoaderDataStruct, splits its content into chunks
+                Given a single Document, splits its content into chunks
                 and generates embeddings according to the chosen model, returning
                 a vector of RAGLibrary::Document.
 
                 Parameters:
 
-                item (RAGLibrary.LoaderDataStruct): Structure containing
+                item (RAGLibrary.Document): Structure containing
                 the identifier and textual content.
                 Returns:
 
@@ -541,13 +509,13 @@ void bind_ChunkSimilarity(py::module &m)
             py::arg("items"),
             py::arg("max_workers") = 4,
             R"doc(
-                Given a single LoaderDataStruct, splits its content into chunks
+                Given a single Document, splits its content into chunks
                 and generates embeddings according to the chosen model, returning
                 a vector of RAGLibrary::Document.
 
                 Parameters:
 
-                item (RAGLibrary.LoaderDataStruct): Structure containing
+                item (RAGLibrary.Document): Structure containing
                 the identifier and textual content.
                 Returns:
 
@@ -1331,7 +1299,7 @@ void bind_ChunkQuery(py::module &m)
 
                 Parameters:
 
-                item (RAGLibrary.LoaderDataStruct): Structure containing the file identifier and textual content.
+                item (RAGLibrary.Document): Structure containing the file identifier and textual content.
                 query_embedding (list[float]): Embedding of the query for comparison.
                 similarity_threshold (float): Similarity threshold for considering a chunk relevant.
                 Returns:
@@ -1352,7 +1320,7 @@ void bind_ChunkQuery(py::module &m)
 
                 Parameters:
 
-                items (list[RAGLibrary.LoaderDataStruct]): List of structures containing identifiers and textual contents.
+                items (list[RAGLibrary.Document]): List of structures containing identifiers and textual contents.
                 query (str): Query text to generate embeddings and compare.
                 similarity_threshold (float): Similarity threshold for considering a chunk relevant.
                 max_workers (int, optional): Maximum number of threads to be used in parallel processing (default=4).

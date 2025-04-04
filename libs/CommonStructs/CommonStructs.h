@@ -17,7 +17,6 @@ using json = nlohmann::json;
 namespace RAGLibrary
 {
     struct DataExtractRequestStruct;
-    struct LoaderDataStruct;
     struct ThreadStruct;
     struct KeywordData;
     struct UpperKeywordData;
@@ -37,75 +36,6 @@ namespace RAGLibrary
 
     using ThreadSafeQueueDataRequest = ThreadSafeQueue<DataExtractRequestStruct>;
     using Metadata = std::map<std::string, std::string>;
-
-    struct LoaderDataStruct
-    {
-        LoaderDataStruct(const Metadata &_metadata, const std::vector<std::string> &_textContent) : metadata(_metadata),
-                                                                                                    textContent(_textContent)
-        {
-        }
-
-        LoaderDataStruct(const LoaderDataStruct &other) = default;
-        LoaderDataStruct &operator=(const LoaderDataStruct &other) = default;
-
-        friend std::ostream &operator<<(std::ostream &o, const LoaderDataStruct &data)
-        {
-            for (auto index = 0; index < data.textContent.size(); ++index)
-            {
-                o << "  SubGroup: " << index + 1 << std::endl;
-                o << "  TextContent: " << std::endl
-                  << data.textContent[index] << std::endl;
-            }
-            o << std::endl;
-            return o;
-        }
-
-        Metadata metadata;
-        std::vector<std::string> textContent;
-    };
-
-    struct DataStruct
-    {
-        DataStruct(const Metadata &_metadata, const std::string &_textContent) : metadata(_metadata),
-                                                                                 textContent(_textContent)
-        {
-        }
-
-        DataStruct(const DataStruct &other) = default;
-        DataStruct &operator=(const DataStruct &other) = default;
-
-        Metadata metadata;
-        std::string textContent;
-
-        json to_json() const
-        {
-            return json{{"metadata", metadata}, {"textContent", textContent}};
-        }
-
-        friend std::ostream &operator<<(std::ostream &os, const DataStruct &data)
-        {
-            os << data.to_json().dump(); // Retorna JSON como string
-            return os;
-        }
-
-        // friend std::ostream &operator<<(std::ostream &os, const DataStruct &data)
-        // {
-        //     os << "(metadata={";
-
-        //     auto it = data.metadata.begin();
-        //     while (it != data.metadata.end())
-        //     {
-        //         os << it->first << ": " << it->second;
-        //         if (++it != data.metadata.end())
-        //         {
-        //             os << ", ";
-        //         }
-        //     }
-
-        //     os << "}, textContent=\"" << data.textContent << "\")";
-        //     return os;
-        // }
-    };
 
     struct ThreadStruct
     {
