@@ -14,7 +14,7 @@ namespace Embedding
     public:
         ~IBaseEmbedding() = default;
 
-        virtual std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) = 0;
+        virtual std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) = 0;
     };
     using IBaseEmbeddingPtr = std::shared_ptr<IBaseEmbedding>;
 }

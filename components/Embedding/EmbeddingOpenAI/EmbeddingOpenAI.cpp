@@ -12,8 +12,14 @@ namespace EmbeddingOpenAI
         openai::start(m_ApiKey);
     }
 
-    std::vector<RAGLibrary::Document> EmbeddingOpenAI::GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents)
+    std::vector<RAGLibrary::Document> EmbeddingOpenAI::GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model)
     {
+        if (documents.empty())
+            throw RAGLibrary::RagException("No documents provided for embedding.");
+
+        if (model.empty())
+            throw RAGLibrary::RagException("Model name cannot be empty.");
+
         std::vector<RAGLibrary::Document> processedDocuments = documents;
 
         for (auto &doc : processedDocuments)
@@ -24,7 +30,7 @@ namespace EmbeddingOpenAI
 
             auto response = openai::embedding().create(openai::_detail::Json{
                 {"input", std::vector<std::string>{text}},
-                {"model", "text-embedding-ada-002"},
+                {"model", model},
             });
 
             if (response.contains("data") && response["data"].is_array() && !response["data"].empty())
@@ -44,4 +50,3 @@ namespace EmbeddingOpenAI
         return processedDocuments;
     }
 }
-

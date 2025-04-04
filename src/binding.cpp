@@ -1011,13 +1011,13 @@ class PyIBaseEmbedding : public Embedding::IBaseEmbedding
 public:
     ~PyIBaseEmbedding() = default;
 
-    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
     {
         PYBIND11_OVERRIDE_PURE(
             std::vector<RAGLibrary::Document>, // Type class
             Embedding::IBaseEmbedding,         // Base class
             GenerateEmbeddings,                // Name of method
-            documents                          // Parameters
+            documents, model                   // Parameters
         );
     }
 };
@@ -1049,12 +1049,14 @@ void bind_IBaseEmbedding(py::module &m)
             "GenerateEmbeddings",
             &Embedding::IBaseEmbedding::GenerateEmbeddings,
             py::arg("documents"),
+            py::arg("model"),
             R"doc(
             Generates embeddings for a list of documents.
 
             Parameters:
 
             documents (list[Document]): List of documents to be converted into embeddings.
+            model (str): Name of the model to be used for generating embeddings.
 
             Returns:
 
@@ -1076,13 +1078,13 @@ class PyBaseEmbedding : public Embedding::BaseEmbedding
 public:
     using Embedding::BaseEmbedding::BaseEmbedding;
 
-    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
     {
         PYBIND11_OVERRIDE_PURE(
             std::vector<RAGLibrary::Document>,
             Embedding::BaseEmbedding,
             GenerateEmbeddings,
-            documents);
+            documents, model);
     }
 };
 
@@ -1111,6 +1113,7 @@ void bind_BaseEmbedding(py::module &m)
             "GenerateEmbeddings",
             &Embedding::BaseEmbedding::GenerateEmbeddings,
             py::arg("documents"),
+            py::arg("model"),
             R"doc(
             Pure virtual method that generates embeddings for a set
             of strings. It must be overridden by concrete derived classes.
@@ -1154,13 +1157,13 @@ public:
     // ----------------------------------------------------------------------
     // Methods (pure or virtual) inherited from BaseEmbedding.
     // ----------------------------------------------------------------------
-    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
     {
         PYBIND11_OVERRIDE_PURE(
             std::vector<RAGLibrary::Document>, // Type of returns
             EmbeddingOpenAI::IEmbeddingOpenAI, // Base Class
             GenerateEmbeddings,                // Name of method
-            documents                          // Paraeter
+            documents, model                   // Parameters
         );
     }
 };
@@ -1187,7 +1190,7 @@ void bind_IEmbeddingOpenAI(py::module &m)
             Main methods:
 
             SetAPIKey(apiKey: str) -> None
-            GenerateEmbeddings(documents: list[Document]) -> list[Document]
+            GenerateEmbeddings(documents: list[Document], model: str) -> list[Document]
         )doc")
         .def(
             py::init<>(),
@@ -1208,6 +1211,7 @@ void bind_IEmbeddingOpenAI(py::module &m)
             "GenerateEmbeddings",
             &EmbeddingOpenAI::IEmbeddingOpenAI::GenerateEmbeddings,
             py::arg("documents"),
+            py::arg("model"),
             R"doc(
             Generates embeddings for a list of documents using the configured model (OpenAI).
         )doc");
@@ -1270,6 +1274,7 @@ void bind_EmbeddingOpenAI(py::module &m)
             "GenerateEmbeddings",
             &EmbeddingOpenAI::EmbeddingOpenAI::GenerateEmbeddings,
             py::arg("documents"),
+            py::arg("model"),
             R"doc(
             Generates embeddings for a list of Documents, using the
             OpenAI model "text-embedding-ada-002". It may raise
@@ -1277,7 +1282,8 @@ void bind_EmbeddingOpenAI(py::module &m)
 
             Parameters:
 
-            text (list[Documents]): List of input Documents class.
+            documents (list[Documents]): List of input Documents class.
+            model (str): Name of the OpenAI model to be used for generating embeddings.
             Returns:
 
             list[float]: Vector with the concatenated embedding values.
