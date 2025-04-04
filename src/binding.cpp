@@ -1011,34 +1011,13 @@ class PyIBaseEmbedding : public Embedding::IBaseEmbedding
 public:
     ~PyIBaseEmbedding() = default;
 
-    std::vector<float> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::vector<float>,        // Type class
-            Embedding::IBaseEmbedding, // Base class
-            GenerateEmbeddings,        // Name of method
-            documents                  // Parameters
-        );
-    }
-
-    Embedding::Document ProcessDocument(Embedding::Document document) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            Embedding::Document,       // Type class
-            Embedding::IBaseEmbedding, // Base class
-            ProcessDocument,           // Name of method
-            document                   // Parameters
-        );
-    }
-
-    std::vector<Embedding::Document> ProcessDocuments(std::vector<Embedding::Document> documents, const int &maxWorkers) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            std::vector<Embedding::Document>, // Type class
-            Embedding::IBaseEmbedding,        // Base class
-            ProcessDocuments,                 // Nome do método
-            documents,                        // Name of method
-            maxWorkers                        // Parameters
+            std::vector<RAGLibrary::Document>, // Type class
+            Embedding::IBaseEmbedding,         // Base class
+            GenerateEmbeddings,                // Name of method
+            documents                          // Parameters
         );
     }
 };
@@ -1071,43 +1050,15 @@ void bind_IBaseEmbedding(py::module &m)
             &Embedding::IBaseEmbedding::GenerateEmbeddings,
             py::arg("documents"),
             R"doc(
-            Generates embeddings for a list of strings.
+            Generates embeddings for a list of documents.
 
             Parameters:
 
-            text (list[str]): List of texts to be converted into embeddings.
+            documents (list[Document]): List of documents to be converted into embeddings.
+
             Returns:
 
-            list[float]: Vector of floats representing the concatenated embeddings.
-        )doc")
-        .def(
-            "ProcessDocument",
-            &Embedding::IBaseEmbedding::ProcessDocument,
-            py::arg("document"),
-            R"doc(
-            Generates embeddings and inserts them into a specific `EmbeddingDocument` object.
-
-            **Parameters:**  
-            - `document` (`EmbeddingDocument`): The document to be processed.
-
-            **Returns:**  
-            - `EmbeddingDocument`: Document with the embeddings populated.
-        )doc")
-        .def(
-            "ProcessDocuments",
-            &Embedding::IBaseEmbedding::ProcessDocuments,
-            py::arg("documents"),
-            py::arg("maxWorkers") = 4,
-            R"doc(
-            Processes multiple documents in parallel, generating embeddings for each.
-
-            Parameters:
-
-            documents (list[EmbeddingDocument]): List of documents to process.
-            maxWorkers (int): Maximum number of threads used in processing (default=4).
-            Returns:
-
-            list[EmbeddingDocument]: List of processed documents.
+            list[Document]: List of documents with generated embeddings.
         )doc");
 }
 // --------------------------------------------------------------------------
@@ -1125,33 +1076,13 @@ class PyBaseEmbedding : public Embedding::BaseEmbedding
 public:
     using Embedding::BaseEmbedding::BaseEmbedding;
 
-    std::vector<float> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents)) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::vector<float>,
+            std::vector<RAGLibrary::Document>,
             Embedding::BaseEmbedding,
             GenerateEmbeddings,
             documents);
-    }
-
-    Embedding::Document ProcessDocument(Embedding::Document document) override
-    {
-        PYBIND11_OVERRIDE(
-            Embedding::Document,
-            Embedding::BaseEmbedding,
-            ProcessDocument,
-            document);
-    }
-
-    // Overriding the virtual method ProcessDocuments (not pure)
-    std::vector<Embedding::Document> ProcessDocuments(std::vector<Embedding::Document> documents, const int &maxWorkers) override
-    {
-        PYBIND11_OVERRIDE(
-            std::vector<Embedding::Document>,
-            Embedding::BaseEmbedding,
-            ProcessDocuments,
-            documents,
-            maxWorkers);
     }
 };
 
@@ -1183,23 +1114,6 @@ void bind_BaseEmbedding(py::module &m)
             R"doc(
             Pure virtual method that generates embeddings for a set
             of strings. It must be overridden by concrete derived classes.
-        )doc")
-        .def(
-            "ProcessDocument",
-            &Embedding::BaseEmbedding::ProcessDocument,
-            py::arg("document"),
-            R"doc(
-            Processes (generates embeddings) for a single document. It can be
-            overridden in derived classes to alter its behavior.
-        )doc")
-        .def(
-            "ProcessDocuments",
-            &Embedding::BaseEmbedding::ProcessDocuments,
-            py::arg("documents"),
-            py::arg("maxWorkers") = 4,
-            R"doc(
-            Processes (generates embeddings) for multiple documents in parallel,
-            using up to maxWorkers threads. It can be overridden in derived classes.
         )doc");
 }
 // --------------------------------------------------------------------------
@@ -1240,33 +1154,14 @@ public:
     // ----------------------------------------------------------------------
     // Methods (pure or virtual) inherited from BaseEmbedding.
     // ----------------------------------------------------------------------
-    std::vector<float> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents) override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::vector<float>,                // Type of returns
+            std::vector<RAGLibrary::Document>, // Type of returns
             EmbeddingOpenAI::IEmbeddingOpenAI, // Base Class
             GenerateEmbeddings,                // Name of method
             documents                          // Paraeter
         );
-    }
-
-    Embedding::Document ProcessDocument(Embedding::Document document) override
-    {
-        PYBIND11_OVERRIDE(
-            Embedding::Document,
-            EmbeddingOpenAI::IEmbeddingOpenAI,
-            ProcessDocument,
-            document);
-    }
-
-    std::vector<Embedding::Document> ProcessDocuments(std::vector<Embedding::Document> documents, const int &maxWorkers) override
-    {
-        PYBIND11_OVERRIDE(
-            std::vector<Embedding::Document>,
-            EmbeddingOpenAI::IEmbeddingOpenAI,
-            ProcessDocuments,
-            documents,
-            maxWorkers);
     }
 };
 
@@ -1292,9 +1187,7 @@ void bind_IEmbeddingOpenAI(py::module &m)
             Main methods:
 
             SetAPIKey(apiKey: str) -> None
-            GenerateEmbeddings(documents: list[Document]) -> list[float]
-            ProcessDocument(document: EmbeddingDocument) -> EmbeddingDocument
-            ProcessDocuments(documents: list[EmbeddingDocument], maxWorkers: int) -> list[EmbeddingDocument]
+            GenerateEmbeddings(documents: list[Document]) -> list[Document]
         )doc")
         .def(
             py::init<>(),
@@ -1316,25 +1209,7 @@ void bind_IEmbeddingOpenAI(py::module &m)
             &EmbeddingOpenAI::IEmbeddingOpenAI::GenerateEmbeddings,
             py::arg("documents"),
             R"doc(
-            Gera embeddings para uma lista de strings, usando 
-            o modelo configurado (OpenAI).
-        )doc")
-        .def(
-            "ProcessDocument",
-            &EmbeddingOpenAI::IEmbeddingOpenAI::ProcessDocument,
-            py::arg("document"),
-            R"doc(
-            Generates embeddings for a list of strings, using
-            the configured model (OpenAI).
-        )doc")
-        .def(
-            "ProcessDocuments",
-            &EmbeddingOpenAI::IEmbeddingOpenAI::ProcessDocuments,
-            py::arg("documents"),
-            py::arg("maxWorkers") = 4,
-            R"doc(
-            Generates embeddings for multiple documents in parallel,
-            using up to maxWorkers threads.
+            Generates embeddings for a list of documents using the configured model (OpenAI).
         )doc");
 }
 // --------------------------------------------------------------------------
@@ -1406,28 +1281,6 @@ void bind_EmbeddingOpenAI(py::module &m)
             Returns:
 
             list[float]: Vector with the concatenated embedding values.
-        )doc");
-
-    // If you wish to expose ProcessDocument and ProcessDocuments, which come from BaseEmbedding / IEmbeddingOpenAI,
-    // you can add .def(...) calls here. Otherwise, they are inherited and already accessible on the Python side.
-    // For example:
-    cls.def(
-        "ProcessDocument",
-        &EmbeddingOpenAI::EmbeddingOpenAI::ProcessDocument,
-        py::arg("document"),
-        R"doc(
-            Generates embeddings for the provided document, inserting the resulting vector
-            into the embeddings field of the EmbeddingDocument.
-        )doc");
-
-    cls.def(
-        "ProcessDocuments",
-        &EmbeddingOpenAI::EmbeddingOpenAI::ProcessDocuments,
-        py::arg("documents"),
-        py::arg("maxWorkers") = 4,
-        R"doc(
-            Generates embeddings for multiple documents in parallel,
-            using up to maxWorkers threads.
         )doc");
 }
 
