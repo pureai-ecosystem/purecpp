@@ -83,20 +83,44 @@ namespace WebLoader
 
     void WebLoader::ExtractBodyText(lxb_dom_node_t *node)
     {
-        if (node->type == LXB_DOM_NODE_TYPE_TEXT)
+        if (!node)
+            return;
+
+        switch (node->type)
         {
-            auto *text = lxb_dom_node_text_content(node, nullptr);
+        case LXB_DOM_NODE_TYPE_ELEMENT:
+        {
+            lxb_tag_id_t tag_id = lxb_dom_element_tag_id(reinterpret_cast<lxb_dom_element_t *>(node));
+            if (tag_id == LXB_TAG_SCRIPT || tag_id == LXB_TAG_STYLE || tag_id == LXB_TAG_META ||
+                tag_id == LXB_TAG_HEAD || tag_id == LXB_TAG_NOSCRIPT || tag_id == LXB_TAG_TITLE ||
+                tag_id == LXB_TAG_LINK)
+            {
+                return;
+            }
+            break;
+        }
+        case LXB_DOM_NODE_TYPE_COMMENT:
+            return;
+
+        case LXB_DOM_NODE_TYPE_TEXT:
+        {
+            const unsigned char *text = lxb_dom_node_text_content(node, nullptr);
             if (text && *text != '\0')
             {
-                std::string textStr(reinterpret_cast<char *>(text));
+                std::string textStr(reinterpret_cast<const char *>(text));
                 if (!textStr.empty() && !std::all_of(textStr.begin(), textStr.end(), isspace))
                 {
                     m_extractedText += textStr + " ";
                 }
             }
+            return;
         }
 
-        for (auto *child = lxb_dom_node_first_child(node); child; child = lxb_dom_node_next(child))
+        default:
+            break;
+        }
+
+        for (lxb_dom_node_t *child = lxb_dom_node_first_child(node); child != nullptr; child = lxb_dom_node_next(child))
         {
             ExtractBodyText(child);
         }
