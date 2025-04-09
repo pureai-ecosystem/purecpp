@@ -11,9 +11,9 @@ namespace EmbeddingOpenAI
         EmbeddingOpenAI() = default;
         virtual ~EmbeddingOpenAI() = default;
 
-        void SetAPIKey(const std::string& apiKey) final;
-        std::vector<float> GenerateEmbeddings(const std::vector<std::string>& text) final;
-    
+        void SetAPIKey(const std::string &apiKey) final;
+        std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) final;
+
     private:
         std::string m_ApiKey;
         std::string m_modelName;
