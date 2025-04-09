@@ -10,8 +10,6 @@ namespace Embedding
         BaseEmbedding() = default;
         virtual ~BaseEmbedding() = default;
 
-        virtual std::vector<float> GenerateEmbeddings(const std::vector<std::string>& text) = 0;
-        virtual Document ProcessDocument(Document document) override;
-        virtual std::vector<Document> ProcessDocuments(std::vector<Document> documents, const int& maxWorkers) override;
+        virtual std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) = 0;
     };
 }

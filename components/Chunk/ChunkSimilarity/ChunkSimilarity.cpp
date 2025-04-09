@@ -57,12 +57,12 @@ std::vector<std::vector<float>> ChunkSimilarity::GenerateEmbeddings(const std::v
     return results;
 }
 
-std::vector<RAGLibrary::Document> ChunkSimilarity::ProcessSingleDocument(const RAGLibrary::LoaderDataStruct &item)
+std::vector<RAGLibrary::Document> ChunkSimilarity::ProcessSingleDocument(const RAGLibrary::Document &item)
 {
     std::vector<RAGLibrary::Document> documents;
     try
     {
-        auto chunks = Chunk::SplitText(item.textContent, m_overlap, m_chunk_size);
+        auto chunks = Chunk::SplitText(item.page_content, m_overlap, m_chunk_size);
         auto embeddings = GenerateEmbeddings(chunks);
         auto embeddingsTensor = Chunk::toTensor(embeddings);
         auto similarity_matrix = torch::inner(embeddingsTensor, embeddingsTensor);
@@ -84,7 +84,7 @@ std::vector<RAGLibrary::Document> ChunkSimilarity::ProcessSingleDocument(const R
     return documents;
 }
 
-std::vector<RAGLibrary::Document> ChunkSimilarity::ProcessDocuments(const std::vector<RAGLibrary::LoaderDataStruct> &items, int max_workers)
+std::vector<RAGLibrary::Document> ChunkSimilarity::ProcessDocuments(const std::vector<RAGLibrary::Document> &items, int max_workers)
 {
     std::vector<RAGLibrary::Document> documents;
     try

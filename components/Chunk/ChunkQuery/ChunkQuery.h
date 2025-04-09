@@ -17,10 +17,10 @@ namespace Chunk
                    const EmbeddingModel embedding_model = EmbeddingModel::HuggingFace,
                    const std::string &openai_api_key = "");
 
-        std::vector<RAGLibrary::Document> ProcessSingleDocument(const RAGLibrary::LoaderDataStruct &item,
+        std::vector<RAGLibrary::Document> ProcessSingleDocument(const RAGLibrary::Document &item,
                                                                 const std::vector<float> &query_embedding,
                                                                 const float similarity_threshold);
-        std::vector<RAGLibrary::Document> ProcessDocuments(const std::vector<RAGLibrary::LoaderDataStruct> &items,
+        std::vector<RAGLibrary::Document> ProcessDocuments(const std::vector<RAGLibrary::Document> &items,
                                                            const std::string &query,
                                                            const float similarity_threshold,
                                                            int max_workers = 4);

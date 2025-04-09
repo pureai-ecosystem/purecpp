@@ -133,17 +133,6 @@ void bind_CommonStructs(py::module &m)
     bindThreadSafeQueue<RAGLibrary::DataExtractRequestStruct>(m, "ThreadSafeQueueDataRequest");
     bindThreadSafeQueue<std::string>(m, "ThreadSafeQueueString");
 
-    py::class_<RAGLibrary::LoaderDataStruct>(m, "LoaderDataStruct")
-        .def(py::init<const RAGLibrary::Metadata &, const std::vector<std::string> &>(),
-             py::arg("metadata"), py::arg("textContent"))
-        .def_readwrite("metadata", &RAGLibrary::LoaderDataStruct::metadata)
-        .def_readwrite("textContent", &RAGLibrary::LoaderDataStruct::textContent)
-        .def("__str__", [](const RAGLibrary::LoaderDataStruct &data)
-             {
-            std::ostringstream o;
-            o << data; // Uses the overloaded << operator
-            return o.str(); });
-
     py::class_<RAGLibrary::ThreadStruct>(m, "ThreadStruct")
         .def(py::init<>())
         .def(py::init<std::shared_ptr<std::future<void>>, RAGLibrary::ThreadSafeQueueDataRequest, unsigned int>(),
@@ -176,12 +165,18 @@ void bind_CommonStructs(py::module &m)
              py::arg("metadata"), py::arg("page_content"))
         .def_readwrite("metadata", &RAGLibrary::Document::metadata)
         .def_readwrite("page_content", &RAGLibrary::Document::page_content)
+        .def_readwrite("embedding", &RAGLibrary::Document::embedding)
         .def("StringRepr", &RAGLibrary::Document::StringRepr)
+        .def("__repr__", [](const RAGLibrary::Document &doc)
+             {
+                std::ostringstream o;
+                o << doc;
+                return o.str(); })
         .def("__str__", [](const RAGLibrary::Document &doc)
              {
-            std::ostringstream o;
-            o << doc; 
-            return o.str(); });
+                std::ostringstream o;
+                o << doc;
+                return o.str(); });
 }
 
 //--------------------------------------------------------------------------
@@ -190,22 +185,12 @@ void bind_CommonStructs(py::module &m)
 class PyIBaseDataLoader : public IBaseDataLoader
 {
 public:
-    void InsertDataToExtract(const std::vector<DataExtractRequestStruct> &dataPaths) override
+    std::vector<RAGLibrary::Document> Load() override
     {
         PYBIND11_OVERRIDE_PURE(
-            void,
+            std::vector<RAGLibrary::Document>,
             IBaseDataLoader,
-            InsertDataToExtract,
-            dataPaths);
-    }
-
-    std::optional<LoaderDataStruct> GetTextContent(const std::string &fileIdentifier) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            std::optional<LoaderDataStruct>,
-            IBaseDataLoader,
-            GetTextContent,
-            fileIdentifier);
+            Load);
     }
 
     bool KeywordExists(const std::string &fileName, const std::string &keyword) override
@@ -231,8 +216,7 @@ void bind_IBaseDataLoader(py::module &m)
 {
     py::class_<IBaseDataLoader, PyIBaseDataLoader, IBaseDataLoaderPtr>(m, "IBaseDataLoader")
         .def(py::init<>())
-        .def("InsertDataToExtract", &IBaseDataLoader::InsertDataToExtract, py::arg("dataPaths"))
-        .def("GetTextContent", &IBaseDataLoader::GetTextContent, py::arg("fileIdentifier"))
+        .def("Load", &IBaseDataLoader::Load)
         .def("KeywordExists", &IBaseDataLoader::KeywordExists, py::arg("fileName"), py::arg("keyword"))
         .def("GetKeywordOccurences", &IBaseDataLoader::GetKeywordOccurences, py::arg("keyword"));
 }
@@ -248,23 +232,13 @@ class PyBaseDataLoader : public BaseDataLoader
 public:
     PyBaseDataLoader(unsigned int threadsNum)
         : BaseDataLoader(threadsNum) {}
-
-    void InsertDataToExtract(const std::vector<DataExtractRequestStruct> &dataPaths) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            void,
-            BaseDataLoader,
-            InsertDataToExtract,
-            dataPaths);
-    }
 };
 
 void bind_BaseDataLoader(py::module &m)
 {
     py::class_<BaseDataLoader, PyBaseDataLoader, std::shared_ptr<BaseDataLoader>, IBaseDataLoader>(m, "BaseDataLoader")
         .def(py::init<unsigned int>(), py::arg("threadsNum"))
-        .def("InsertDataToExtract", &BaseDataLoader::InsertDataToExtract, py::arg("dataPaths"))
-        .def("GetTextContent", &BaseDataLoader::GetTextContent, py::arg("pdfFileName"))
+        .def("Load", &BaseDataLoader::Load)
         .def("KeywordExists", &BaseDataLoader::KeywordExists, py::arg("pdfFileName"), py::arg("keyword"))
         .def("GetKeywordOccurences", &BaseDataLoader::GetKeywordOccurences, py::arg("keyword"));
 }
@@ -490,7 +464,7 @@ void bind_ChunkSimilarity(py::module &m)
     // but keeping it here may be more convenient.
 
     py::class_<Chunk::ChunkSimilarity>(m, "ChunkSimilarity", R"doc(
-        Class for processing LoaderDataStruct and generating chunks and embeddings,
+        Class for processing Document and generating chunks and embeddings,
         allowing document similarity evaluation. It includes options to define chunk size,
         overlap, embedding model (HuggingFace or OpenAI), and an API key for OpenAI if needed.
     )doc")
@@ -515,13 +489,13 @@ void bind_ChunkSimilarity(py::module &m)
             &Chunk::ChunkSimilarity::ProcessSingleDocument,
             py::arg("item"),
             R"doc(
-                Given a single LoaderDataStruct, splits its content into chunks
+                Given a single Document, splits its content into chunks
                 and generates embeddings according to the chosen model, returning
                 a vector of RAGLibrary::Document.
 
                 Parameters:
 
-                item (RAGLibrary.LoaderDataStruct): Structure containing
+                item (RAGLibrary.Document): Structure containing
                 the identifier and textual content.
                 Returns:
 
@@ -535,13 +509,13 @@ void bind_ChunkSimilarity(py::module &m)
             py::arg("items"),
             py::arg("max_workers") = 4,
             R"doc(
-                Given a single LoaderDataStruct, splits its content into chunks
+                Given a single Document, splits its content into chunks
                 and generates embeddings according to the chosen model, returning
                 a vector of RAGLibrary::Document.
 
                 Parameters:
 
-                item (RAGLibrary.LoaderDataStruct): Structure containing
+                item (RAGLibrary.Document): Structure containing
                 the identifier and textual content.
                 Returns:
 
@@ -554,49 +528,42 @@ void bind_ChunkSimilarity(py::module &m)
 // Binding for PDFLoader
 // --------------------------------------------------------------------------
 // Note: We are using full qualification for the PDFLoader class.
-// Remove the end of the InsertDataToExtract method in PDFLoader.h if issues persist.
 void bind_PDFLoader(py::module &m)
 {
     py::class_<::PDFLoader::PDFLoader, std::shared_ptr<::PDFLoader::PDFLoader>, DataLoader::BaseDataLoader>(m, "PDFLoader")
-        .def(py::init<const std::vector<DataExtractRequestStruct> &, const unsigned int &>(),
-             py::arg("filePaths") = std::vector<DataExtractRequestStruct>{},
-             py::arg("numThreads") = 0)
-        .def("InsertDataToExtract", &::PDFLoader::PDFLoader::InsertDataToExtract, py::arg("dataPaths"));
+        .def(py::init<const std::string, const unsigned int &>(),
+             py::arg("filePath"),
+             py::arg("numThreads") = 1,
+             "Creates a PDFLoader with a file path and an optional number of threads.");
 }
-// The bind_DOCXLoader function is similar to bind_PDFLoader
+// The function for DOCXLoader
 void bind_DOCXLoader(py::module &m)
 {
     py::class_<::DOCXLoader::DOCXLoader, std::shared_ptr<::DOCXLoader::DOCXLoader>, DataLoader::BaseDataLoader>(m, "DOCXLoader")
-        .def(py::init<const std::vector<DataExtractRequestStruct> &, const unsigned int &>(),
-             py::arg("filePaths") = std::vector<DataExtractRequestStruct>{},
-             py::arg("numThreads") = 0,
-             "Creates a DOCXLoader, optionally with initial paths and a defined number of threads.")
-        .def("InsertDataToExtract", &::DOCXLoader::DOCXLoader::InsertDataToExtract, py::arg("dataPaths"),
-             "Inserts paths for extracting data from DOCX files.");
+        .def(py::init<const std::string, const unsigned int &>(),
+             py::arg("filePath"),
+             py::arg("numThreads") = 1,
+             "Creates a DOCXLoader with a file path and an optional number of threads.");
 }
 
 // Binding function for TXTLoader
 void bind_TXTLoader(py::module &m)
 {
     py::class_<::TXTLoader::TXTLoader, std::shared_ptr<::TXTLoader::TXTLoader>, DataLoader::BaseDataLoader>(m, "TXTLoader")
-        .def(py::init<const std::vector<RAGLibrary::DataExtractRequestStruct> &, const unsigned int &>(),
-             py::arg("filePaths") = std::vector<RAGLibrary::DataExtractRequestStruct>{},
-             py::arg("numThreads") = 0,
-             "Creates a TXTLoader, optionally with initial paths and a defined number of threads.")
-        .def("InsertDataToExtract", &::TXTLoader::TXTLoader::InsertDataToExtract, py::arg("dataPaths"),
-             "Inserts paths for extracting data from TXT files.");
+        .def(py::init<const std::string, const unsigned int &>(),
+             py::arg("filePath"),
+             py::arg("numThreads") = 1,
+             "Creates a TXTLoader, optionally with initial paths and a defined number of threads.");
 }
 
 // Binding function for WebLoader
 void bind_WebLoader(py::module &m)
 {
     py::class_<::WebLoader::WebLoader, std::shared_ptr<::WebLoader::WebLoader>, DataLoader::BaseDataLoader>(m, "WebLoader")
-        .def(py::init<const std::vector<RAGLibrary::DataExtractRequestStruct> &, const int &>(),
-             py::arg("urlsToScrap") = std::vector<RAGLibrary::DataExtractRequestStruct>{},
-             py::arg("numThreads") = 0,
-             "Creates a WebLoader with optional URLs and a defined number of threads.")
-        .def("InsertDataToExtract", &::WebLoader::WebLoader::InsertDataToExtract, py::arg("dataPaths"),
-             "Insere URLs para extração de dados.");
+        .def(py::init<const std::string, const unsigned int &>(),
+             py::arg("url"),
+             py::arg("numThreads") = 1,
+             "Creates a WebLoader with optional URLs and a defined number of threads.");
 }
 // --------------------------------------------------------------------------
 // Binding for MetadataExtractor::Document
@@ -1012,34 +979,13 @@ class PyIBaseEmbedding : public Embedding::IBaseEmbedding
 public:
     ~PyIBaseEmbedding() = default;
 
-    std::vector<float> GenerateEmbeddings(const std::vector<std::string> &text) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::vector<float>,        // Type class
-            Embedding::IBaseEmbedding, // Base class
-            GenerateEmbeddings,        // Name of method
-            text                       // Parameters
-        );
-    }
-
-    Embedding::Document ProcessDocument(Embedding::Document document) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            Embedding::Document,       // Type class
-            Embedding::IBaseEmbedding, // Base class
-            ProcessDocument,           // Name of method
-            document                   // Parameters
-        );
-    }
-
-    std::vector<Embedding::Document> ProcessDocuments(std::vector<Embedding::Document> documents, const int &maxWorkers) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            std::vector<Embedding::Document>, // Type class
-            Embedding::IBaseEmbedding,        // Base class
-            ProcessDocuments,                 // Nome do método
-            documents,                        // Name of method
-            maxWorkers                        // Parameters
+            std::vector<RAGLibrary::Document>, // Type class
+            Embedding::IBaseEmbedding,         // Base class
+            GenerateEmbeddings,                // Name of method
+            documents, model                   // Parameters
         );
     }
 };
@@ -1070,45 +1016,19 @@ void bind_IBaseEmbedding(py::module &m)
         .def(
             "GenerateEmbeddings",
             &Embedding::IBaseEmbedding::GenerateEmbeddings,
-            py::arg("text"),
-            R"doc(
-            Generates embeddings for a list of strings.
-
-            Parameters:
-
-            text (list[str]): List of texts to be converted into embeddings.
-            Returns:
-
-            list[float]: Vector of floats representing the concatenated embeddings.
-        )doc")
-        .def(
-            "ProcessDocument",
-            &Embedding::IBaseEmbedding::ProcessDocument,
-            py::arg("document"),
-            R"doc(
-            Generates embeddings and inserts them into a specific `EmbeddingDocument` object.
-
-            **Parameters:**  
-            - `document` (`EmbeddingDocument`): The document to be processed.
-
-            **Returns:**  
-            - `EmbeddingDocument`: Document with the embeddings populated.
-        )doc")
-        .def(
-            "ProcessDocuments",
-            &Embedding::IBaseEmbedding::ProcessDocuments,
             py::arg("documents"),
-            py::arg("maxWorkers") = 4,
+            py::arg("model"),
             R"doc(
-            Processes multiple documents in parallel, generating embeddings for each.
+            Generates embeddings for a list of documents.
 
             Parameters:
 
-            documents (list[EmbeddingDocument]): List of documents to process.
-            maxWorkers (int): Maximum number of threads used in processing (default=4).
+            documents (list[Document]): List of documents to be converted into embeddings.
+            model (str): Name of the model to be used for generating embeddings.
+
             Returns:
 
-            list[EmbeddingDocument]: List of processed documents.
+            list[Document]: List of documents with generated embeddings.
         )doc");
 }
 // --------------------------------------------------------------------------
@@ -1126,33 +1046,13 @@ class PyBaseEmbedding : public Embedding::BaseEmbedding
 public:
     using Embedding::BaseEmbedding::BaseEmbedding;
 
-    std::vector<float> GenerateEmbeddings(const std::vector<std::string> &text) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::vector<float>,
+            std::vector<RAGLibrary::Document>,
             Embedding::BaseEmbedding,
             GenerateEmbeddings,
-            text);
-    }
-
-    Embedding::Document ProcessDocument(Embedding::Document document) override
-    {
-        PYBIND11_OVERRIDE(
-            Embedding::Document,
-            Embedding::BaseEmbedding,
-            ProcessDocument,
-            document);
-    }
-
-    // Overriding the virtual method ProcessDocuments (not pure)
-    std::vector<Embedding::Document> ProcessDocuments(std::vector<Embedding::Document> documents, const int &maxWorkers) override
-    {
-        PYBIND11_OVERRIDE(
-            std::vector<Embedding::Document>,
-            Embedding::BaseEmbedding,
-            ProcessDocuments,
-            documents,
-            maxWorkers);
+            documents, model);
     }
 };
 
@@ -1180,27 +1080,11 @@ void bind_BaseEmbedding(py::module &m)
         .def(
             "GenerateEmbeddings",
             &Embedding::BaseEmbedding::GenerateEmbeddings,
-            py::arg("text"),
+            py::arg("documents"),
+            py::arg("model"),
             R"doc(
             Pure virtual method that generates embeddings for a set
             of strings. It must be overridden by concrete derived classes.
-        )doc")
-        .def(
-            "ProcessDocument",
-            &Embedding::BaseEmbedding::ProcessDocument,
-            py::arg("document"),
-            R"doc(
-            Processes (generates embeddings) for a single document. It can be
-            overridden in derived classes to alter its behavior.
-        )doc")
-        .def(
-            "ProcessDocuments",
-            &Embedding::BaseEmbedding::ProcessDocuments,
-            py::arg("documents"),
-            py::arg("maxWorkers") = 4,
-            R"doc(
-            Processes (generates embeddings) for multiple documents in parallel,
-            using up to maxWorkers threads. It can be overridden in derived classes.
         )doc");
 }
 // --------------------------------------------------------------------------
@@ -1241,33 +1125,14 @@ public:
     // ----------------------------------------------------------------------
     // Methods (pure or virtual) inherited from BaseEmbedding.
     // ----------------------------------------------------------------------
-    std::vector<float> GenerateEmbeddings(const std::vector<std::string> &text) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::vector<float>,                // Type of returns
+            std::vector<RAGLibrary::Document>, // Type of returns
             EmbeddingOpenAI::IEmbeddingOpenAI, // Base Class
             GenerateEmbeddings,                // Name of method
-            text                               // Paraeter
+            documents, model                   // Parameters
         );
-    }
-
-    Embedding::Document ProcessDocument(Embedding::Document document) override
-    {
-        PYBIND11_OVERRIDE(
-            Embedding::Document,
-            EmbeddingOpenAI::IEmbeddingOpenAI,
-            ProcessDocument,
-            document);
-    }
-
-    std::vector<Embedding::Document> ProcessDocuments(std::vector<Embedding::Document> documents, const int &maxWorkers) override
-    {
-        PYBIND11_OVERRIDE(
-            std::vector<Embedding::Document>,
-            EmbeddingOpenAI::IEmbeddingOpenAI,
-            ProcessDocuments,
-            documents,
-            maxWorkers);
     }
 };
 
@@ -1293,9 +1158,7 @@ void bind_IEmbeddingOpenAI(py::module &m)
             Main methods:
 
             SetAPIKey(apiKey: str) -> None
-            GenerateEmbeddings(text: list[str]) -> list[float]
-            ProcessDocument(document: EmbeddingDocument) -> EmbeddingDocument
-            ProcessDocuments(documents: list[EmbeddingDocument], maxWorkers: int) -> list[EmbeddingDocument]
+            GenerateEmbeddings(documents: list[Document], model: str) -> list[Document]
         )doc")
         .def(
             py::init<>(),
@@ -1315,27 +1178,10 @@ void bind_IEmbeddingOpenAI(py::module &m)
         .def(
             "GenerateEmbeddings",
             &EmbeddingOpenAI::IEmbeddingOpenAI::GenerateEmbeddings,
-            py::arg("text"),
-            R"doc(
-            Gera embeddings para uma lista de strings, usando 
-            o modelo configurado (OpenAI).
-        )doc")
-        .def(
-            "ProcessDocument",
-            &EmbeddingOpenAI::IEmbeddingOpenAI::ProcessDocument,
-            py::arg("document"),
-            R"doc(
-            Generates embeddings for a list of strings, using
-            the configured model (OpenAI).
-        )doc")
-        .def(
-            "ProcessDocuments",
-            &EmbeddingOpenAI::IEmbeddingOpenAI::ProcessDocuments,
             py::arg("documents"),
-            py::arg("maxWorkers") = 4,
+            py::arg("model"),
             R"doc(
-            Generates embeddings for multiple documents in parallel,
-            using up to maxWorkers threads.
+            Generates embeddings for a list of documents using the configured model (OpenAI).
         )doc");
 }
 // --------------------------------------------------------------------------
@@ -1357,18 +1203,26 @@ void bind_EmbeddingOpenAI(py::module &m)
             "EmbeddingOpenAI",
             R"doc(
             Concrete class that implements IEmbeddingOpenAI, allowing the use
-            of the OpenAI API for generating embeddings. Example of usage in Python:
-
-            python
-            Copy
-            from RagPUREAI import EmbeddingOpenAI
-
-            emb = EmbeddingOpenAI()
-            emb.SetAPIKey("your_openai_key")
-            embeddings = emb.GenerateEmbeddings(["example text", "more text"])
-            Alternatively, you can also leverage the methods inherited
-            from BaseEmbedding, such as .ProcessDocument() and .ProcessDocuments().
+            of the OpenAI API for generating embeddings.
         )doc");
+
+    // cls(
+    //     m,
+    //     "EmbeddingOpenAI",
+    //     R"doc(
+    //     Concrete class that implements IEmbeddingOpenAI, allowing the use
+    //     of the OpenAI API for generating embeddings. Example of usage in Python:
+
+    //     python
+    //     Copy
+    //     from RagPUREAI import EmbeddingOpenAI
+
+    //     emb = EmbeddingOpenAI()
+    //     emb.SetAPIKey("your_openai_key")
+    //     embeddings = emb.GenerateEmbeddings([{"example text", "more text"])
+    //     Alternatively, you can also leverage the methods inherited
+    //     from BaseEmbedding, such as .ProcessDocument() and .ProcessDocuments().
+    // )doc");
 
     cls.def(
            py::init<>(),
@@ -1387,40 +1241,20 @@ void bind_EmbeddingOpenAI(py::module &m)
         .def(
             "GenerateEmbeddings",
             &EmbeddingOpenAI::EmbeddingOpenAI::GenerateEmbeddings,
-            py::arg("text"),
+            py::arg("documents"),
+            py::arg("model"),
             R"doc(
-            Generates embeddings for a list of strings, using the
+            Generates embeddings for a list of Documents, using the
             OpenAI model "text-embedding-ada-002". It may raise
             a RagException if an error occurs in the JSON response.
 
             Parameters:
 
-            text (list[str]): List of input texts.
+            documents (list[Documents]): List of input Documents class.
+            model (str): Name of the OpenAI model to be used for generating embeddings.
             Returns:
 
             list[float]: Vector with the concatenated embedding values.
-        )doc");
-
-    // If you wish to expose ProcessDocument and ProcessDocuments, which come from BaseEmbedding / IEmbeddingOpenAI,
-    // you can add .def(...) calls here. Otherwise, they are inherited and already accessible on the Python side.
-    // For example:
-    cls.def(
-        "ProcessDocument",
-        &EmbeddingOpenAI::EmbeddingOpenAI::ProcessDocument,
-        py::arg("document"),
-        R"doc(
-            Generates embeddings for the provided document, inserting the resulting vector
-            into the embeddings field of the EmbeddingDocument.
-        )doc");
-
-    cls.def(
-        "ProcessDocuments",
-        &EmbeddingOpenAI::EmbeddingOpenAI::ProcessDocuments,
-        py::arg("documents"),
-        py::arg("maxWorkers") = 4,
-        R"doc(
-            Generates embeddings for multiple documents in parallel,
-            using up to maxWorkers threads.
         )doc");
 }
 
@@ -1465,7 +1299,7 @@ void bind_ChunkQuery(py::module &m)
 
                 Parameters:
 
-                item (RAGLibrary.LoaderDataStruct): Structure containing the file identifier and textual content.
+                item (RAGLibrary.Document): Structure containing the file identifier and textual content.
                 query_embedding (list[float]): Embedding of the query for comparison.
                 similarity_threshold (float): Similarity threshold for considering a chunk relevant.
                 Returns:
@@ -1486,7 +1320,7 @@ void bind_ChunkQuery(py::module &m)
 
                 Parameters:
 
-                items (list[RAGLibrary.LoaderDataStruct]): List of structures containing identifiers and textual contents.
+                items (list[RAGLibrary.Document]): List of structures containing identifiers and textual contents.
                 query (str): Query text to generate embeddings and compare.
                 similarity_threshold (float): Similarity threshold for considering a chunk relevant.
                 max_workers (int, optional): Maximum number of threads to be used in parallel processing (default=4).

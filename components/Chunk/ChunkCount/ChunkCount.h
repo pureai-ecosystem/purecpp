@@ -15,8 +15,8 @@ namespace Chunk
         ChunkCount(const std::string &count_unit, const int overlap = 600, const int count_threshold = 1);
         ~ChunkCount() = default;
 
-        std::vector<RAGLibrary::Document> ProcessSingleDocument(RAGLibrary::LoaderDataStruct &item);
-        std::vector<RAGLibrary::Document> ProcessDocuments(const std::vector<RAGLibrary::LoaderDataStruct> &items, int max_workers = 4);
+        std::vector<RAGLibrary::Document> ProcessSingleDocument(RAGLibrary::Document &item);
+        std::vector<RAGLibrary::Document> ProcessDocuments(const std::vector<RAGLibrary::Document> &items, int max_workers = 4);
 
     protected:
         void ValidateCountUnit();

@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <iostream>
 
+namespace fs = std::filesystem;
+
 namespace DataLoader
 {
     BaseDataLoader::BaseDataLoader(unsigned int threadsNum)
@@ -93,17 +95,10 @@ namespace DataLoader
         }
     }
 
-    std::optional<RAGLibrary::LoaderDataStruct> BaseDataLoader::GetTextContent(const std::string &fileName)
+    std::vector<RAGLibrary::Document> BaseDataLoader::Load()
     {
         WaitFinishWorkload();
-        for (auto &elem : m_dataVector)
-        {
-            if (std::any_cast<std::string>(elem.metadata["fileIdentifier"]) == fileName)
-            {
-                return elem;
-            }
-        }
-        return std::nullopt;
+        return m_dataVector;
     }
 
     bool BaseDataLoader::KeywordExists(const std::string &fileName, const std::string &keyword)
@@ -112,13 +107,12 @@ namespace DataLoader
 
         for (const auto &elem : m_dataVector)
         {
-            auto it = elem.metadata.find("fileIdentifier");
+            auto it = elem.metadata.find("source");
             if (it == elem.metadata.end() || std::any_cast<std::string>(it->second) != fileName)
                 continue;
 
-            for (const auto &page : elem.textContent)
-                if (page.find(keyword) != std::string::npos)
-                    return true;
+            if (elem.page_content.find(keyword))
+                return true;
         }
 
         return false;
@@ -131,18 +125,18 @@ namespace DataLoader
         RAGLibrary::UpperKeywordData upperKeywordData;
         std::for_each(m_dataVector.begin(), m_dataVector.end(), [&upperKeywordData, keyword](auto &elem)
                       {
-            for(auto line = 0; line < elem.textContent.size(); ++line)
+            auto pos = elem.page_content.find(keyword, 0);
+            std::string fileIdentifier = std::any_cast<std::string>(elem.metadata["source"]);
+            
+            while (pos != std::string::npos)
             {
-                auto pos = elem.textContent[line].find(keyword,0);
-                std::string fileIdentifier = std::any_cast<std::string>(elem.metadata["fileIdentifier"]);
-                while(pos != std::string::npos)
-                {
-                    upperKeywordData.totalOccurences++;
-
-                    upperKeywordData.keywordDataPerFile[fileIdentifier].occurrences++;
-                    upperKeywordData.keywordDataPerFile[fileIdentifier].position.emplace_back(line, static_cast<int>(pos));
-                    pos = elem.textContent[line].find(keyword,pos + 1);
-                } 
+                upperKeywordData.totalOccurences++;
+                upperKeywordData.keywordDataPerFile[fileIdentifier].occurrences++;
+                
+                int line = std::count(elem.page_content.begin(), elem.page_content.begin() + pos, '\n');
+                
+                upperKeywordData.keywordDataPerFile[fileIdentifier].position.emplace_back(line, static_cast<int>(pos));
+                pos = elem.page_content.find(keyword, pos + 1);
             } });
         return upperKeywordData;
     }
@@ -156,32 +150,29 @@ namespace DataLoader
         }
     }
 
-    void BaseDataLoader::LocalFileReader(const std::vector<RAGLibrary::DataExtractRequestStruct> &dataPaths, const std::string &extension)
+    void BaseDataLoader::LocalFileReader(const std::string &filePath, const std::string &extension)
     {
         std::vector<RAGLibrary::DataExtractRequestStruct> workQueue;
-        auto regularFileProcessor = [this, &workQueue, extension](const std::filesystem::path &dir, const unsigned int &pdfPageLimit)
+        auto regularFileProcessor = [this, &workQueue, extension](const fs::path &file)
         {
-            if (std::filesystem::is_regular_file(dir) && dir.extension().string() == extension)
-            {
-                std::cout << std::format("IsRegularFile: {}", dir.string()) << std::endl;
-                workQueue.emplace_back(std::string(dir.string()), pdfPageLimit);
-            }
+            if (fs::is_regular_file(file) && file.extension() == extension)
+                workQueue.emplace_back(file.string(), 0);
         };
-        std::for_each(dataPaths.begin(), dataPaths.end(), [this, regularFileProcessor](auto &str_path)
-                      {
-            auto path = std::filesystem::path(str_path.targetIdentifier);
-            if(std::filesystem::is_directory(path))
+        {
+            auto path = fs::path(filePath);
+            if (fs::is_directory(path))
             {
-                for(auto dir : std::filesystem::recursive_directory_iterator{path})
+                for (auto file : fs::recursive_directory_iterator(path))
                 {
-                    regularFileProcessor(dir.path(), str_path.extractContentLimit);
+                    regularFileProcessor(file.path());
                 }
             }
-            else if(std::filesystem::is_regular_file(path))
+            else if (fs::is_regular_file(path))
             {
-                regularFileProcessor(path, str_path.extractContentLimit);
-            } });
-        InsertWorkIntoThreads(workQueue);
+                regularFileProcessor(path);
+            }
+            InsertWorkIntoThreads(workQueue);
+        }
     }
 
     void BaseDataLoader::WaitThreadsStartup()
@@ -192,5 +183,4 @@ namespace DataLoader
                 ;
         }
     }
-
 }

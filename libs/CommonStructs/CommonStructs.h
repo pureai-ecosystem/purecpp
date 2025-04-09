@@ -8,14 +8,15 @@
 #include <sstream>
 #include <map>
 #include <any>
+#include <nlohmann/json.hpp>
 
 #include "ThreadSafeQueue.h"
 #include "StringUtils.h"
 
+using json = nlohmann::json;
 namespace RAGLibrary
 {
     struct DataExtractRequestStruct;
-    struct LoaderDataStruct;
     struct ThreadStruct;
     struct KeywordData;
     struct UpperKeywordData;
@@ -35,32 +36,6 @@ namespace RAGLibrary
 
     using ThreadSafeQueueDataRequest = ThreadSafeQueue<DataExtractRequestStruct>;
     using Metadata = std::map<std::string, std::string>;
-
-    struct LoaderDataStruct
-    {
-        LoaderDataStruct(const Metadata &_metadata, const std::vector<std::string> &_textContent) : metadata(_metadata),
-                                                                                                    textContent(_textContent)
-        {
-        }
-
-        LoaderDataStruct(const LoaderDataStruct &other) = default;
-        LoaderDataStruct &operator=(const LoaderDataStruct &other) = default;
-
-        friend std::ostream &operator<<(std::ostream &o, const LoaderDataStruct &data)
-        {
-            for (auto index = 0; index < data.textContent.size(); ++index)
-            {
-                o << "  SubGroup: " << index + 1 << std::endl;
-                o << "  TextContent: " << std::endl
-                  << data.textContent[index] << std::endl;
-            }
-            o << std::endl;
-            return o;
-        }
-
-        Metadata metadata;
-        std::vector<std::string> textContent;
-    };
 
     struct ThreadStruct
     {
@@ -165,12 +140,38 @@ namespace RAGLibrary
 
         Metadata metadata;
         std::string page_content;
+        std::optional<std::vector<float>> embedding;
+
+        static std::string escape_with_json(const std::string &input)
+        {
+            std::string dumped = nlohmann::json(input).dump();
+            return dumped.substr(1, dumped.size() - 2); // remove aspas externas
+        }
 
         friend std::ostream &operator<<(std::ostream &o, const Document &data)
         {
-            const auto &page_content = data.page_content;
-            o << "Document(" << "metadata=" << meta2str(data.metadata) << ", page_content=\"" << StringUtils::ellipsis(page_content) << "\""
-                                                                                                                                        ")";
+            o << "Document(metadata=" << meta2str(data.metadata)
+              << ", page_content=\"" << StringUtils::ellipsis(escape_with_json(data.page_content)) << "\"";
+
+            if (data.embedding)
+            {
+                o << ", embedding=[";
+                const auto &emb = *data.embedding;
+                for (size_t i = 0; i < emb.size(); ++i)
+                {
+                    if (i > 0)
+                        o << ", ";
+                    o << emb[i];
+                    if (i >= 4)
+                    {
+                        o << ", ...";
+                        break;
+                    }
+                }
+                o << "]";
+            }
+
+            o << ")";
             return o;
         }
     };

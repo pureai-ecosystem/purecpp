@@ -18,8 +18,8 @@ namespace Chunk
                         const EmbeddingModel embedding_model = EmbeddingModel::HuggingFace,
                         const std::string &openai_api_key = "");
 
-        std::vector<RAGLibrary::Document> ProcessSingleDocument(const RAGLibrary::LoaderDataStruct &item);
-        std::vector<RAGLibrary::Document> ProcessDocuments(const std::vector<RAGLibrary::LoaderDataStruct> &items, int max_workers = 4);
+        std::vector<RAGLibrary::Document> ProcessSingleDocument(const RAGLibrary::Document &item);
+        std::vector<RAGLibrary::Document> ProcessDocuments(const std::vector<RAGLibrary::Document> &items, int max_workers = 4);
 
     protected:
         void ValidateModel();
