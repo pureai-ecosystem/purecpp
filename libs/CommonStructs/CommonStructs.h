@@ -142,10 +142,16 @@ namespace RAGLibrary
         std::string page_content;
         std::optional<std::vector<float>> embedding;
 
+        static std::string escape_with_json(const std::string &input)
+        {
+            std::string dumped = nlohmann::json(input).dump();
+            return dumped.substr(1, dumped.size() - 2); // remove aspas externas
+        }
+
         friend std::ostream &operator<<(std::ostream &o, const Document &data)
         {
             o << "Document(metadata=" << meta2str(data.metadata)
-              << ", page_content=\"" << StringUtils::ellipsis(data.page_content) << "\"";
+              << ", page_content=\"" << StringUtils::ellipsis(escape_with_json(data.page_content)) << "\"";
 
             if (data.embedding)
             {
@@ -157,7 +163,7 @@ namespace RAGLibrary
                         o << ", ";
                     o << emb[i];
                     if (i >= 4)
-                    { // Limit to first 4 elements
+                    {
                         o << ", ...";
                         break;
                     }
