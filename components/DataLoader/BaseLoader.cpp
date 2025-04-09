@@ -95,25 +95,10 @@ namespace DataLoader
         }
     }
 
-    std::vector<RAGLibrary::DataStruct> BaseDataLoader::Load()
+    std::vector<RAGLibrary::Document> BaseDataLoader::Load()
     {
         WaitFinishWorkload();
         return m_dataVector;
-    }
-
-    std::optional<RAGLibrary::LoaderDataStruct> BaseDataLoader::GetTextContent(const std::string &fileName)
-    {
-        WaitFinishWorkload();
-        for (auto &elem : m_dataVector)
-        {
-            if (std::any_cast<std::string>(elem.metadata["source"]) == fileName)
-            {
-                const auto &metadata = elem.metadata;
-                const auto &textContent = elem.textContent;
-                return RAGLibrary::LoaderDataStruct(metadata, {textContent});
-            }
-        }
-        return std::nullopt;
     }
 
     bool BaseDataLoader::KeywordExists(const std::string &fileName, const std::string &keyword)
@@ -126,7 +111,7 @@ namespace DataLoader
             if (it == elem.metadata.end() || std::any_cast<std::string>(it->second) != fileName)
                 continue;
 
-            if (elem.textContent.find(keyword))
+            if (elem.page_content.find(keyword))
                 return true;
         }
 
@@ -140,7 +125,7 @@ namespace DataLoader
         RAGLibrary::UpperKeywordData upperKeywordData;
         std::for_each(m_dataVector.begin(), m_dataVector.end(), [&upperKeywordData, keyword](auto &elem)
                       {
-            auto pos = elem.textContent.find(keyword, 0);
+            auto pos = elem.page_content.find(keyword, 0);
             std::string fileIdentifier = std::any_cast<std::string>(elem.metadata["source"]);
             
             while (pos != std::string::npos)
@@ -148,10 +133,10 @@ namespace DataLoader
                 upperKeywordData.totalOccurences++;
                 upperKeywordData.keywordDataPerFile[fileIdentifier].occurrences++;
                 
-                int line = std::count(elem.textContent.begin(), elem.textContent.begin() + pos, '\n');
+                int line = std::count(elem.page_content.begin(), elem.page_content.begin() + pos, '\n');
                 
                 upperKeywordData.keywordDataPerFile[fileIdentifier].position.emplace_back(line, static_cast<int>(pos));
-                pos = elem.textContent.find(keyword, pos + 1);
+                pos = elem.page_content.find(keyword, pos + 1);
             } });
         return upperKeywordData;
     }

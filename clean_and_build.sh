@@ -42,10 +42,10 @@ LIBTORCH_CPU_URL="https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-s
 # python3 scripts/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence-transformers/all-MiniLM-L6-v2"
 
 # Run Conan package manager for dependency installation
-# rm -rf ${BUILD_DIR} conan.lock
-# conan install . --build=missing
-# conan lock create conanfile.py --build=missing
-# conan install . --build=missing
+rm -rf ${BUILD_DIR} conan.lock
+conan install . --build=missing
+conan lock create conanfile.py --build=missing
+conan install . --build=missing
 
 cmake \
     --preset conan-release \

@@ -190,43 +190,35 @@ at::Tensor Chunk::toTensor(std::vector<std::vector<float>> &vect)
     return tensor;
 }
 
-std::vector<std::string> Chunk::SplitText(const std::vector<std::string> &inputs, const int overlap, const int chunk_size)
+std::vector<std::string> Chunk::SplitText(std::string inputs, const int overlap, const int chunk_size)
 {
-    std::string text;
-    StringUtils::joinStr("\n", inputs, text);
-
     size_t step = size_t(chunk_size - overlap);
-    size_t chunk_sizes = (size_t)std::ceil((long double)text.size() / (long double)(step));
+    size_t chunk_sizes = (size_t)std::ceil((long double)inputs.size() / (long double)(step));
 
     std::vector<std::string> chunks(chunk_sizes);
-    for (int i = 0; i < chunk_sizes; ++i)
+    for (size_t i = 0; i < chunk_sizes; ++i)
     {
         size_t start_index = i * step;
         size_t end_index = start_index + chunk_size;
-        if (end_index >= text.size())
+        if (end_index >= inputs.size())
         {
-            end_index = text.size() + 1;
+            end_index = inputs.size();
         }
-        chunks[i] = text.substr(start_index, end_index - start_index);
+        chunks[i] = inputs.substr(start_index, end_index - start_index);
     }
 
     return chunks;
 }
 
-std::vector<std::string> Chunk::SplitTextByCount(const std::vector<std::string> &inputs, const int overlap, const int count_threshold, const std::shared_ptr<re2::RE2> regex)
+std::vector<std::string> Chunk::SplitTextByCount(const std::string &input, int overlap, int count_threshold, const std::shared_ptr<re2::RE2> regex)
 {
     std::vector<std::string> chunks;
-    chunks.reserve(inputs.size());
-
-    std::string text;
-    StringUtils::joinStr("\n", inputs, text);
-
     std::vector<re2::StringPiece> matches;
 
-    re2::StringPiece input(text);
+    re2::StringPiece text(input);
     re2::StringPiece match;
 
-    while (re2::RE2::FindAndConsume(&input, *regex, &match))
+    while (re2::RE2::FindAndConsume(&text, *regex, &match))
     {
         matches.push_back(match);
     }
@@ -238,9 +230,9 @@ std::vector<std::string> Chunk::SplitTextByCount(const std::vector<std::string> 
         size_t end_idx = text.size() + 1;
         if (j < matches.size())
         {
-            end_idx = (matches[j - 1].data() - text.data()) + matches[j - 1].size();
+            end_idx = (matches[j - 1].data() - input.data()) + matches[j - 1].size();
         }
-        chunks.push_back(text.substr(start_idx, end_idx - start_idx));
+        chunks.push_back(std::string(text.substr(start_idx, end_idx - start_idx)));
         start_idx = end_idx > overlap ? size_t(end_idx - overlap) : size_t(0);
     }
 
