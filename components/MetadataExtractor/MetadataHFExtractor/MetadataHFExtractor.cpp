@@ -124,21 +124,23 @@ namespace MetadataHFExtractor
 
     std::vector<float> MetadataHFExtractor::SoftMax(const std::vector<float> &logits)
     {
+        if (logits.empty()) 
+        {
+            return {};
+        }
+    
         std::vector<float> probabilities(logits.size());
-        float max_logit = *std::max_element(logits.begin(), logits.end());
-
-        float sum = 0.0;
-        for (auto index = 0; index < logits.size(); ++index)
+        float max_logit = logits[0];
+        for (float v : logits) max_logit = std::max(max_logit, v);
+        float sum_exp = 0.0;
+        for (size_t i = 0; i < logits.size(); i++) 
         {
-            probabilities[index] = std::exp(logits[index] - max_logit);
-            sum += probabilities[index];
+            float logit = logits[i] - max_logit;
+            float exp_logit = std::exp(logit);
+            sum_exp += exp_logit;
+            probabilities[i] = exp_logit;
         }
-
-        for (float &prob : probabilities)
-        {
-            prob /= sum;
-        }
-
+        for (size_t i = 0; i < probabilities.size(); i++) probabilities[i] /= sum_exp;
         return probabilities;
     }
 
