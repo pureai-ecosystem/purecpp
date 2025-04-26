@@ -45,33 +45,33 @@ namespace EmbeddingOpenAI
             });
             if(response.contains("data") && response["data"].is_array() && !response["data"].empty())
             {
-								auto& data = response["data"];
-								
-								if(data.size() != batch_texts.size())
-								{
-										throw RAGLibrary::RagException(
-                    "Mismatch between batch size and response size. Expected: " +
-                    std::to_string(batch_texts.size()) + " Received: " +
-                    std::to_string(data.size()));
-								}
-								for (size_t b = 0; b < data.size(); ++b) 
-								{
-										const size_t doc_index = i + b;
-										if (data[b].contains("embedding") && data[b]["embedding"].is_array()) {
-												processedDocuments[doc_index].embedding = 
-														data[b]["embedding"].get<std::vector<float>>();
-										}
-										else {
-												throw RAGLibrary::RagException(
-														"Malformed embedding response for document index: " + 
-														std::to_string(doc_index));
-										}
-								}
+                auto& data = response["data"];
+                
+                if(data.size() != batch_texts.size())
+                {
+                    throw RAGLibrary::RagException(
+                        "Mismatch between batch size and response size. Expected: " +
+                        std::to_string(batch_texts.size()) + " Received: " +
+                        std::to_string(data.size()));
+                }
+                for (size_t b = 0; b < data.size(); ++b) 
+                {
+                    const size_t doc_index = i + b;
+                    if (data[b].contains("embedding") && data[b]["embedding"].is_array()) {
+                        processedDocuments[doc_index].embedding = 
+                                data[b]["embedding"].get<std::vector<float>>();
+                    }
+                    else {
+                        throw RAGLibrary::RagException(
+                            "Malformed embedding response for document index: " + 
+                            std::to_string(doc_index));
+                    }
+                }
             }
-						else
-						{
-								throw RAGLibrary::RagException("API Error: " + response.dump() + "\nBatches indices: " + std::to_string(i) + "-" + std::to_string(end_idx - 1));
-						}
+            else
+            {
+                throw RAGLibrary::RagException("API Error: " + response.dump() + "\nBatches indices: " + std::to_string(i) + "-" + std::to_string(end_idx - 1));
+            }
         }          
         return processedDocuments;
     }
