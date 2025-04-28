@@ -1125,13 +1125,13 @@ public:
     // ----------------------------------------------------------------------
     // Methods (pure or virtual) inherited from BaseEmbedding.
     // ----------------------------------------------------------------------
-    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size = 32) override
     {
         PYBIND11_OVERRIDE_PURE(
             std::vector<RAGLibrary::Document>, // Type of returns
             EmbeddingOpenAI::IEmbeddingOpenAI, // Base Class
             GenerateEmbeddings,                // Name of method
-            documents, model                   // Parameters
+            documents, model, batch_size       // Parameters
         );
     }
 };
@@ -1180,6 +1180,7 @@ void bind_IEmbeddingOpenAI(py::module &m)
             &EmbeddingOpenAI::IEmbeddingOpenAI::GenerateEmbeddings,
             py::arg("documents"),
             py::arg("model"),
+						py::arg("batch_size"),
             R"doc(
             Generates embeddings for a list of documents using the configured model (OpenAI).
         )doc");
@@ -1243,6 +1244,7 @@ void bind_EmbeddingOpenAI(py::module &m)
             &EmbeddingOpenAI::EmbeddingOpenAI::GenerateEmbeddings,
             py::arg("documents"),
             py::arg("model"),
+						py::arg("batch_size"),
             R"doc(
             Generates embeddings for a list of Documents, using the
             OpenAI model "text-embedding-ada-002". It may raise
@@ -1252,6 +1254,10 @@ void bind_EmbeddingOpenAI(py::module &m)
 
             documents (list[Documents]): List of input Documents class.
             model (str): Name of the OpenAI model to be used for generating embeddings.
+						batch_size (int): The number of documents to process in each batch. Larger batch sizes
+                              may improve throughput by processing multiple documents simultaneously, 
+                              but can also increase memory usage. A smaller batch size may reduce 
+                              memory overhead, but might lead to more API calls and slower processing.
             Returns:
 
             list[float]: Vector with the concatenated embedding values.
