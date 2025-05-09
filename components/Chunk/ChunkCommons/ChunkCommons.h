@@ -28,4 +28,7 @@ namespace Chunk
 
     std::vector<std::string> SplitText(std::string inputs, const int overlap, const int chunk_size);
     std::vector<std::string> SplitTextByCount(const std::string &input, int overlap, int count_threshold, const std::shared_ptr<re2::RE2> regex);
+    
+    // void InitAPIKey();// Inicialização separada da chave
+    // std::vector<RAGLibrary::Document> Embeddings(const std::vector<RAGLibrary::Document>& list);
 }
