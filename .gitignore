@@ -1,74 +1,54 @@
-### C++ ###
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-### Python ###
-pycache/
-__pycache__/
-.pytest_cache/
-
-.pyd
-
-### Others ###
+build
 CMakeUserPresets.json
-CMakeFiles/
-
-bkp/
-build/
-models/
-libs/libtorch
-libs/tokenizers-cpp
-libs/openai-cpp
-
-libtorch*.zip
-libtorch-cxx11-abi-shared*
-libtorch-cxx11-abi-shared-with-deps-2.5.1+cpu.zip
-
-models
+bkp
+CMakeLists.txt.user
 conan.lock
-libtorch/
-extern/*
-
+libs*/libtorch
+libs*/libtorch - Copy
+libs*/libtorch new c11
+models/
+libtorch-cxx11-abi-shared*
 openai_api_key*
+libtorch-cxx11-abi-shared-with-deps-2.5.1+cpu.zip
+libtorch-cxx11-abi-shared-with-deps-2.5.1+cu124.zip
+*/libtorch*.zip
+*/openai-cpp/*
+*/openai-cpp
+*/tokenizers-cpp*
+*/tokenizers-cpp/*
+venv
 
-package/build/
-package/dist/
-packer
-package/*.egg-info
 
-.venv/
-.venv*/
-.vscode/
-.vs/
+*/*/*.egg-info
+*/*/build/*
+*/*/dist/*
 
-tests/
+"testes many linux"/*.so
+"testes wsl"/*.so
+testes/*.so
+testes/"modulos old"/*.so
+testes/"modulos pip"/*.so
+
+./*.so 
+./*/*.so 
+./*/*/*.so 
+./*/*/*/*.so
+./*/*/*/*/*.so
+*.so 
+*/*.so 
+*/*/*.so 
+*/*/*/*.so
+*/*/*/*/*.so
+*.whl
+*/*.whl
+*/*/*.whl
+*/*/*/*.whl
+*/*/*/*/*.whl
+*/libtorch
+*/openai-cpp
+*/tokenizers-cpp
+*/build/*
+*/conan.lock
+*/CMakeUserPresets.json
+
+

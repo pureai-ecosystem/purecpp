@@ -51,7 +51,7 @@ int main(int argc, char const *argv[])
     }
     std::string filenamepath = vm["filenamepath"].as<std::string>();
 
-    RAGLibrary::Metadata metadata = {{"fileIdentifier", filenamepath}};
+    RAGLibrary::Metadata metadata = {{"fileIdentifer", filenamepath}};
     RAGLibrary::Document doc(metadata, Utils::GetText(filenamepath));
 
     auto initialTime = std::chrono::high_resolution_clock::now();
