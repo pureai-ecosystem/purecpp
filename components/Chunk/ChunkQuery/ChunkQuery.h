@@ -1,39 +1,55 @@
 #pragma once
-
-#include "ChunkCommons/ChunkCommons.h"
-#include "CommonStructs.h"
-
+#include <tuple>
+#include <string>
 #include <vector>
+#include "CommonStructs.h"
+#include "EmbeddingOpenAI.h"
+#include "ChunkCommons.h"
 
-namespace Chunk
-{
+namespace Chunk {
 
-    class ChunkQuery
-    {
+    class ChunkQuery {
     public:
-        ~ChunkQuery() = default;
-        ChunkQuery(const int chunk_size = 100,
-                   const int overlap = 20,
-                   const EmbeddingModel embedding_model = EmbeddingModel::HuggingFace,
-                   const std::string &openai_api_key = "");
-
-        std::vector<RAGLibrary::Document> ProcessSingleDocument(const RAGLibrary::Document &item,
-                                                                const std::vector<float> &query_embedding,
-                                                                const float similarity_threshold);
-        std::vector<RAGLibrary::Document> ProcessDocuments(const std::vector<RAGLibrary::Document> &items,
-                                                           const std::string &query,
-                                                           const float similarity_threshold,
-                                                           int max_workers = 4);
-
+        ChunkQuery(
+            std::string query = "",
+            RAGLibrary::Document query_doc = {},
+            std::vector<RAGLibrary::Document> chunks_list = {},
+            Chunk::EmbeddingModel embedding_model = Chunk::EmbeddingModel::OpenAI,
+            std::string model = "text-embedding-ada-002"
+        );
+        ~ChunkQuery() = default;     
+        RAGLibrary::Document Query(std::string query = "");
+        RAGLibrary::Document Query(RAGLibrary::Document query_doc = {}); 
+        
+        std::vector<std::vector<float>> CreateVD(std::vector<RAGLibrary::Document> chunks_list = {});
+        std::vector<std::tuple<std::string, float, int>> Retrieve(float threshold = 0.5);
+        std::string StrQ(int index = -1);
+        std::vector<std::tuple<std::string, float, int>> getRetrieveList() const;
+        RAGLibrary::Document getQuery() const;
+        std::vector<RAGLibrary::Document> getChunksList() const; 
+        std::pair<Chunk::EmbeddingModel, std::string> getPair() const;
+        void printVD(int limit);
+        
     protected:
-        void ValidateModel();
-        std::vector<std::vector<float>> GenerateEmbeddings(const std::vector<std::string> &chunks);
+        bool allChunksHaveEmbeddings(const std::vector<RAGLibrary::Document>& chunks_list);
 
     private:
-        int m_chunk_size;
-        int m_overlap;
-        EmbeddingModel m_embedding_model;
+        std::string m_query;
+        std::vector<RAGLibrary::Document> m_chunks_list;
+        RAGLibrary::Document m_query_doc;
+        
+        std::vector<float> m_emb_query;
+        std::vector<std::vector<float>> m_chunk_embedding;
+        std::vector<std::tuple<std::string, float, int>> m_retrieve_list;
+        int quant_retrieve_list = 0;
+
+        Chunk::EmbeddingModel m_embedding_model; 
+        std::string m_model;
         std::string m_openai_api_key;
+
+        bool initialized_ = false;
+        void InitAPIKey();
+        std::vector<RAGLibrary::Document> Embeddings(const std::vector<RAGLibrary::Document>& list);
     };
 
 }

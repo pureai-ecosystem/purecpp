@@ -1267,73 +1267,105 @@ void bind_EmbeddingOpenAI(py::module &m)
 //--------------------------------------------------------------------------
 //  Binding function for ChunkQuery
 //--------------------------------------------------------------------------
-void bind_ChunkQuery(py::module &m)
-{
-    //--------------------------------------------------------------------------
-    // Binding for the Chunk::ChunkQuery class.
-    //--------------------------------------------------------------------------
-
-    py::class_<Chunk::ChunkQuery, std::shared_ptr<Chunk::ChunkQuery>>(m, "ChunkQuery", R"doc(
-        Class for processing queries in text chunks, generating embeddings, and
-        evaluating similarity with a provided query.
-    )doc")
-        .def(py::init<int, int, Chunk::EmbeddingModel, const std::string &>(),
-             py::arg("chunk_size") = 100,
-             py::arg("overlap") = 20,
-             py::arg("embedding_model") = Chunk::EmbeddingModel::HuggingFace,
-             py::arg("openai_api_key") = "",
-             R"doc(
-                 Constructor for the ChunkQuery class.
+void bind_ChunkQuery(py::module& m) {
+    py::class_<Chunk::ChunkQuery, std::shared_ptr<Chunk::ChunkQuery>>(m, "ChunkQuery",
+        R"doc(
+            Class for processing queries over text chunks, generating embeddings,
+            and evaluating similarity against a provided query.
+        )doc")
+        // Construtor
+        .def(py::init<
+                std::string&,                       // query text
+                RAGLibrary::Document&,             // optional document containing content and embedding
+                std::vector<RAGLibrary::Document>&,// list of documents for chunk indexing
+                const Chunk::EmbeddingModel,       // embedding model enum
+                const std::string&                 // model name string
+            >(),
+            py::arg("query") = "",
+            py::arg("query_doc") = RAGLibrary::Document(),
+            py::arg("chunks_list") = std::vector<RAGLibrary::Document>(),
+            py::arg("embedding_model") = Chunk::EmbeddingModel::OpenAI,
+            py::arg("model") = "text-embedding-ada-002",
+            R"doc(
+                Constructor for ChunkQuery.
 
                 Parameters:
+                    query (str, optional): Text to be processed (default="").
+                    query_doc (RAGLibrary.Document, optional): Document with content/embedding (default empty).
+                    chunks_list (list[RAGLibrary.Document], optional): Documents to index into chunks (default empty list).
+                    embedding_model (EmbeddingModel, optional): Embedding model to use (OpenAI or HuggingFace).
+                    model (str, optional): Name of the embedding model (default="text-embedding-ada-002").
+            )doc")
+         .def("Query",
+            py::overload_cast<std::string>(&Chunk::ChunkQuery::Query),
+            py::arg("query"),
+            R"doc(
+                 Generates an embedding for the provided query and returns it as a document.
 
-                chunk_size (int, optional): Size of each text chunk (default=100).
-                overlap (int, optional): Overlap between successive chunks (default=20).
-                embedding_model (EmbeddingModel, optional): Embedding model to be used (HuggingFace or OpenAI).
-                openai_api_key (str, optional): OpenAI API key (required if embedding_model=OpenAI).
+                 Parameters:
+                     query (str): The text query to embed.
+
+                 Returns:
+                     RAGLibrary.Document: Document containing the embedding of the query.
              )doc")
-
-        // Method: ProcessSingleDocument
-        .def("ProcessSingleDocument",
-             &Chunk::ChunkQuery::ProcessSingleDocument,
-             py::arg("item"),
-             py::arg("query_embedding"),
-             py::arg("similarity_threshold"),
+       .def("Query",
+            py::overload_cast<RAGLibrary::Document>(&Chunk::ChunkQuery::Query),
+            py::arg("query_doc"),
+            R"doc(
+                Uses the provided Document (with or without embedding) to set the query.
+            )doc")
+        .def("CreateVD", &Chunk::ChunkQuery::CreateVD,
+             py::arg("chunks_list"),
              R"doc(
-                 Processes a single document by splitting it into chunks, generating embeddings,
-                and evaluating similarity with the provided query.
+                 Creates embeddings for a list of chunks.
 
-                Parameters:
+                 Parameters:
+                     chunks_list (list[RAGLibrary.Document]): Documents for which to generate embeddings.
 
-                item (RAGLibrary.Document): Structure containing the file identifier and textual content.
-                query_embedding (list[float]): Embedding of the query for comparison.
-                similarity_threshold (float): Similarity threshold for considering a chunk relevant.
-                Returns:
-
-                list[RAGLibrary.Document]: List of documents that meet the similarity criteria.
+                 Returns:
+                     list[list[float]]: Embedding vectors for each chunk.
              )doc")
-
-        // Method: ProcessDocuments
-        .def("ProcessDocuments",
-             &Chunk::ChunkQuery::ProcessDocuments,
-             py::arg("items"),
-             py::arg("query"),
-             py::arg("similarity_threshold"),
-             py::arg("max_workers") = 4,
+        .def("Retrieve", &Chunk::ChunkQuery::Retrieve,
+             py::arg("threshold"),
              R"doc(
-                 Processes multiple documents in parallel, splitting each into chunks,
-                generating embeddings, and evaluating similarity with the provided query.
+                 Retrieves chunks whose similarity to the query embedding exceeds the threshold.
 
-                Parameters:
+                 Parameters:
+                     threshold (float): Similarity cutoff in [-1.0, 1.0].
 
-                items (list[RAGLibrary.Document]): List of structures containing identifiers and textual contents.
-                query (str): Query text to generate embeddings and compare.
-                similarity_threshold (float): Similarity threshold for considering a chunk relevant.
-                max_workers (int, optional): Maximum number of threads to be used in parallel processing (default=4).
-                Returns:
+                 Returns:
+                     list[tuple(str, float, int)]: Triplets of
+                         - chunk content (str),
+                         - similarity score (float),
+                         - original chunk index (int).
+             )doc")
+        .def("getRetrieveList", &Chunk::ChunkQuery::getRetrieveList,
+             R"doc(
+                 Returns the list of retrieved chunks with their similarity scores and original indices.
 
-                list[RAGLibrary.Document]: List of documents that meet the similarity criteria.
-             )doc");
+                 Returns:
+                     list[tuple(str, float, int)]: Retrieved chunk content, similarity score, and original index triplets.
+             )doc")
+        .def("StrQ", &Chunk::ChunkQuery::StrQ,
+             py::arg("index"),
+             R"doc(
+                 Formats the query and the specified retrieved chunk into a full prompt.
+
+                 Parameters:
+                     index (int): Index of the retrieved chunk to format.
+
+                 Returns:
+                     str: Formatted prompt containing question, context, similarity score, and original chunk index.
+             )doc")
+        .def("getQuery", &Chunk::ChunkQuery::getQuery,
+            R"doc(
+                Returns the current query Document.
+            )doc")
+        .def("getPar", &Chunk::ChunkQuery::getPar,
+            R"doc(
+                Returns a pair (EmbeddingModel, model name).
+            )doc")
+        ;
 }
 
 //--------------------------------------------------------------------------
