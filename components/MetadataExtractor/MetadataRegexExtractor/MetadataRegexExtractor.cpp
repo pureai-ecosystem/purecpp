@@ -4,13 +4,6 @@
 #include <future>
 #include <atomic>
 #include <semaphore>
-// #if __has_include(<semaphore>)
-//     #include <semaphore>
-// #else
-//     // Alternativa: inclua uma implementação própria ou de terceiros
-//     #include "semaphore_compat.h"
-// #endif
-
 #include <mutex>
 
 namespace MetadataRegexExtractor

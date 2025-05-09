@@ -9,13 +9,12 @@
 #include <omp.h>
 #include <syncstream>
 #include <algorithm>
-#include <memory>      // unique_ptr, make_unique
-#include <sstream>     // stringstream
+#include <memory>
+#include <sstream>
 #include <torch/torch.h>
-#include <iomanip>    // setprecision
-#include <stdexcept>  // std::invalid_argument
+#include <iomanip> 
+#include <stdexcept> 
 
-// #define DEBUG // Uncomment to enable debug messages
 
 Chunk::ChunkQuery::ChunkQuery(
     std::string query,
@@ -90,7 +89,6 @@ std::vector<RAGLibrary::Document> Chunk::ChunkQuery::Embeddings(const std::vecto
     {
     case  Chunk::EmbeddingModel::HuggingFace:
         throw std::invalid_argument("Model not yet supported");
-        // break;
     case  Chunk::EmbeddingModel::OpenAI:
         if(m_model == "text-embedding-ada-002"){
             int count = 0;
@@ -107,7 +105,6 @@ std::vector<RAGLibrary::Document> Chunk::ChunkQuery::Embeddings(const std::vecto
         }
         else{
             throw std::invalid_argument("Model not yet supported");
-            // return {};
         }
         break;
     }
@@ -149,7 +146,6 @@ RAGLibrary::Document Chunk::ChunkQuery::Query(std::string query){
     return m_query_doc;
 }
 
-// Versão que recebe diretamente um Document
 RAGLibrary::Document Chunk::ChunkQuery::Query(RAGLibrary::Document query_doc) {
     if (query_doc.page_content.empty()) {
         throw std::invalid_argument("Query document is empty.");
@@ -164,41 +160,7 @@ RAGLibrary::Document Chunk::ChunkQuery::Query(RAGLibrary::Document query_doc) {
     m_emb_query = m_query_doc.embedding.value();
     return m_query_doc;
 }
-// Versao recente
-/*std::vector<std::vector<float>> Chunk::ChunkQuery::CreateVD(std::vector<RAGLibrary::Document> chunks_list){
-    if (initialized_) throw std::invalid_argument("Chunks list already initialized.");// If you create in init
-      
-    if (chunks_list.empty() && m_chunks_list.empty()) 
-        throw std::invalid_argument("Empty chunks list.");
 
-    if (chunks_list.empty()) 
-        throw std::invalid_argument("Empty chunks list."); //Redundant check
-
-    if (!chunks_list.empty() && m_chunks_list.empty()) {// Not initialized or firsh time init
-        #ifdef DEBUG
-        std::cout << "Erro: not all chunks have embeddings\n"; // Debug
-        #endif
-        m_chunk_embedding.resize(chunks_list.size()); // cria com o tamanho certo
-        if(this->allChunksHaveEmbeddings(chunks_list)){
-            for (size_t i = 0; i < chunks_list.size(); ++i) {
-                m_chunk_embedding[i] = chunks_list[i].embedding.value();
-            }
-        }
-        else{
-            auto docs = this->Embeddings(chunks_list);
-            m_chunks_list = std::move(docs);
-            for (size_t i = 0; i < m_chunks_list.size(); ++i) {
-                m_chunk_embedding[i] = m_chunks_list[i].embedding.value();
-            }
-        }
-        //m_chunks_list = std::move(docs);// verificar isso
-
-        initialized_ = true;
-        return m_chunk_embedding;
-        
-    }
-    return {};      
-}*/
 std::vector<std::vector<float>> Chunk::ChunkQuery::CreateVD(std::vector<RAGLibrary::Document> chunks_list)// Testar
 {
     if (initialized_)
@@ -207,7 +169,6 @@ std::vector<std::vector<float>> Chunk::ChunkQuery::CreateVD(std::vector<RAGLibra
     if (chunks_list.empty())
         throw std::invalid_argument("Empty chunks list.");
 
-    // 1) Decida se usa os embeddings já presentes ou chama a API
     std::vector<RAGLibrary::Document> docs;
     if (allChunksHaveEmbeddings(chunks_list)) {
         docs = std::move(chunks_list);
@@ -215,11 +176,9 @@ std::vector<std::vector<float>> Chunk::ChunkQuery::CreateVD(std::vector<RAGLibra
         docs = this->Embeddings(chunks_list);
     }
 
-    // 2) Atualize m_chunks_list e reserve espaço para o embedding vector
     m_chunks_list    = std::move(docs);
     m_chunk_embedding.resize(m_chunks_list.size());
 
-    // 3) Preencha m_chunk_embedding a partir de m_chunks_list
     for (size_t i = 0; i < m_chunks_list.size(); ++i) {
         m_chunk_embedding[i] = m_chunks_list[i].embedding.value();
     }
@@ -294,7 +253,6 @@ RAGLibrary::Document Chunk::ChunkQuery::getQuery() const {
     return m_query_doc;
 }
 
-// Retorna o par (modelo de embedding, nome do modelo) usados na instância
 std::pair<Chunk::EmbeddingModel, std::string> Chunk::ChunkQuery::getPar() const {
     return { m_embedding_model, m_model };
 }
@@ -306,24 +264,17 @@ std::vector<RAGLibrary::Document> Chunk::ChunkQuery::getChunksList() const {
     return m_chunks_list;
 }
 
-std::vector<std::tuple<std::string, float, int>>
-Chunk::ChunkQuery::Retrieve(float threshold) {
-
-    // Validation of input parameters -----------------------------------------------------------------------
+std::vector<std::tuple<std::string, float, int>> Chunk::ChunkQuery::Retrieve(float threshold) {
     if (m_emb_query.empty()) throw std::runtime_error("Query not yet initialized.");
     if (threshold < -1.0f || threshold > 1.0f) throw std::invalid_argument("Threshold out of bound [-1,1].");
     if (m_chunk_embedding.empty() || m_emb_query.empty()) throw std::runtime_error("Embeddings not found.");
-    //------------------------------------------------------------------------------------------------------
 
-    // Vetor temporário de (texto, score, índice)
     std::vector<std::tuple<std::string, float, int>> scored_hits;
-    //torch::Tensor()
-    // Tensor da query
+    torch::Tensor()
     auto query_tensor = torch::from_blob(
         const_cast<float*>(m_emb_query.data()),
         {int64_t(m_emb_query.size())}, torch::kFloat32
     );
-    // auto query_tensor = torch::tensor(m_emb_query, torch::kFloat32); -> ?
 
     float norm_q = torch::norm(query_tensor).item<float>();
 
@@ -342,7 +293,7 @@ Chunk::ChunkQuery::Retrieve(float threshold) {
             float dot_p = torch::dot(query_tensor, chunk_tensor).item<float>();
             float sim = dot_p / (norm_q * norm_c);
 
-            if (sim >= threshold) {// armazena (conteúdo, similaridade, índice original)
+            if (sim >= threshold) {
                 local_hits.emplace_back(
                     m_chunks_list[i].page_content,
                     sim,
@@ -358,7 +309,6 @@ Chunk::ChunkQuery::Retrieve(float threshold) {
         );
     }
 
-    // ordena decrescentemente por similaridade (get<1>)
     std::sort(
         scored_hits.begin(),
         scored_hits.end(),
@@ -367,7 +317,6 @@ Chunk::ChunkQuery::Retrieve(float threshold) {
         }
     );
 
-    // atualiza estado e retorna
     m_retrieve_list   = std::move(scored_hits);
     quant_retrieve_list = int(m_retrieve_list.size()); //int quant_retrieve_list = static_cast<int>(m_retrieve_list.size());
     return m_retrieve_list;

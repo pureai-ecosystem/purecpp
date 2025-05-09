@@ -6,6 +6,25 @@
 
 #include "nlohmann/json.hpp"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+#undef min
+#undef max
+#undef format
+
+static std::wstring to_wstring_utf16(const std::string &utf8)
+{
+    int needed_size = MultiByteToWideChar(CP_UTF8, 0, utf8.data(),
+                                          (int)utf8.size(), nullptr, 0);
+    std::wstring wstr(needed_size, 0);
+    MultiByteToWideChar(CP_UTF8, 0, utf8.data(),
+                        (int)utf8.size(), wstr.data(), needed_size);
+    return wstr;
+}
+#endif
+
 namespace MetadataHFExtractor
 {
     MetadataHFExtractor::MetadataHFExtractor()
@@ -16,7 +35,14 @@ namespace MetadataHFExtractor
     {
         m_env = std::make_shared<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "NER");
         m_sessionOptions.SetInterOpNumThreads(1);
+
+        #ifdef _WIN32
+        std::wstring wpath = to_wstring_utf16(modelPath);
+        m_session = std::make_shared<Ort::Session>(*m_env, wpath.c_str(), m_sessionOptions);
+        #else
         m_session = std::make_shared<Ort::Session>(*m_env, modelPath.c_str(), m_sessionOptions);
+        #endif
+
         auto blob = RAGLibrary::FileReader(tokenizerPath);
         m_tokenizer = tokenizers::Tokenizer::FromBlobJSON(blob);
         ReadingFromLabelMap(labelMapPath);
@@ -98,28 +124,30 @@ namespace MetadataHFExtractor
 
     std::vector<float> MetadataHFExtractor::SoftMax(const std::vector<float> &logits)
     {
+        if (logits.empty()) 
+        {
+            return {};
+        }
+    
         std::vector<float> probabilities(logits.size());
-        float max_logit = *std::max_element(logits.begin(), logits.end());
-
-        float sum = 0.0;
-        for (auto index = 0; index < logits.size(); ++index)
+        float max_logit = logits[0];
+        for (float v : logits) max_logit = std::max(max_logit, v);
+        float sum_exp = 0.0;
+        for (size_t i = 0; i < logits.size(); i++) 
         {
-            probabilities[index] = std::exp(logits[index] - max_logit);
-            sum += probabilities[index];
+            float logit = logits[i] - max_logit;
+            float exp_logit = std::exp(logit);
+            sum_exp += exp_logit;
+            probabilities[i] = exp_logit;
         }
-
-        for (float &prob : probabilities)
-        {
-            prob /= sum;
-        }
-
+        for (size_t i = 0; i < probabilities.size(); i++) probabilities[i] /= sum_exp;
         return probabilities;
     }
 
     std::vector<std::string> MetadataHFExtractor::ProcessLogits(float *logits, size_t seqLength, size_t numLabels, const std::map<int, std::string> &labelMap)
     {
         std::vector<std::string> returnValues;
-        for (size_t tokenIdx = 0; tokenIdx < seqLength; ++tokenIdx)
+        for (int tokenIdx = 0; tokenIdx < seqLength; ++tokenIdx)
         {
             std::vector<float> tokenLogits(logits + tokenIdx * numLabels, logits + (tokenIdx + 1) * numLabels);
             std::vector<float> probabilities = SoftMax(tokenLogits);
