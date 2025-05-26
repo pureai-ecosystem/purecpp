@@ -15,7 +15,7 @@ namespace Chunk
         ~ChunkSimilarity() = default;
         ChunkSimilarity(const int chunk_size = 100,
                         const int overlap = 20,
-                        const EmbeddingModel embedding_model = EmbeddingModel::HuggingFace,
+                        std::string embedding_model = "openai",
                         const std::string &openai_api_key = "");
 
         std::vector<RAGLibrary::Document> ProcessSingleDocument(const RAGLibrary::Document &item);
@@ -28,7 +28,7 @@ namespace Chunk
     private:
         int m_chunk_size;
         int m_overlap;
-        EmbeddingModel m_embedding_model;
+        std::string m_embedding_model;
         std::string m_openai_api_key;
     };
 

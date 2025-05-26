@@ -1,13 +1,32 @@
 #pragma once
-
 #include <mutex>
 #include <queue>
 #include <optional>
 #include <string>
 #include <iostream>
 #include <vector>
+// #if __has_include(<semaphore>)
+//     #include <semaphore>
+// #else
+//     // Alternativa: inclua uma implementação própria ou de terceiros
+//     #include "semaphore_compat.h"
+// #endif
 
+// #if __has_include(<format>)
+//     #include <format>
+// #else
+//     // Alternativa: use a biblioteca fmt ou implemente uma função de formatação simples
+//     #include <fmt/core.h>
+// #endif
+#include <semaphore>
+#include <format>
 
+#include <fstream>
+#include <sstream>
+#include <iostream> 
+//#define WIN32_LEAN_AND_MEAN
+//#include <windows.h>
+#include <filesystem>
 namespace RAGLibrary
 {
     template <typename Type>
@@ -23,7 +42,7 @@ namespace RAGLibrary
 
         ThreadSafeQueue(const std::vector<Type>& vect)
         {
-            for(auto elem : vect)
+            for (auto elem : vect)
             {
                 this->m_queue.push(elem);
             }
@@ -35,6 +54,7 @@ namespace RAGLibrary
             return *this;
         }
 
+
         void push(const Type& value)
         {
             std::lock_guard lock(m_mutex);
@@ -44,7 +64,7 @@ namespace RAGLibrary
         std::optional<Type> pop()
         {
             std::lock_guard lock(m_mutex);
-            if(m_queue.empty())
+            if (m_queue.empty())
             {
                 return std::nullopt;
             }
@@ -63,7 +83,7 @@ namespace RAGLibrary
         void clear()
         {
             std::lock_guard lock(m_mutex);
-            while(!m_queue.empty())
+            while (!m_queue.empty())
             {
                 m_queue.pop();
             }

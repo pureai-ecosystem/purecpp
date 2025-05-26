@@ -1,4 +1,5 @@
 #!/bin/bash
+
 base_dir=./build/Release/apps
 chunk_base_dir=${base_dir}/chunk
 clean_data_dir=${base_dir}/clean_data
