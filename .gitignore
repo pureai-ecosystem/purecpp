@@ -1,4 +1,5 @@
 build
+.vscode
 CMakeUserPresets.json
 bkp
 CMakeLists.txt.user
