@@ -40,7 +40,7 @@ git clone https://github.com/pureai-ecosystem/purecpp.git
 cd purecpp
 ```
 
-## 2. Ubuntu / Debian equivalent
+## 2. Installing dependencies
 
 Run the following commands:
 
@@ -66,20 +66,27 @@ sudo apt install -y \
 
 ## 3. Install python essential packages
 
+```bash
 pip install build conan cmake requests pybind11
+```
 
 ---
+
 ## 4. Execute the FAISS installation script
 
-`./installers/install_faiss_ubuntu.sh`
+```bash
+./installers/install_faiss_ubuntu.sh
+```
 
 ---
+
 ## 5. Install Rust via rustup
 
 ### Run rustup installer non-interactively (-y). This places cargo and rustc in /root/.cargo.
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ```
+
 ### Activate Rust Environment:
 ```bash
 source ~/.cargo/env
