@@ -215,6 +215,27 @@ python model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence
 
 # How to build 
 
+## Compile all at once
+```
+./all_cmake.sh
+```
+
+## Compile one at time
+```
+./module_cmake.sh
+```
+
+The resulting libraries will be placed inside `Sandbox` dir
+
+```
+Sandbox/
+├── purecpp_chunks_clean.cpython-312-x86_64-linux-gnu.so
+└── ...
+```
+
+Use this directory to load, test, and iterate on the library code.
+
+
 ## 📌 Next Steps
 ![Next Steps](community/release.jpg)
 
