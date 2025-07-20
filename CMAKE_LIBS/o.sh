@@ -4,7 +4,7 @@ echo "PATH: $PATH"
 
 rm -fr build conan.lock
 
-conan install . --build=missing
+#conan install . --build=missing
 conan lock create conanfile.py --build=missing
 conan install . --build=missing
 
@@ -18,6 +18,12 @@ cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW \
     -B "$(pwd)/build/Release" \
     -G "Unix Makefiles"
 
-cmake --build "$(pwd)/build/Release" --parallel "$(nproc)"
-rm -f ../Tests/purecpp_libs*.so
-cp ./build/Release/purecpp_libs*.so ../Tests/
+cores=$(nproc)
+if [ "$cores" -gt 1 ]; then
+    half=$((cores / 2))
+else
+    half=1
+fi
+cmake --build "$(pwd)/build/Release" --parallel "$half"
+rm -f ../Sandbox/purecpp_libs*.so
+cp ./build/Release/purecpp_libs*.so ../Sandbox/

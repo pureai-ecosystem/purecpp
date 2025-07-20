@@ -210,7 +210,8 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/../libs/CommonStructs
     ${CMAKE_SOURCE_DIR}/../libs/StringUtils
     ${CMAKE_SOURCE_DIR}/../libs/FileUtils
-
+    ${CMAKE_SOURCE_DIR}/../libs/MemoryUtils
+    
     #C:/vcpkg/packages/protobuf_x64-windows/include
     ${CURL_INCLUDE_DIRS}
     ${TOKENIZERS_PATH}/include
