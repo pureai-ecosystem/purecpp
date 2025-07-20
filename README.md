@@ -101,8 +101,7 @@ pip install build conan cmake requests pybind11
 ## 4. Execute the FAISS installation script
 
 ```bash
-chmod +X installers/install_faiss_ubuntu.sh
-./installers/install_faiss_ubuntu.sh
+chmod +x  ./installers/install_faiss_ubuntu.sh
 ````
 
 ---
