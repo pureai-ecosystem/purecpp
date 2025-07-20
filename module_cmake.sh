@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# echo "=========================================================================="
+# echo "|                              Module                         |"
+# echo "=========================================================================="
+
 print_m() {
-    local num="$1"     # Captura o primeiro argumento (versão do Python)
-    local modulo="$2"  # Captura o segundo argumento (nome do módulo)
+    local modulo="$1"  # Captura o segundo argumento (nome do módulo)
 
     # Determina o comprimento máximo da string
     local titulo_modulo="MODULE ${modulo}"
