@@ -164,6 +164,7 @@ python3 scripts/hf_model_to_onnx.py -m="dbmdz/bert-large-cased-finetuned-conll03
 python3 scripts/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence-transformers/all-MiniLM-L6-v2"
 ```
 
+```
 **Notes:**
 
 * Make sure to adjust `compiler.version` and `os` if your environment is different.
@@ -172,6 +173,7 @@ python3 scripts/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" 
 ```
 
 ---
+
 ## 📌 Next Steps
 ![Next Steps](community/release.jpg)
 
