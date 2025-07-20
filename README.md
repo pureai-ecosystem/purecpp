@@ -29,6 +29,18 @@ Ensure you have the following dependencies installed before building PureCPP:
 - **Conan** 2
 - **Rust**
 
+## 📚 Table of Contents
+
+- [Introduction](#purecpp-framework)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing-to-purecpp)
+- [Minimum Requirements](#-minimum-requirements)
+- [Environment Setup](#environment-setup-ubuntu--debian-for-c-and-python-development)
+- [Using Pre-trained Models](#7-use-pre-trained-models)
+- [Build Instructions](#how-to-build)
+  - [Compile All Modules](#compile-all-at-once)
+  - [Compile Individually](#compile-one-at-time)
+- [Next Steps](#-next-steps)
 
 ---
 # Environment Setup (Ubuntu / Debian) for C++ and Python Development
