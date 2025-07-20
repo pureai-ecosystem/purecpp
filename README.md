@@ -171,3 +171,8 @@ python3 scripts/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" 
 
 ```
 
+---
+## 📌 Next Steps
+![Next Steps](community/release.jpg)
+
+Stay tuned for updates! 🚀
