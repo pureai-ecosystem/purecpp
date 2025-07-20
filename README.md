@@ -1,6 +1,22 @@
 # PureCPP framework
-**PureCPP** is the C++ backend for architectural code that powers the RAG system.
+**PureCPP is a powerfull C++ Backend RAG system.**\
+Designed for maximum performance and scalability, it integrates vector search, ONNX models, and CUDA acceleration into a seamless, production-ready core.\
+This repository provides detailed guidance on how to set up the environment, configure dependencies with Conan, and compile the project using CMake — going beyond a simple build, it shows how to prepare a robust development pipeline.
 
+## 📚 Table of Contents
+
+- [Introduction](#purecpp-framework)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing-to-purecpp)
+- [Minimum Requirements](#-minimum-requirements)
+- [Environment Setup](#environment-setup-ubuntu--debian-for-c-and-python-development)
+- [Using Pre-trained Models](#7-use-pre-trained-models)
+- [Build Instructions](#how-to-build)
+  - [Compile All Modules](#compile-all-at-once)
+  - [Compile Individually](#compile-one-at-time)
+- [Next Steps](#-next-steps)
+
+---
 ---
 
 ## 📖 Documentation
@@ -152,9 +168,10 @@ find ~ -type d -wholename "*/.conan2/profiles"
 
 ### Editing the profile
 
-Once you’ve located the `default` profile, you can edit it to explicitly set the following configuration:
+Once you’ve located the `default` profile, you shall edit it to explicitly set the following configuration:
 
-```
+```bash 
+cat << EOF > ~/.conan2/profiles/default 
 [settings]
 arch=x86_64
 build_type=Release
@@ -163,7 +180,8 @@ compiler.cppstd=17
 compiler.libcxx=libstdc++11
 compiler.version=11
 os=Linux
-```
+EOF
+````
 
 ---
 
@@ -227,6 +245,21 @@ python model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence
 
 # How to build 
 
+
+This is a development version with an automatic pipline build system. Optimizing the process, making it easy to compile and test all five modules automatically in this development version.
+
+To compile and build, just use the provided scripts — no manual setup needed.
+
+Each module (CMAKE_LIBS, CMAKE_META, CMAKE_EMBED, CMAKE_EXTRACT, CMAKE_CHUNKS_CLEAN) has its own o.sh script, which:
+
+- Cleans the build/ folder
+
+- Installs Conan dependencies if missing
+
+- Compiles the code
+
+- Sends the .so output to the central Sandbox/ directory
+
 Before running the provided shell scripts, ensure they have the appropriate execution permissions. This step is essential to avoid permission errors during the build process, especially when working on Linux or macOS systems.
 
 ```bash
@@ -244,7 +277,7 @@ chmod +x ./module_cmake.sh
 ./module_cmake.sh <module>
 ```
 
-The resulting libraries will be placed inside `Sandbox` dir
+The resulting libraries will be placed inside `Sandbox` dir:
 
 ```
 Sandbox/
@@ -252,7 +285,7 @@ Sandbox/
 └── ...
 ```
 
-Use this directory to load, test, and iterate on the library code.
+
 
 
 ## 📌 Next Steps
