@@ -64,10 +64,22 @@ sudo apt install -y  build-essential nano wget \
 
 ## 3. Install python essential packages
 
+*In case you do not have a Docker environment available*, we strongly recommend that you use a Python `venv` (virtual environment) to ensure proper isolation of dependencies and reproducibility of results. This practice minimizes conflicts between global packages and project-specific requirements, fostering a cleaner and more maintainable development setup. 
+
+Steps below to create and activate the virtual environment:
+
+  - Create the virtual environment (replace 'venv' with your preferred name)
+    ```bash
+    python3 -m venv venv
+    ````
+  - Activate the virtual environment on Linux or macOS
+    ```bash
+    source venv/bin/activate
+    ````
+
 ```bash
 pip install build conan cmake requests pybind11
 ````
-
 ---
 
 ## 4. Execute the FAISS installation script
@@ -215,6 +227,13 @@ python model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence
 
 # How to build 
 
+Before running the provided shell scripts, ensure they have the appropriate execution permissions. This step is essential to avoid permission errors during the build process, especially when working on Linux or macOS systems.
+
+```bash
+chmod +x ./all_cmake.sh
+chmod +x ./module_cmake.sh
+````
+
 ## Compile all at once
 ```
 ./all_cmake.sh
@@ -222,7 +241,7 @@ python model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence
 
 ## Compile one at time
 ```
-./module_cmake.sh
+./module_cmake.sh <module>
 ```
 
 The resulting libraries will be placed inside `Sandbox` dir

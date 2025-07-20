@@ -56,6 +56,8 @@ def convert_token_classification_model(model_name, output_name):
 
 # Main with argparse
 def main():
+    global BASE_DIR
+    
     parser = argparse.ArgumentParser(description="Conversor de modelos Hugging Face para ONNX")
     parser.add_argument("-m", "--model", required=True, help="Nome do modelo Hugging Face (ex.: dslim/bert-base-NER)")
     parser.add_argument("-o", "--output", required=True, help="Nome de saída para a pasta exportada")
@@ -64,7 +66,7 @@ def main():
 
     args = parser.parse_args()
 
-    global BASE_DIR
+   
     BASE_DIR = args.base_dir
 
     if args.mode == "feature":
