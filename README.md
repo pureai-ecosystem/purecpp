@@ -29,9 +29,7 @@ Ensure you have the following dependencies installed before building PureCPP:
 - **Rust**
 
 ---
-# Environment
-
-# Ubuntu / Debian Setup for C++ and Python Development
+# Environment Setup (Ubuntu / Debian) for C++ and Python Development
 
 ## 1. Clone the Repository
 
