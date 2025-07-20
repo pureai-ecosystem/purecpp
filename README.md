@@ -1,6 +1,6 @@
 # PureCPP framework
 **PureCPP is a powerful C++ backend architecture for RAG systems.**\
-Designed for maximum performance and scalability, it integrates vector search, ONNX models, and CUDA acceleration into a seamless, production-ready core.\
+Designed for maximum performance and scalability, it integrates vector search, ONNX models, and CUDA acceleration into a seamless, production-ready framework.\
 This repository provides detailed guidance on how to set up the environment, configure dependencies with Conan, and compile the project using CMake — going beyond a simple build, it shows how to prepare a robust development pipeline.
 
 ## 📚 Table of Contents
