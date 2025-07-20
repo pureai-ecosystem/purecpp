@@ -29,50 +29,57 @@ Ensure you have the following dependencies installed before building PureCPP:
 - **Rust**
 
 ---
+# Environment
 
-## ⚡ Quick Start with PIP
+# Ubuntu / Debian Setup for C++ and Python Development
 
-To quickly get started with **PureCPP**, follow the installation guide in our documentation:
+## 1. Clone the Repository
 
-📖 [Setup Guide](https://docs.puredocs.org/setup)
-
----
-
-## 🔨 How to Build
-
-The following commands execute the `cleand_and_build.sh` script, which performs the following actions:
-
-- Creates the required folders for the project build.
-- Runs **CMake** to configure and generate the build files.
-- Creates the **build** folder, where the compiled files will be stored.
-- Installs **Conan** dependencies, ensuring all necessary libraries and packages are available.
-
-### Build Commands:
 ```bash
-chmod +x cleand_and_build.sh
-./cleand_and_build.sh
+git clone https://github.com/pureai-ecosystem/purecpp.git
+cd purecpp
+```
+
+## 2. Ubuntu / Debian equivalent
+
+Run the following commands:
+
+```bash
+sudo apt update && \
+sudo apt upgrade -y && \
+sudo apt install -y \
+    build-essential \
+    nano \
+    wget \
+    curl \
+    git \
+    ninja-build \
+    cmake \
+    libopenblas-dev \
+    libgflags-dev \
+    python3-dev \
+    libprotobuf-dev \
+    protobuf-compiler
 ```
 
 ---
 
-## 📥 Downloading Pre-trained Models
+## 3. Install python essential packages
 
-To use pre-trained models with **PureCPP**, you can download and convert them to **ONNX** format using the following commands:
-
-```bash
-python3 scripts/hf_model_to_onnx.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-large-cased-finetuned-conll03-english"
-python3 scripts/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence-transformers/all-MiniLM-L6-v2"
-```
+pip install build conan cmake requests pybind11
 
 ---
+## 4. Execute the FAISS installation script
 
-## 🦀 Rust Installation
+`./installers/install_faiss_ubuntu.sh`
 
-### Install Rust:
+---
+## 5. Install Rust via rustup
+
+### Run rustup installer non-interactively (-y). This places cargo and rustc in /root/.cargo.
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ```
-
 ### Activate Rust Environment:
 ```bash
 source ~/.cargo/env
@@ -80,41 +87,41 @@ source ~/.cargo/env
 
 ---
 
-## 🔗 Downloading Libtorch
+## 6. Setting the Default Conan Profile 
 
-Libtorch is required for running PyTorch models in **C++**. Follow the links below for installation:
+To locate the path of the `.conan2/profiles/default` file, run:
 
-- 📖 [Installing Libtorch](https://pytorch.org/cppdocs/installing.html)
-- 📥 [Download Binaries](https://pytorch.org/get-started/locally/)
-
-![libtorch-download](docs/libtorch-download.png)
-
-### CPU Version Installation
 ```bash
-libtorch_cpu_zip=libtorch-cxx11-abi-shared-with-deps-2.5.1+cpu.zip
-libtorch_cpu_url=https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-2.5.1%2Bcpu.zip
+find ~ -type d -wholename "*/.conan2/profiles"
+````
 
-wget ${libtorch_cpu_url} -O ${libtorch_cpu_zip}
-mkdir -p ./libs/libtorch
-unzip ${libtorch_cpu_zip} -d ./libs/libtorch
-mv ./libs/libtorch/libtorch/ ./libs/libtorch/cpu
+Once you have located the `default` profile, open the file and edit it to include the following content:
 ```
-
-### CUDA Version Installation
-```bash
-libtorch_cuda_zip=libtorch-cxx11-abi-shared-with-deps-2.5.1+cu124.zip
-libtorch_cuda_url=https://download.pytorch.org/libtorch/cu124/libtorch-cxx11-abi-shared-with-deps-2.5.1%2Bcu124.zip
-
-wget ${libtorch_cuda_url} -O ${libtorch_cuda_zip}
-mkdir -p ./libs/libtorch
-unzip ${libtorch_cuda_zip} -d ./libs/libtorch
-mv ./libs/libtorch/libtorch/ ./libs/libtorch/cuda
+[settings]
+arch=x86_64
+build_type=Release
+compiler=gcc
+compiler.cppstd=17
+compiler.libcxx=libstdc++11
+compiler.version=11
+os=Linux
 ```
 
 ---
 
-## 📌 Next Steps
-![Next Steps](community/release.jpg)
+## 7. Use pre-trained models
 
-Stay tuned for updates! 🚀
+### With **PureCPP**, you can download and convert them to **ONNX** format using the following commands:
+
+```bash
+python3 scripts/hf_model_to_onnx.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-large-cased-finetuned-conll03-english"
+python3 scripts/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence-transformers/all-MiniLM-L6-v2"
+```
+
+**Notes:**
+
+* Make sure to adjust `compiler.version` and `os` if your environment is different.
+* This configuration ensures compatibility with GCC 11 and C++17 using the GNU libstdc++11 ABI.
+
+```
 

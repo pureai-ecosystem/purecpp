@@ -10,7 +10,7 @@ set -e  # Exit immediately if a command fails
 PROJ_DIR=$(pwd)
 
 # Destination directory for FAISS
-FAISS_DIR="${PROJ_DIR}/libs/faiss"
+FAISS_DIR="${PROJ_DIR}/../libs/faiss"
 
 echo "Creating libs/faiss/ directory inside the project..."
 mkdir -p "$FAISS_DIR"
