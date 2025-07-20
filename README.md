@@ -276,7 +276,7 @@ chmod +x ./module_cmake.sh
 ./module_cmake.sh <module>
 ```
 
-The resulting libraries will be placed inside `Sandbox` dir:
+The resulting libraries will be placed inside `[Sandbox dir](/Sandbox)` :
 
 ```
 Sandbox/
