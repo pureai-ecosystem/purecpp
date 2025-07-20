@@ -1,8 +1,22 @@
 # PureCPP framework
 **PureCPP** is the C++ backend for architectural code that powers the RAG system.
 PureCPP is a GPU-accelerated RAG (Retrieval-Augmented Generation) framework, written in modern C++ with Python bindings. Designed for maximum performance and scalability, it integrates vector search, ONNX models, and CUDA acceleration into a seamless, production-ready core.
-
 This repository provides detailed guidance on how to set up the environment, configure dependencies with Conan, and compile the project using CMake — going beyond a simple build, it shows how to prepare a robust development pipeline.
+
+## 📚 Table of Contents
+
+- [Introduction](#purecpp-framework)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing-to-purecpp)
+- [Minimum Requirements](#-minimum-requirements)
+- [Environment Setup](#environment-setup-ubuntu--debian-for-c-and-python-development)
+- [Using Pre-trained Models](#7-use-pre-trained-models)
+- [Build Instructions](#how-to-build)
+  - [Compile All Modules](#compile-all-at-once)
+  - [Compile Individually](#compile-one-at-time)
+- [Next Steps](#-next-steps)
+
+---
 ---
 
 ## 📖 Documentation
@@ -28,19 +42,6 @@ Ensure you have the following dependencies installed before building PureCPP:
 - **CMake** 3.22
 - **Conan** 2
 - **Rust**
-
-## 📚 Table of Contents
-
-- [Introduction](#purecpp-framework)
-- [Documentation](#-documentation)
-- [Contributing](#-contributing-to-purecpp)
-- [Minimum Requirements](#-minimum-requirements)
-- [Environment Setup](#environment-setup-ubuntu--debian-for-c-and-python-development)
-- [Using Pre-trained Models](#7-use-pre-trained-models)
-- [Build Instructions](#how-to-build)
-  - [Compile All Modules](#compile-all-at-once)
-  - [Compile Individually](#compile-one-at-time)
-- [Next Steps](#-next-steps)
 
 ---
 # Environment Setup (Ubuntu / Debian) for C++ and Python Development
