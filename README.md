@@ -191,38 +191,29 @@ pip install torch transformers onnx onnxruntime optimum
 ## 🚀 Examples
 
 ```bash
-python model.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-conll03"
+python model_to_onnx.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-large-cased-finetuned-conll03-english"
 ```
 
 ```bash
-python script.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-conll03"
+python model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence-transformers/all-MiniLM-L6-v2"
 ```
-
----
 
 ## Output
 
-/models/
-  ├── sentence-transformers/all-MiniLM-L6-v2/
+```
+/models/ 
+  ├── sentence-transformers/all-MiniLM-L6-v2/ 
   │    ├── model.onnx (via optimum)
-  │    └── tokenizer/
-  └── dslim/bert-base-NER/
-       ├── model.onnx
-       ├── label_map.json
-       └── tokenizer/
-
----
-
-
-```
-**Notes:**
-
-* Make sure to adjust `compiler.version` and `os` if your environment is different.
-* This configuration ensures compatibility with GCC 11 and C++17 using the GNU libstdc++11 ABI.
-
+  │    └── tokenizer/ 
+  └── dslim/bert-base-NER/  
+       ├── model.onnx  
+       ├── label_map.json  
+       └── tokenizer/ 
 ```
 
 ---
+
+# How to build 
 
 ## 📌 Next Steps
 ![Next Steps](community/release.jpg)
