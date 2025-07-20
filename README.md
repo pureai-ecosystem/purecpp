@@ -140,9 +140,10 @@ find ~ -type d -wholename "*/.conan2/profiles"
 
 ### Editing the profile
 
-Once you’ve located the `default` profile, you can edit it to explicitly set the following configuration:
+Once you’ve located the `default` profile, you shall edit it to explicitly set the following configuration:
 
-```
+```bash 
+cat << EOF > ~/.conan2/profiles/default 
 [settings]
 arch=x86_64
 build_type=Release
@@ -151,7 +152,8 @@ compiler.cppstd=17
 compiler.libcxx=libstdc++11
 compiler.version=11
 os=Linux
-```
+EOF
+````
 
 ---
 
