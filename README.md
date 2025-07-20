@@ -10,7 +10,7 @@ This repository provides detailed guidance on how to set up the environment, con
 - [Contributing](#-contributing-to-purecpp)
 - [Minimum Requirements](#-minimum-requirements)
 - [Environment Setup](#environment-setup-ubuntu--debian-for-c-and-python-development)
-- [Using Pre-trained Models](#7-use-pre-trained-models)
+- [Using Pre-trained Models](#use-pre-trained-models)
 - [Build Instructions](#how-to-build)
   - [Compile All Modules](#compile-all-at-once)
   - [Compile Individually](#compile-one-at-time)
@@ -184,7 +184,7 @@ EOF
 
 ---
 
-## 7. Use pre-trained models
+# Use pre-trained models
 
 ### 🛠️ Hugging Face to **ONNX** Converter 
 
