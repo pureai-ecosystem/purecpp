@@ -157,12 +157,62 @@ os=Linux
 
 ## 7. Use pre-trained models
 
-### With **PureCPP**, you can download and convert them to **ONNX** format using the following commands:
+### 🛠️ Hugging Face to **ONNX** Converter 
+
+**`models_to_onnx.py`**
+
+This is a unified Python script to convert Hugging Face models into the ONNX format for optimized inference.
+
+The script handles two main use cases:
+1. **Feature extraction models** (e.g., `sentence-transformers`).
+2. **Token classification models** (e.g., Named Entity Recognition - NER).
+
+It automatically creates a `models` directory (in the parent folder of the script) to store the exported ONNX models and related assets.
+
+### Requirements
+
+Before running the script, make sure you have the following Python packages installed:
 
 ```bash
-python3 scripts/hf_model_to_onnx.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-large-cased-finetuned-conll03-english"
-python3 scripts/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence-transformers/all-MiniLM-L6-v2"
+pip install torch transformers onnx onnxruntime optimum
 ```
+
+### 🔧 How to Use
+
+| Argument          | Description                                           |
+| ----------------- | ----------------------------------------------------- |
+| `-m` / `--model`  | Hugging Face model name (e.g., `dslim/bert-base-NER`) |
+| `-o` / `--output` | Output folder name                                    |
+| `--mode`          | `feature` or `token` (default: `token`)               |
+| `--base_dir`      | Base save directory (default: `./models`)             |
+
+---
+
+## 🚀 Examples
+
+```bash
+python model.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-conll03"
+```
+
+```bash
+python script.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-conll03"
+```
+
+---
+
+## Output
+
+/models/
+  ├── sentence-transformers/all-MiniLM-L6-v2/
+  │    ├── model.onnx (via optimum)
+  │    └── tokenizer/
+  └── dslim/bert-base-NER/
+       ├── model.onnx
+       ├── label_map.json
+       └── tokenizer/
+
+---
+
 
 ```
 **Notes:**
