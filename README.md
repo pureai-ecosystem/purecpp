@@ -217,6 +217,20 @@ python model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence
 
 # How to build 
 
+This is a development version with an automatic pipline build system. Optimizing the process, making it easy to compile and test all five modules automatically in this development version.
+
+To compile and build, just use the provided scripts — no manual setup needed.
+
+Each module (CMAKE_LIBS, CMAKE_META, CMAKE_EMBED, CMAKE_EXTRACT, CMAKE_CHUNKS_CLEAN) has its own o.sh script, which:
+
+- Cleans the build/ folder
+
+- Installs Conan dependencies if missing
+
+- Compiles the code
+
+- Sends the .so output to the central Sandbox/ directory
+
 ## Compile all at once
 ```
 ./all_cmake.sh
@@ -227,7 +241,7 @@ python model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence
 ./module_cmake.sh
 ```
 
-The resulting libraries will be placed inside `Sandbox` dir
+The resulting libraries will be placed inside `Sandbox` dir:
 
 ```
 Sandbox/
@@ -235,7 +249,7 @@ Sandbox/
 └── ...
 ```
 
-Use this directory to load, test, and iterate on the library code.
+
 
 
 ## 📌 Next Steps
