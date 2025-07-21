@@ -1,0 +1,38 @@
+=== System Report ===
+OS and Kernel:
+Linux Bruno 5.15.167.4-microsoft-standard-WSL2 #1 SMP Tue Nov 5 00:21:55 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux
+
+CPU Info:
+Model name:                           11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz
+Thread(s) per core:                   2
+Core(s) per socket:                   8
+Socket(s):                            1
+
+Memory Info:
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       2.8Gi       4.6Gi       3.3Mi       477Mi       4.8Gi
+Swap:          2.0Gi          0B       2.0Gi
+
+GCC Version:
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+
+CMake Version:
+cmake version 3.31.4
+
+Conan Version:
+Conan version 2.13.0
+
+Python Version:
+Python 3.12.3
+
+Python Package Check (build, conan, cmake, requests, pybind11):
+Version: 1.2.2.post1
+Version: 2.13.0
+Version: 3.31.4
+Version: 2.32.3
+Version: 2.13.6
+
+Environment Variables (limited view):
+VIRTUAL_ENV_PROMPT=(venv) 
+
+What happen?
