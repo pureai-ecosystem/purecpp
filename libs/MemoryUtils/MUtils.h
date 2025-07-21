@@ -64,8 +64,8 @@ namespace RAGLibrary{
         auto [total, unit1] = RAGLibrary::convert_bytes(info.total_bytes);
         auto [free, unit2] = RAGLibrary::convert_bytes(info.free_bytes);
 
-        std::cout << std::format("📦 Memória Total: {:.2f} {}\n", total, unit1);
-        std::cout << std::format("🟢 Memória Livre: {:.2f} {}\n", free, unit2);
+        std::cout << std::format("Memória Total: {:.2f} {}\n", total, unit1);
+        std::cout << std::format("Memória Livre: {:.2f} {}\n", free, unit2);
 
         return 0;
     }
