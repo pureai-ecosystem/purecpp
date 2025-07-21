@@ -1,6 +1,6 @@
-[submodule "libs/tokenizers-cpp"]
-	path = libs/tokenizers-cpp
+[submodule "tokenizers-cpp"]
+	path = libs
 	url = https://github.com/mlc-ai/tokenizers-cpp.git
-[submodule "libs/openai-cpp"]
-	path = libs/openai-cpp
+[submodule "openai-cpp"]
+	path = libs
 	url = https://github.com/olrea/openai-cpp.git
