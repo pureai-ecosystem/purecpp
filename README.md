@@ -118,8 +118,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source ~/.cargo/env
 ````
 
+      ---
+      ## 5. Execute the Torch installation script
 ---
-
 ## 6. Setting the Default Conan Profile
 
 To ensure Conan has a working default configuration, run:
