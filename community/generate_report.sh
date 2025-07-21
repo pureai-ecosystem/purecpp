@@ -4,6 +4,8 @@ OUTPUT="report.txt"
 echo "Generating system report into $OUTPUT..."
 
 {
+    echo -e "What happen?\n"
+
     echo "=== System Report ==="
     echo "OS and Kernel:"
     uname -a
@@ -34,8 +36,8 @@ echo "Generating system report into $OUTPUT..."
     echo -e "\nEnvironment Variables (limited view):"
     env | grep -E 'CMAKE|OMP|LD_LIBRARY_PATH'
 
-    echo -e "\nWhat happen?"
+
 
 } > "$OUTPUT" 2>&1
 
-echo "✅ Report saved to $OUTPUT"
+echo "Report saved to $OUTPUT"
