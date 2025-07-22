@@ -4,6 +4,7 @@ project(RagPUREAI VERSION 1.0)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fPIC /EHsc /Ox /DNDEBUG")
@@ -63,8 +64,8 @@ endif()
 #------- Torch -------
 set(Torch_DIR "${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/share/cmake/Torch")
 find_package(Torch REQUIRED)
-include_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include")#.h
-link_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/lib")#.lib e .dir
+include_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include") #.h
+link_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/lib") #.lib e .dir
 
 #------- Tokenizers -------
 set(TOKENIZERS_PATH "${CMAKE_SOURCE_DIR}/libs/tokenizers-cpp")
@@ -88,16 +89,16 @@ set(RagPUREAI_IMPL_SRCS
     ${CMAKE_SOURCE_DIR}/components/MetadataExtractor/MetadataExtractor.cpp
     ${CMAKE_SOURCE_DIR}/components/MetadataExtractor/MetadataRegexExtractor/MetadataRegexExtractor.cpp
     ${CMAKE_SOURCE_DIR}/components/MetadataExtractor/MetadataHFExtractor/MetadataHFExtractor.cpp
-    
+
     ${CMAKE_SOURCE_DIR}/components/Embedding/BaseEmbedding.cpp
     ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingOpenAI/EmbeddingOpenAI.cpp
-   
+
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkCommons/ChunkCommons.cpp
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkCount/ChunkCount.cpp
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkDefault/ChunkDefault.cpp
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkSimilarity/ChunkSimilarity.cpp
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkQuery/ChunkQuery.cpp
-    
+
     ${CMAKE_SOURCE_DIR}/components/CleanData/ContentCleaner/ContentCleaner.cpp
 )
 

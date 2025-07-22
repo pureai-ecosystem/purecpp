@@ -189,57 +189,91 @@ at::Tensor Chunk::toTensor(std::vector<std::vector<float>> &vect)
     }
     return tensor;
 }
-std::vector<std::string> Chunk::SplitText(const std::vector<std::string> &inputs, const int overlap, const int chunk_size)
-{
-    std::string text;
-    StringUtils::joinStr("\n", inputs, text);
 
-    if (text.empty()){
+// Helper to find the start of a UTF-8 character backwards from a given index
+static size_t find_prev_char_boundary(const std::string &s, size_t index)
+{
+    if (index == 0)
+        return 0;
+
+    size_t i = index;
+    while (i > 0 && (s[i] & 0xC0) == 0x80)
+    {
+        i--;
+    }
+
+    // If we stopped at a valid start byte, we are good.
+    // Otherwise, we might be in an invalid sequence. For simplicity, we return the original index.
+    // Valid start bytes are 0xxxxxxx, 110xxxxx, 1110xxxx, 11110xxx.
+    if ((s[i] & 0xC0) == 0xC0 || (s[i] & 0x80) == 0)
+    {
+        return i;
+    }
+    return index;
+}
+
+std::vector<std::string> Chunk::SplitText(const std::string &text, int chunk_size, int overlap)
+{
+    if (chunk_size <= 0)
+    {
         return {};
     }
 
-    size_t step = chunk_size > overlap ? chunk_size - overlap : 0;
-    if (!step){
-        if (text.size() > chunk_size){
-            return {text};
-        }
+    std::vector<std::string> chunks;
+    if (text.length() <= chunk_size)
+    {
+        chunks.push_back(text);
+        return chunks;
     }
 
-    std::vector<std::string> chunks;
-    size_t start_index = 0;
+    size_t start = 0;
+    while (start < text.length())
+    {
+        size_t end = std::min(start + chunk_size, text.length());
 
-    while (start_index < text.size()){
-        size_t end_index = std::min(start_index + chunk_size, text.size());
-
-        // Adjust end_index to not split a UTF-8 character
-        while (end_index > start_index && (text[end_index] & 0xC0) == 0x80){
-            end_index--;
+        if (end < text.length())
+        {
+            end = find_prev_char_boundary(text, end);
         }
 
-        std::string current_chunk = text.substr(start_index, end_index - start_index);
-        chunks.push_back(current_chunk);
+        if (end <= start)
+        {
+            end = std::min(start + chunk_size, text.length());
+            size_t next_boundary = start + 1;
+            while (next_boundary < text.length() && (text[next_boundary] & 0xC0) == 0x80) {
+                next_boundary++;
+            }
+            end = std::min(start + chunk_size, next_boundary);
+        }
 
-        if (end_index == text.size()){
+        chunks.push_back(text.substr(start, end - start));
+
+        if (end == text.length())
+        {
             break;
         }
 
-        size_t next_start_index = (end_index > overlap) ? (end_index - overlap) : 0;
+        size_t next_start = end > overlap ? end - overlap : 0;
 
-        // Adjust start_index to not split a UTF-8 character
-        while (next_start_index > start_index && (text[next_start_index] & 0xC0) == 0x80){
-            next_start_index--;
+        if (next_start > start)
+        {
+            next_start = find_prev_char_boundary(text, next_start);
         }
 
-        if (next_start_index <= start_index){
-            start_index = end_index;
-        }else{
-            start_index = next_start_index;
+        if (next_start <= start)
+        {
+            size_t next_char = start + 1;
+            while(next_char < text.length() && (text[next_char] & 0xC0) == 0x80) {
+                next_char++;
+            }
+            start = next_char;
+        } else {
+            start = next_start;
         }
     }
 
     return chunks;
 }
-
 std::vector<std::string> Chunk::SplitTextByCount(const std::string &input, int overlap, int count_threshold, const std::shared_ptr<re2::RE2> regex)
 {
     std::vector<std::string> chunks;

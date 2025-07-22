@@ -389,14 +389,15 @@ void bind_ChunkCommons(py::module &m)
     //--------------------------------------------------------------------------
     // Binding for the SplitText function.
     //--------------------------------------------------------------------------
-    m.def("SplitText", &Chunk::SplitText,
-          py::arg("inputs"), py::arg("overlap"), py::arg("chunk_size"),
+    m.def("SplitText", static_cast<std::vector<std::string> (*)(const std::string&, int, int)>(&Chunk::SplitText),
+          py::arg("text"), py::arg("chunk_size"), py::arg("overlap"),
           R"doc(
               Splits the text into overlapping chunks.
 
                 Parameters:
 
-                inputs (list[str]): List of input strings.
+                text (str): The input string.
+                chunk_size (int): The size of each chunk.
                 overlap (int): Number of characters for overlap.
                 chunk_size (int): Size of each chunk.
                 Returns:
