@@ -963,133 +963,100 @@ void bind_EmbeddingDocument(py::module &m)
         )doc")
         .def(py::init<>())
         .def("push", &Embedding::ThreadSafeQueueDocument::push, py::arg("value"))
-        .def("pop", &Embedding::ThreadSafeQueueDocument::pop)
-        .def("size", &Embedding::ThreadSafeQueueDocument::size);
+        .def("pop", &Embedding::ThreadSafeQueueDocument::pop);
 }
-// --------------------------------------------------------------------------
 // Binding for Embedding::IBaseEmbedding
 // --------------------------------------------------------------------------
-
-/**
- * Trampoline class (Python wrapper) for IBaseEmbedding, allowing
- * the overriding of pure virtual methods in Python.
- */
+// --------------------------------------------------------------------------
+// Trampoline class for IBaseEmbedding.
+// --------------------------------------------------------------------------
 class PyIBaseEmbedding : public Embedding::IBaseEmbedding
 {
 public:
-    ~PyIBaseEmbedding() = default;
+    using Embedding::IBaseEmbedding::IBaseEmbedding;
 
-    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size) override
     {
         PYBIND11_OVERRIDE_PURE(
-            std::vector<RAGLibrary::Document>, // Type class
-            Embedding::IBaseEmbedding,         // Base class
-            GenerateEmbeddings,                // Name of method
-            documents, model                   // Parameters
-        );
+            std::vector<RAGLibrary::Document>,
+            Embedding::IBaseEmbedding,
+            GenerateEmbeddings,
+            documents,
+            model,
+            batch_size);
     }
 };
 
-/**
- * Creates the binding for the `IBaseEmbedding` interface.
- * Note: Since it is an interface with pure methods,
- * it cannot be instantiated directly without a concrete class,
- * but we can inherit in Python using the trampoline class.
- */
-
+// --------------------------------------------------------------------------
+// Binding for IBaseEmbedding.
+// --------------------------------------------------------------------------
 void bind_IBaseEmbedding(py::module &m)
 {
-    py::class_<Embedding::IBaseEmbedding, PyIBaseEmbedding, Embedding::IBaseEmbeddingPtr>(
+    py::class_<Embedding::IBaseEmbedding, PyIBaseEmbedding, std::shared_ptr<Embedding::IBaseEmbedding>>(
         m,
         "IBaseEmbedding",
         R"doc(
-            Base interface for generating embeddings in texts or documents.
-            It includes methods for generating embeddings, processing a document,
-            and processing multiple documents in parallel.
+            Interface for embedding models.
         )doc")
-        .def(
-            py::init<>(),
-            R"doc(
-            Default constructor for the IBaseEmbedding interface.
-            It cannot be instantiated without overriding methods in Python.
-        )doc")
-        .def(
-            "GenerateEmbeddings",
-            &Embedding::IBaseEmbedding::GenerateEmbeddings,
-            py::arg("documents"),
-            py::arg("model"),
-            R"doc(
-            Generates embeddings for a list of documents.
+        .def(py::init<>(),
+             R"doc(
+                Default constructor for the IBaseEmbedding class.
+             )doc")
+        .def("GenerateEmbeddings",
+             &Embedding::IBaseEmbedding::GenerateEmbeddings,
+             py::arg("documents"),
+             py::arg("model"),
+             py::arg("batch_size") = 32,
+             R"doc(
+             Generates embeddings for a list of documents.
 
-            Parameters:
+             Parameters:
 
-            documents (list[Document]): List of documents to be converted into embeddings.
-            model (str): Name of the model to be used for generating embeddings.
+                 documents (list[Document]): List of documents to be converted into embeddings.
+                 model (str): Name of the model to be used for generating embeddings.
+                 batch_size (int): The batch size to use for embedding.
 
-            Returns:
+             Returns:
 
-            list[Document]: List of documents with generated embeddings.
-        )doc");
+                 list[Document]: List of documents with generated embeddings.
+             )doc");
 }
-// --------------------------------------------------------------------------
-// Binding for Embedding::BaseEmbedding
-// --------------------------------------------------------------------------
 
-/**
- * Trampoline class (Python wrapper) for `BaseEmbedding`, as this class
- * still has a purely virtual method (`GenerateEmbeddings`). We need to
- * allow overriding of this method in Python.
- */
-
+// --------------------------------------------------------------------------
+// Trampoline class for BaseEmbedding.
+// --------------------------------------------------------------------------
 class PyBaseEmbedding : public Embedding::BaseEmbedding
 {
 public:
     using Embedding::BaseEmbedding::BaseEmbedding;
 
-    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model) override
+    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size) override
     {
-        PYBIND11_OVERRIDE_PURE(
+        PYBIND11_OVERRIDE(
             std::vector<RAGLibrary::Document>,
             Embedding::BaseEmbedding,
             GenerateEmbeddings,
-            documents, model);
+            documents,
+            model,
+            batch_size);
     }
 };
 
-/**
- * Creates the binding for the `BaseEmbedding` class, which inherits from `IBaseEmbedding`.
- * The `BaseEmbedding` class still has a purely virtual method (`GenerateEmbeddings`),
- * so it cannot be instantiated directly.
- */
-
+// --------------------------------------------------------------------------
+// Binding for BaseEmbedding.
+// --------------------------------------------------------------------------
 void bind_BaseEmbedding(py::module &m)
 {
     py::class_<Embedding::BaseEmbedding, PyBaseEmbedding, std::shared_ptr<Embedding::BaseEmbedding>, Embedding::IBaseEmbedding>(
         m,
         "BaseEmbedding",
         R"doc(
-            Abstract class that implements part of the embedding logic, inheriting
-            from IBaseEmbedding. It still has a purely virtual method
-            (GenerateEmbeddings), making it non-instantiable directly.
+            Abstract class that implements part of the embedding logic.
         )doc")
-        .def(
-            py::init<>(),
-            R"doc(
+        .def(py::init<>(), R"doc(
             Default constructor for the BaseEmbedding class.
-        )doc")
-        .def(
-            "GenerateEmbeddings",
-            &Embedding::BaseEmbedding::GenerateEmbeddings,
-            py::arg("documents"),
-            py::arg("model"),
-            R"doc(
-            Pure virtual method that generates embeddings for a set
-            of strings. It must be overridden by concrete derived classes.
         )doc");
 }
-// --------------------------------------------------------------------------
-// Binding for EmbeddingOpenAI::IEmbeddingOpenAI
-// --------------------------------------------------------------------------
 
 /**
  * Trampoline class (Python wrapper) for `IEmbeddingOpenAI`.
@@ -1361,7 +1328,7 @@ void bind_ChunkQuery(py::module& m) {
             R"doc(
                 Returns the current query Document.
             )doc")
-        .def("getPar", &Chunk::ChunkQuery::getPar,
+                .def("getPair", &Chunk::ChunkQuery::getPair,
             R"doc(
                 Returns a pair (EmbeddingModel, model name).
             )doc")

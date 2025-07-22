@@ -253,7 +253,7 @@ RAGLibrary::Document Chunk::ChunkQuery::getQuery() const {
     return m_query_doc;
 }
 
-std::pair<Chunk::EmbeddingModel, std::string> Chunk::ChunkQuery::getPar() const {
+std::pair<Chunk::EmbeddingModel, std::string> Chunk::ChunkQuery::getPair() const {
     return { m_embedding_model, m_model };
 }
 
@@ -270,10 +270,10 @@ std::vector<std::tuple<std::string, float, int>> Chunk::ChunkQuery::Retrieve(flo
     if (m_chunk_embedding.empty() || m_emb_query.empty()) throw std::runtime_error("Embeddings not found.");
 
     std::vector<std::tuple<std::string, float, int>> scored_hits;
-    torch::Tensor()
     auto query_tensor = torch::from_blob(
         const_cast<float*>(m_emb_query.data()),
-        {int64_t(m_emb_query.size())}, torch::kFloat32
+        {static_cast<long>(m_emb_query.size())},
+        torch::kFloat32
     );
 
     float norm_q = torch::norm(query_tensor).item<float>();

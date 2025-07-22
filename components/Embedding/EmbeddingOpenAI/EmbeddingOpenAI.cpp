@@ -13,7 +13,7 @@ namespace EmbeddingOpenAI
         openai::start(m_ApiKey);
     }
 
-    std::vector<RAGLibrary::Document> EmbeddingOpenAI::GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size = 32)
+        std::vector<RAGLibrary::Document> EmbeddingOpenAI::GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size)
     {
         if (documents.empty())
             throw RAGLibrary::RagException("No documents provided for embedding.");

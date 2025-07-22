@@ -112,6 +112,7 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/components/Chunk
     ${CMAKE_SOURCE_DIR}/components/CleanData
     ${CMAKE_SOURCE_DIR}/components/Embedding
+        ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingOpenAI
     ${CMAKE_SOURCE_DIR}/libs/RagException
     ${CMAKE_SOURCE_DIR}/libs/ThreadSafeQueue
     ${CMAKE_SOURCE_DIR}/libs/CommonStructs

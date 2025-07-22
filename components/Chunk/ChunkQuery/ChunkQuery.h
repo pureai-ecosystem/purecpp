@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 #include "CommonStructs.h"
-#include "EmbeddingOpenAI.h"
-#include "ChunkCommons.h"
+#include "EmbeddingOpenAI/EmbeddingOpenAI.h"
+#include "ChunkCommons/ChunkCommons.h"
 
 namespace Chunk {
 
