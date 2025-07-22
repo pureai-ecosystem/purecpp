@@ -44,8 +44,6 @@ LIBTORCH_CPU_URL="https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-s
 # Run Conan package manager for dependency installation
 rm -rf ${BUILD_DIR} conan.lock
 conan install . --build=missing
-conan lock create conanfile.py --build=missing
-conan install . --build=missing
 
 cmake \
     --preset conan-release \
