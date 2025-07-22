@@ -47,8 +47,8 @@ bkp/
 build/
 models/
 libs/libtorch
-libs/tokenizers-cpp
-libs/openai-cpp
+!libs/tokenizers-cpp
+!libs/openai-cpp
 
 libtorch*.zip
 libtorch-cxx11-abi-shared*
