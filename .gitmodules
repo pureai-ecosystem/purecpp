@@ -8,3 +8,6 @@
 	path = extern/pybind11
 	url = ../../pybind/pybind11
 	branch = stable
+[submodule "tokenizers-cpp"]
+	path = tokenizers-cpp
+	url = https://github.com/mlc-ai/tokenizers-cpp.git
