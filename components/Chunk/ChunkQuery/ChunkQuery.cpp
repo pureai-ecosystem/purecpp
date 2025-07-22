@@ -77,39 +77,35 @@ Chunk::ChunkQuery::ChunkQuery(
 
 std::vector<RAGLibrary::Document> Chunk::ChunkQuery::Embeddings(const std::vector<RAGLibrary::Document>& list)
 {
-    if (m_embedding_model !=  Chunk::EmbeddingModel::OpenAI){
-        throw std::invalid_argument("Model not yet supported");
-    }
-    InitAPIKey();
-    #ifdef DEBUG
-    std::cerr<< "Chave da API do OpenAI: " << m_openai_api_key << std::endl; //Debug
-    #endif
-    std::vector<RAGLibrary::Document> emb;
+    Embedding::IBaseEmbeddingPtr embedding_engine;
+
     switch (this->m_embedding_model)
     {
-    case  Chunk::EmbeddingModel::HuggingFace:
-        throw std::invalid_argument("Model not yet supported");
-    case  Chunk::EmbeddingModel::OpenAI:
-        if(m_model == "text-embedding-ada-002"){
-            int count = 0;
-            do{
-                std::unique_ptr<EmbeddingOpenAI::EmbeddingOpenAI> OpenAI = std::make_unique<EmbeddingOpenAI::EmbeddingOpenAI>();
-                emb = OpenAI->GenerateEmbeddings(list, m_model);
-                count++;
-            }while(!this->allChunksHaveEmbeddings(emb) && count < 3);
+        case Chunk::EmbeddingModel::OpenAI:
+            InitAPIKey();
+            embedding_engine = std::make_unique<EmbeddingOpenAI::EmbeddingOpenAI>();
+            break;
 
-            if (!this->allChunksHaveEmbeddings(emb)) {
-                throw std::runtime_error("Failed to generate valid embeddings after 3 attempts.");
-            }
-            return emb;
-        }
-        else{
-            throw std::invalid_argument("Model not yet supported");
-        }
-        break;
+        case Chunk::EmbeddingModel::HuggingFace:
+            embedding_engine = std::make_unique<Embedding::EmbeddingModel>();
+            break;
+
+        default:
+            throw RAGLibrary::RagException("Unsupported embedding model selected.");
     }
 
-    return {};
+    std::vector<RAGLibrary::Document> emb;
+    int count = 0;
+    do {
+        emb = embedding_engine->GenerateEmbeddings(list, m_model);
+        count++;
+    } while (!this->allChunksHaveEmbeddings(emb) && count < 3);
+
+    if (!this->allChunksHaveEmbeddings(emb)) {
+        throw std::runtime_error("Failed to generate valid embeddings after 3 attempts.");
+    }
+
+    return emb;
 }
 
 inline bool Chunk::ChunkQuery::allChunksHaveEmbeddings(const std::vector<RAGLibrary::Document>& chunks_list) {

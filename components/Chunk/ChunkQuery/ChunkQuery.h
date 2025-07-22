@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "CommonStructs.h"
+#include "EmbeddingModel/EmbeddingModel.h"
 #include "EmbeddingOpenAI/EmbeddingOpenAI.h"
 #include "ChunkCommons/ChunkCommons.h"
 

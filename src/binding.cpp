@@ -48,7 +48,7 @@
 
 #include "../components/Embedding/Document.h"
 #include "IBaseEmbedding.h"
-#include "BaseEmbedding.h"
+
 #include "EmbeddingOpenAI/IEmbeddingOpenAI.h"
 #include "EmbeddingOpenAI/EmbeddingOpenAI.h"
 
@@ -1023,50 +1023,9 @@ void bind_IBaseEmbedding(py::module &m)
              )doc");
 }
 
-// --------------------------------------------------------------------------
-// Trampoline class for BaseEmbedding.
-// --------------------------------------------------------------------------
-class PyBaseEmbedding : public Embedding::BaseEmbedding
-{
-public:
-    using Embedding::BaseEmbedding::BaseEmbedding;
-
-    std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size) override
-    {
-        PYBIND11_OVERRIDE(
-            std::vector<RAGLibrary::Document>,
-            Embedding::BaseEmbedding,
-            GenerateEmbeddings,
-            documents,
-            model,
-            batch_size);
-    }
-};
-
-// --------------------------------------------------------------------------
-// Binding for BaseEmbedding.
-// --------------------------------------------------------------------------
-void bind_BaseEmbedding(py::module &m)
-{
-    py::class_<Embedding::BaseEmbedding, PyBaseEmbedding, std::shared_ptr<Embedding::BaseEmbedding>, Embedding::IBaseEmbedding>(
-        m,
-        "BaseEmbedding",
-        R"doc(
-            Abstract class that implements part of the embedding logic.
-        )doc")
-        .def(py::init<>(), R"doc(
-            Default constructor for the BaseEmbedding class.
-        )doc");
-}
-
 /**
  * Trampoline class (Python wrapper) for `IEmbeddingOpenAI`.
- * This interface inherits from `BaseEmbedding`, which also has virtual methods
- * (including a purely virtual one: `GenerateEmbeddings`).
- * Therefore, we need to override:
- *  - `SetAPIKey` (purely virtual in `IEmbeddingOpenAI`)
- *  - `GenerateEmbeddings` (purely virtual in `BaseEmbedding`)
- *  - `ProcessDocument` and `ProcessDocuments` (virtual in `BaseEmbedding`)
+ * This interface inherits from `IBaseEmbedding`.
  */
 
 class PyIEmbeddingOpenAI : public EmbeddingOpenAI::IEmbeddingOpenAI
@@ -1091,7 +1050,7 @@ public:
     }
 
     // ----------------------------------------------------------------------
-    // Methods (pure or virtual) inherited from BaseEmbedding.
+    // Methods (pure or virtual) inherited from IBaseEmbedding.
     // ----------------------------------------------------------------------
     std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size = 32) override
     {
@@ -1106,9 +1065,8 @@ public:
 
 /**
  * Creates the binding for the `IEmbeddingOpenAI` interface.
- * Since it inherits from `BaseEmbedding` (which is also abstract) and
- * has pure virtual method(s), it cannot be instantiated directly in Python
- * without overriding these methods.
+ * Since it inherits from `IBaseEmbedding` and has pure virtual method(s), 
+ * it cannot be instantiated directly in Python without overriding these methods.
  */
 
 void bind_IEmbeddingOpenAI(py::module &m)
@@ -1116,11 +1074,11 @@ void bind_IEmbeddingOpenAI(py::module &m)
     py::class_<EmbeddingOpenAI::IEmbeddingOpenAI,
                PyIEmbeddingOpenAI,
                EmbeddingOpenAI::IEmbeddingOpenAIPtr,
-               Embedding::BaseEmbedding>(
+               Embedding::IBaseEmbedding>(
         m,
         "IEmbeddingOpenAI",
         R"doc(
-            Interface that inherits from Embedding::BaseEmbedding and adds the purely virtual method
+            Interface that inherits from Embedding::IBaseEmbedding and adds the purely virtual method
             SetAPIKey for configuring the API key required to generate embeddings using OpenAI.
 
             Main methods:
@@ -1159,7 +1117,7 @@ void bind_IEmbeddingOpenAI(py::module &m)
 
 /**
     Creates the binding for the concrete class EmbeddingOpenAI, which inherits from
-    IEmbeddingOpenAI (and therefore, from BaseEmbedding). This implementation
+    IEmbeddingOpenAI. This implementation
     uses the OpenAI API to generate embeddings.
  */
 void bind_EmbeddingOpenAI(py::module &m)
@@ -1190,7 +1148,7 @@ void bind_EmbeddingOpenAI(py::module &m)
     //     emb.SetAPIKey("your_openai_key")
     //     embeddings = emb.GenerateEmbeddings([{"example text", "more text"])
     //     Alternatively, you can also leverage the methods inherited
-    //     from BaseEmbedding, such as .ProcessDocument() and .ProcessDocuments().
+    //     from IBaseEmbedding, such as .ProcessDocument() and .ProcessDocuments().
     // )doc");
 
     cls.def(
@@ -1372,7 +1330,7 @@ PYBIND11_MODULE(RagPUREAI, m)
     bind_ChunkSimilarity(m);
     bind_EmbeddingDocument(m);
     bind_IBaseEmbedding(m);
-    bind_BaseEmbedding(m);
+
     bind_IEmbeddingOpenAI(m);
     bind_EmbeddingOpenAI(m);
 }

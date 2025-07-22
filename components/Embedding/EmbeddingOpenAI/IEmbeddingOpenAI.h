@@ -1,16 +1,16 @@
 #pragma once
 
-#include "BaseEmbedding.h"
+#include "../IBaseEmbedding.h"
 
 namespace EmbeddingOpenAI
 {
-    class IEmbeddingOpenAI : public ::Embedding::BaseEmbedding
+        class IEmbeddingOpenAI : public ::Embedding::IBaseEmbedding
     {
     public:
        virtual ~IEmbeddingOpenAI() = default;
 
               virtual void SetAPIKey(const std::string& apiKey) = 0;
-       virtual std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size) = 0;
+       // Note: GenerateEmbeddings is inherited from IBaseEmbedding and does not need to be redeclared here.
     };
     using IEmbeddingOpenAIPtr = std::shared_ptr<IEmbeddingOpenAI>;
 }

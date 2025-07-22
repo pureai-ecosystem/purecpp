@@ -90,8 +90,8 @@ set(RagPUREAI_IMPL_SRCS
     ${CMAKE_SOURCE_DIR}/components/MetadataExtractor/MetadataRegexExtractor/MetadataRegexExtractor.cpp
     ${CMAKE_SOURCE_DIR}/components/MetadataExtractor/MetadataHFExtractor/MetadataHFExtractor.cpp
 
-    ${CMAKE_SOURCE_DIR}/components/Embedding/BaseEmbedding.cpp
     ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingOpenAI/EmbeddingOpenAI.cpp
+    ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingModel/EmbeddingModel.cpp
 
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkCommons/ChunkCommons.cpp
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkCount/ChunkCount.cpp
@@ -113,7 +113,8 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/components/Chunk
     ${CMAKE_SOURCE_DIR}/components/CleanData
     ${CMAKE_SOURCE_DIR}/components/Embedding
-        ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingOpenAI
+    ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingOpenAI
+    ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingModel
     ${CMAKE_SOURCE_DIR}/libs/RagException
     ${CMAKE_SOURCE_DIR}/libs/ThreadSafeQueue
     ${CMAKE_SOURCE_DIR}/libs/CommonStructs

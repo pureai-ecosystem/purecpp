@@ -36,7 +36,7 @@
 pycache/
 __pycache__/
 .pytest_cache/
-
+test_bindings.py
 .pyd
 
 ### Others ###
@@ -66,9 +66,14 @@ package/dist/
 packer
 package/*.egg-info
 
+.env
 .venv/
 .venv*/
 .vscode/
 .vs/
 
 tests/
+compile_commands.json
+.cache/
+*.pdf
+*.docx
