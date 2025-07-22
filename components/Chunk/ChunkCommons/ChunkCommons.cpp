@@ -189,22 +189,52 @@ at::Tensor Chunk::toTensor(std::vector<std::vector<float>> &vect)
     }
     return tensor;
 }
-
-std::vector<std::string> Chunk::SplitText(std::string inputs, const int overlap, const int chunk_size)
+std::vector<std::string> Chunk::SplitText(const std::vector<std::string> &inputs, const int overlap, const int chunk_size)
 {
-    size_t step = size_t(chunk_size - overlap);
-    size_t chunk_sizes = (size_t)std::ceil((long double)inputs.size() / (long double)(step));
+    std::string text;
+    StringUtils::joinStr("\n", inputs, text);
 
-    std::vector<std::string> chunks(chunk_sizes);
-    for (size_t i = 0; i < chunk_sizes; ++i)
-    {
-        size_t start_index = i * step;
-        size_t end_index = start_index + chunk_size;
-        if (end_index >= inputs.size())
-        {
-            end_index = inputs.size();
+    if (text.empty()){
+        return {};
+    }
+
+    size_t step = chunk_size > overlap ? chunk_size - overlap : 0;
+    if (!step){
+        if (text.size() > chunk_size){
+            return {text};
         }
-        chunks[i] = inputs.substr(start_index, end_index - start_index);
+    }
+
+    std::vector<std::string> chunks;
+    size_t start_index = 0;
+
+    while (start_index < text.size()){
+        size_t end_index = std::min(start_index + chunk_size, text.size());
+
+        // Adjust end_index to not split a UTF-8 character
+        while (end_index > start_index && (text[end_index] & 0xC0) == 0x80){
+            end_index--;
+        }
+
+        std::string current_chunk = text.substr(start_index, end_index - start_index);
+        chunks.push_back(current_chunk);
+
+        if (end_index == text.size()){
+            break;
+        }
+
+        size_t next_start_index = (end_index > overlap) ? (end_index - overlap) : 0;
+
+        // Adjust start_index to not split a UTF-8 character
+        while (next_start_index > start_index && (text[next_start_index] & 0xC0) == 0x80){
+            next_start_index--;
+        }
+
+        if (next_start_index <= start_index){
+            start_index = end_index;
+        }else{
+            start_index = next_start_index;
+        }
     }
 
     return chunks;
