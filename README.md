@@ -56,10 +56,10 @@ docker build -t purecpp .
 docker run -it --rm purecpp bash
 ```
 
-#### Step 3: Inside the container, build the project
+#### Step 3: Build the project
 
 ```bash
-./build
+./build.sh
 ```
 
 This will generate the shared object (`RagPUREAI.cpython-<python-version>*.so`) in the `build/Release/` directory.
