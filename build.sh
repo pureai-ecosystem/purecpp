@@ -13,8 +13,3 @@ cmake \
   -G "Unix Makefiles"
 cmake --build --preset conan-release --parallel $(nproc) --target RagPUREAI --
 
-rm -f package/purecpp/*.so
-rm -rf package/dist/*
-
-cp build/Release/*.so package/purecpp/
-
