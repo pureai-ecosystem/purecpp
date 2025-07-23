@@ -18,6 +18,6 @@ venv/
 openai_api_key*
 
 libs/libtorch/*
-libs/openai-cpp/
-libs/tokenizers-cpp/
+# libs/openai-cpp/
+# libs/tokenizers-cpp/
 libs/faiss/
