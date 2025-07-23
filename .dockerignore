@@ -1,0 +1,62 @@
+build
+CMakeUserPresets.json
+bkp
+CMakeLists.txt.user
+conan.lock
+libs*/libtorch
+libs*/libtorch - Copy
+libs*/libtorch new c11
+models/
+libtorch-cxx11-abi-shared*
+openai_api_key*
+libtorch-cxx11-abi-shared-with-deps-2.5.1+cpu.zip
+libtorch-cxx11-abi-shared-with-deps-2.5.1+cu124.zip
+*/libtorch*.zip
+*/openai-cpp/*
+*/tokenizers-cpp/*
+*/faiss/*
+venv
+
+*/purecpp_chuncks_clean/purecpp_chuncks_clean/*.so
+*/purecpp_chuncks_clean2/purecpp_chuncks_clean/*.so
+*/purecpp_chunks_clean/purecpp_chunks_clean/*.so
+*/purecpp_chunks_clean2/purecpp_chunks_clean/*.so
+*/purecpp_extract/purecpp_extract/*.so
+*/purecpp_embed/purecpp_embed/*.so
+*/purecpp_meta/purecpp_meta/*.so
+*/purecpp_meta/purecpp_meta_t/*.so
+*/purecpp_libs/purecpp_libs/*.so
+
+*/*/*.egg-info
+*/*/build/*
+*/*/dist/*
+
+"testes wsl"/*.so
+"testes many linux"/*.so
+testes/*.so
+testes/"modulos old"/*.so
+testes/"modulos pip"/*.so
+
+./*.so 
+./*/*.so 
+./*/*/*.so 
+./*/*/*/*.so
+./*/*/*/*/*.so
+*.so 
+*/*.so 
+*/*/*.so 
+*/*/*/*.so
+*/*/*/*/*.so
+*.whl
+*/*.whl
+*/*/*.whl
+*/*/*/*.whl
+*/*/*/*/*.whl
+*/libtorch
+
+*/build/*
+*/conan.lock
+*/CMakeUserPresets.json
+*/Tests/*
+
+./*.zip

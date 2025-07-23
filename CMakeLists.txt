@@ -7,9 +7,6 @@ set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fPIC /EHsc /Ox /DNDEBUG")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
-    #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Od")
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_BINARY_DIR}/generators/conan_toolchain.cmake)
     set(CMAKE_CXX_FLAGS_RELEASE "/Od")
 else()
@@ -49,6 +46,13 @@ find_package(nlohmann_json REQUIRED)
 find_package(CURL REQUIRED)
 find_package(onnxruntime REQUIRED)
 
+execute_process(
+    COMMAND "${Python3_EXECUTABLE}" -c
+        "import sysconfig; import pathlib; site_packages = sysconfig.get_paths()['purelib']; print(str(pathlib.Path(site_packages).resolve()))"
+    OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 #------- Protobuf -------
 find_package(Protobuf REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIRS})
@@ -64,8 +68,35 @@ endif()
 #------- Torch -------
 set(Torch_DIR "${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/share/cmake/Torch")
 find_package(Torch REQUIRED)
-include_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include") #.h
-link_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/lib") #.lib e .dir
+include_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include")
+link_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/lib")
+
+set(CMAKE_BUILD_RPATH
+    "${PYTHON_SITE_PACKAGES}/*/d_libs/libtorch/cpu/lib"
+    "\$ORIGIN/purecpp.libs"
+    "\$ORIGIN/d_libs/libtorch/cpu/lib"
+    "${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/lib"
+    "\$ORIGIN/libs/libtorch/cpu/lib"
+    "\$ORIGIN:/usr/bin/protoc"
+    "/usr/lib/x86_64-linux-gnu"
+    "/usr/lib64"
+    "\$ORIGIN/"
+    "\$ORIGIN/purecpp/d_libs/libtorch/cpu/lib"
+)
+set(CMAKE_INSTALL_RPATH 
+    "${PYTHON_SITE_PACKAGES}/*/d_libs/libtorch/cpu/lib"
+    "\$ORIGIN/purecpp.libs"
+    "\$ORIGIN/d_libs/libtorch/cpu/lib"
+    "${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/lib"
+    "\$ORIGIN/libs/libtorch/cpu/lib"
+    "\$ORIGIN:/usr/bin/protoc"
+    "/usr/lib/x86_64-linux-gnu"
+    "/usr/lib64"
+    "\$ORIGIN/"
+    "\$ORIGIN/purecpp/d_libs/libtorch/cpu/lib"
+)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-new-dtags")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 #------- Tokenizers -------
 set(TOKENIZERS_PATH "${CMAKE_SOURCE_DIR}/libs/tokenizers-cpp")
@@ -75,8 +106,6 @@ add_subdirectory(${TOKENIZERS_PATH} tokenizers EXCLUDE_FROM_ALL)
 set(OPEANAI_CPP_PATH "${CMAKE_SOURCE_DIR}/libs/openai-cpp")
 
 # ----- project -----
-#set(RagPUREAI_MAIN ${CMAKE_SOURCE_DIR}/main.cpp)
-
 set(RagPUREAI_BINDING_SRCS  ${CMAKE_SOURCE_DIR}/src/binding.cpp)
 set(RagPUREAI_IMPL_SRCS
     ${CMAKE_SOURCE_DIR}/libs/StringUtils/StringUtils.cpp
@@ -104,7 +133,6 @@ set(RagPUREAI_IMPL_SRCS
 
 #------- RagPUREAI Library -------
 add_library(RagPUREAILib STATIC ${RagPUREAI_IMPL_SRCS})
-# add_library(RagPUREAILib ${RagPUREAI_IMPL_SRCS})
 
 target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/components
@@ -123,13 +151,8 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${TOKENIZERS_PATH}/include
     ${OPEANAI_CPP_PATH}/include
     ${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include
-    ${TOKENIZERS_PATH}/include
     ${CURL_INCLUDE_DIRS}
-    #${Python3_INCLUDE_DIRS}
-    #${Protobuf_INCLUDE_DIRS}
-    #${Python3_LIBRARY_DIRS}
-    #${Protobuf_LIBRARY_DIRS}
-    # C:/vcpkg/packages/protobuf_x64-windows/include
+    ${TORCH_INCLUDE_DIRS}
 )
 
 target_link_libraries(RagPUREAILib PUBLIC #.lib e .dll
@@ -146,19 +169,10 @@ target_link_libraries(RagPUREAILib PUBLIC #.lib e .dll
     tokenizers_cpp
     protobuf::libprotobuf
     CURL::libcurl
-    #${CURL_LIBRARIES}
     ${Python3_LIBRARIES}
     ${TORCH_LIBRARIES}
-    #Python3::Python
 )
-#message(STATUS "\n\n\n\n\n\n\n\n\n\nTORCH_LIBRARIES: ${TORCH_LIBRARIES}\n\n\n\n\n\n\n\n\n\n")
 
 # Pybind11 Module
-#pybind11_add_module(RagPUREAI ${RagPUREAI_IMPL_SRCS})
 pybind11_add_module(RagPUREAI ${RagPUREAI_BINDING_SRCS})
-
 target_link_libraries(RagPUREAI PRIVATE RagPUREAILib)
-# if(BUILD_APPS)
-#     message(STATUS "Building apps")
-#     add_subdirectory(apps)
-# endif()
