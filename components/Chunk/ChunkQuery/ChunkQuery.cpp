@@ -1,4 +1,4 @@
-#include "ChunkCommons/ChunkCommons.h"
+
 #include "ChunkQuery.h"
 #include "RagException.h"
 #include "StringUtils.h"
@@ -9,42 +9,37 @@
 #include <omp.h>
 #include <syncstream>
 #include <algorithm>
-#include <memory>
-#include <sstream>
+#include <memory>      // unique_ptr, make_unique
+#include <sstream>     // stringstream
 #include <torch/torch.h>
-#include <iomanip> 
-#include <stdexcept> 
+#include <iomanip>    // setprecision
+#include <stdexcept>  // std::invalid_argument
 
+// #define DEBUG // Uncomment to enable debug messages
 
 Chunk::ChunkQuery::ChunkQuery(
-    std::string query,
-    RAGLibrary::Document query_doc,
-    std::vector<RAGLibrary::Document> chunks_list,
-    Chunk::EmbeddingModel embedding_model,
-    std::string model
-) :  
- m_embedding_model(embedding_model), 
- m_model(std::move(model)),
- m_retrieve_list(),
- quant_retrieve_list(0)
- {
-
-    if (!query.empty() && !query_doc.page_content.empty()) {
-        if (query != query_doc.page_content)
-            throw std::invalid_argument("Ambiguous input: both query and query_doc differ.");
-
-        m_query = query_doc.page_content;
-
-        if (query_doc.embedding.has_value() && !query_doc.embedding->empty()) {
-            m_query_doc = query_doc;
-            m_emb_query = m_query_doc.embedding.value(); 
-            
-        } else {
-            auto docs = this->Embeddings({query_doc});
-            m_query_doc = docs[0];
-            m_emb_query = docs[0].embedding.value(); 
-          
+        std::string query,
+        RAGLibrary::Document query_doc,
+        const Chunk::ChunkDefault* chunks,
+        std::optional<size_t> pos,
+        float threshold
+): m_query(std::move(query)), m_query_doc(std::move(query_doc))
+{
+    if (pos.has_value() && chunks != nullptr) {
+        try{
+            setChunks(*chunks, pos.value()); 
         }
+        catch(const std::exception& e){
+            throw;
+        }
+    }
+    // else cout<<"Invalid";
+
+    if (!query.empty()) {
+        Query(query);
+    } 
+    else if (!query_doc.page_content.empty()) {
+        Query(query_doc);
     }
     else if (!query.empty() && query_doc.page_content.empty()){   
         m_query = query;
@@ -75,153 +70,214 @@ Chunk::ChunkQuery::ChunkQuery(
     if (!chunks_list.empty()) this->CreateVD(chunks_list);
 }
 
-std::vector<RAGLibrary::Document> Chunk::ChunkQuery::Embeddings(const std::vector<RAGLibrary::Document>& list)
-{
-    if (m_embedding_model !=  Chunk::EmbeddingModel::OpenAI){
-        throw std::invalid_argument("Model not yet supported");
-    }
-    InitAPIKey();
-    #ifdef DEBUG
-    std::cerr<< "Chave da API do OpenAI: " << m_openai_api_key << std::endl; //Debug
-    #endif
-    std::vector<RAGLibrary::Document> emb;
-    switch (this->m_embedding_model)
-    {
-    case  Chunk::EmbeddingModel::HuggingFace:
-        throw std::invalid_argument("Model not yet supported");
-    case  Chunk::EmbeddingModel::OpenAI:
-        if(m_model == "text-embedding-ada-002"){
-            int count = 0;
-            do{
-                std::unique_ptr<EmbeddingOpenAI::EmbeddingOpenAI> OpenAI = std::make_unique<EmbeddingOpenAI::EmbeddingOpenAI>();
-                emb = OpenAI->GenerateEmbeddings(list, m_model);
-                count++;
-            }while(!this->allChunksHaveEmbeddings(emb) && count < 3);
+void Chunk::ChunkQuery::setChunks(const Chunk::ChunkDefault& chunks, size_t pos) {
+    if (!chunks.isInitialized())
+        throw std::invalid_argument("No class.");
 
-            if (!this->allChunksHaveEmbeddings(emb)) {
-                throw std::runtime_error("Failed to generate valid embeddings after 3 attempts.");
-            }
-            return emb;
+    size_t x = chunks.quant_of_elements();
+    if (x == 0)
+        throw std::invalid_argument("Empty chunks vector.");
+        
+    if (pos >= x)
+        throw std::out_of_range("Position out of range.");
+
+    const auto* vdb = chunks.getElement(pos);
+    if (!vdb)
+        throw std::invalid_argument("No element in this position.");
+
+    if (m_vdb && m_vdb->model != vdb->model && !m_query.empty()) {
+        m_emb_query.clear();
+        auto docs = Chunk::Embeddings({ RAGLibrary::Document({}, m_query)}, vdb->model);
+        if (!docs[0].embedding.has_value())
+            throw std::runtime_error("Missing embedding in generated doc.");
+        m_query_doc = docs[0];
+        m_emb_query = docs[0].embedding.value();
+    }
+
+    //------------------------------------------------------------------------------------------------------
+    //Criar views via span
+    if (!m_chunk_embedding.empty()) m_chunk_embedding.clear();
+    m_vdb = vdb; 
+    m_chunk_embedding.reserve(m_vdb->n);
+    for (size_t i = 0; i < m_vdb->n; ++i) {
+        const float* ptr = m_vdb->flatVD.data() + (i * m_vdb->dim);
+        m_chunk_embedding.emplace_back(ptr, m_vdb->dim); 
+    }
+    if (m_chunk_embedding.empty()) throw std::runtime_error("Unable to create window");
+    //------------------------------------------------------------------------------------------------------
+    m_n_chunk =vdb->n;
+    m_dim = vdb->dim;
+    m_pos = pos;
+    m_chunks_list = &chunks.getChunks(); 
+    m_chunks = &chunks;
+    m_query_doc = {};  //clear
+    m_emb_query.clear();
+
+    RAGLibrary::Document result;
+    if(m_vdb!=nullptr){
+        try{
+            auto results = Chunk::Embeddings({ RAGLibrary::Document({}, m_query) }, m_vdb->model);// sempre retorna algo 
+            result = validateEmbeddingResult(results);
         }
-        else{
-            throw std::invalid_argument("Model not yet supported");
+        catch(const std::exception& e){
+            throw;
         }
-        break;
+        m_emb_query = result.embedding.value(); 
+        m_n = 1;
+        m_query_doc = result;
+        m_query_doc.metadata["model"] = m_vdb->model;
     }
-
-    return {};
 }
 
-inline bool Chunk::ChunkQuery::allChunksHaveEmbeddings(const std::vector<RAGLibrary::Document>& chunks_list) {
-    return std::all_of(
-        chunks_list.begin(),
-        chunks_list.end(),
-        [](const RAGLibrary::Document& doc) {
-            return doc.embedding.has_value();
-        });
-}
-
-void Chunk::ChunkQuery::InitAPIKey() {
-    const char* env_key = std::getenv("OPENAI_API_KEY");
-    m_openai_api_key = (env_key != nullptr) ? std::string(env_key) : "";
-    if (m_openai_api_key.empty()) {
-        #ifdef DEBUG
-            std::cerr << "Erro: API key not set.\n";
-        #endif
-        throw std::runtime_error("API key not set. Please set the OPENAI_API_KEY environment variable.");
-    }
-    #ifdef DEBUG
-    std::cerr << "API key set\n";//Debug
-    #endif
-}
-
-RAGLibrary::Document Chunk::ChunkQuery::Query(std::string query){
-    if (query.empty()) {
+RAGLibrary::Document Chunk::ChunkQuery::Query(std::string query, const Chunk::ChunkDefault* temp_chunks, std::optional<size_t> pos){
+    if (query.empty() || query.size()<5) {
         throw std::invalid_argument("Query string is empty.");
     }
+    if (pos.has_value()){
+        if (temp_chunks != nullptr) setChunks(*temp_chunks, pos.value());
+        else if(m_chunks != nullptr) setChunks(*m_chunks, pos.value());
+    }
+
+    m_query_doc = {};  //clear
+    m_emb_query.clear();
     m_query = query;
-    std::vector<RAGLibrary::Document> list = { RAGLibrary::Document({}, query) };
-    m_query_doc = this->Embeddings(list)[0];
-    m_emb_query = m_query_doc.embedding.value(); 
+    RAGLibrary::Document result;
+    if(m_vdb!=nullptr){
+        //std::vector<RAGLibrary::Document> results = Chunk::Embeddings({ RAGLibrary::Document({}, query) }, vdb->model)[0];
+        try{
+            auto results = Chunk::Embeddings({ RAGLibrary::Document({}, query) }, m_vdb->model);// sempre retorna algo 
+            result =validateEmbeddingResult(results);
+        }
+        catch(const std::exception& e){
+            throw;
+        }
+        m_emb_query = result.embedding.value(); 
+        m_n = 1;
+        m_query_doc = result;
+        m_query_doc.metadata["model"] = m_vdb->model;
+    }
+    else {
+        m_query_doc = RAGLibrary::Document({}, query);
+        m_n = 0;
+    }
+
     return m_query_doc;
 }
 
-RAGLibrary::Document Chunk::ChunkQuery::Query(RAGLibrary::Document query_doc) {
+
+// Versão que recebe diretamente um Document
+RAGLibrary::Document Chunk::ChunkQuery::Query(RAGLibrary::Document query_doc, const Chunk::ChunkDefault* temp_chunks, std::optional<size_t> pos) {
     if (query_doc.page_content.empty()) {
         throw std::invalid_argument("Query document is empty.");
     }
-    m_query = query_doc.page_content;
-    if (!query_doc.embedding.has_value() || query_doc.embedding->empty()) {
-        auto results = this->Embeddings({ query_doc });
-        m_query_doc = results[0];
-    } else {
-        m_query_doc = query_doc;
+
+    if (pos.has_value()){
+        this->m_query = query_doc.page_content;
+        if (temp_chunks != nullptr) setChunks(*temp_chunks, pos.value());
+        else if(m_chunks != nullptr) setChunks(*m_chunks, pos.value());
     }
-    m_emb_query = m_query_doc.embedding.value();
-    return m_query_doc;
+
+    RAGLibrary::Document result;
+    if(this->m_vdb!=nullptr){
+        //-----------------------------------------
+        this->m_query_doc = {};  
+        this->m_emb_query.clear();
+        //-----------------------------------------
+        bool needs_embedding = !query_doc.embedding.has_value() || query_doc.embedding->empty();
+
+        bool wrong_model = true;
+        auto it = query_doc.metadata.find("model");
+        if (it != query_doc.metadata.end()) {
+            wrong_model = (it->second != m_vdb->model);
+        }
+
+        if (needs_embedding || wrong_model) {
+            auto results = Chunk::Embeddings({ query_doc }, m_vdb->model);
+            result = validateEmbeddingResult(results);
+            this->m_query_doc = result;
+            this->m_query_doc.metadata["model"] = m_vdb->model;
+            m_n = 1;
+        } else {
+            this->m_query_doc = query_doc;
+        }
+        this->m_emb_query = this->m_query_doc.embedding.value();
+        m_n = 1;
+    }
+    m_n = 1;
+    return this->m_query_doc;
 }
-
-std::vector<std::vector<float>> Chunk::ChunkQuery::CreateVD(std::vector<RAGLibrary::Document> chunks_list)// Testar
-{
-    if (initialized_)
-        throw std::invalid_argument("Chunks list already initialized.");
-
-    if (chunks_list.empty())
-        throw std::invalid_argument("Empty chunks list.");
-
-    std::vector<RAGLibrary::Document> docs;
-    if (allChunksHaveEmbeddings(chunks_list)) {
-        docs = std::move(chunks_list);
-    } else {
-        docs = this->Embeddings(chunks_list);
+//======================================================================================================
+std::vector<std::tuple<std::string, float, int>> Chunk::ChunkQuery::Retrieve(float threshold, const Chunk::ChunkDefault* temp_chunks, std::optional<size_t> pos) {
+    // Validation of input parameters -----------------------------------------------------------------------
+    if (m_emb_query.empty()) throw std::runtime_error("Query not yet initialized.");
+    if (threshold < -1.0f || threshold > 1.0f) throw std::invalid_argument("Threshold out of bound [-1,1].");
+    if (m_vdb->flatVD.empty()) throw std::runtime_error("Embeddings not found.");
+    if (pos.has_value()){
+        if (temp_chunks != nullptr) setChunks(*temp_chunks, pos.value());
+        else if(m_chunks != nullptr) setChunks(*m_chunks, pos.value());
+        else throw std::invalid_argument("Position was provided, but no chunk context (temp_chunks or m_chunks) was set.");
     }
 
-    m_chunks_list    = std::move(docs);
-    m_chunk_embedding.resize(m_chunks_list.size());
+    // Vetor temporário de (texto, score, índice)
+    std::vector<std::tuple<std::string, float, int>> scored_hits;
+    // Tensor da query
+    auto query_tensor = torch::from_blob(
+        const_cast<float*>(m_emb_query.data()),
+        {int64_t(m_emb_query.size())}, torch::kFloat32
+    );
+    // auto query_tensor = torch::tensor(m_emb_query, torch::kFloat32); -> ?
 
-    for (size_t i = 0; i < m_chunks_list.size(); ++i) {
-        m_chunk_embedding[i] = m_chunks_list[i].embedding.value();
+    float norm_q = torch::norm(query_tensor).item<float>();
+
+    #pragma omp parallel
+    {
+        std::vector<std::tuple<std::string, float, int>> local_hits;
+        #pragma omp for nowait
+        for (int i = 0; i < int(m_chunk_embedding.size()); ++i) {
+            auto& emb = m_chunk_embedding[i];
+            auto chunk_tensor = torch::from_blob(
+                const_cast<float*>(emb.data()),
+                {int64_t(emb.size())}, torch::kFloat32
+            );
+
+            float norm_c = torch::norm(chunk_tensor).item<float>();
+            float dot_p = torch::dot(query_tensor, chunk_tensor).item<float>();
+            float sim = dot_p / (norm_q * norm_c);
+
+            if (sim >= threshold) {// armazena (conteúdo, similaridade, índice original)
+                local_hits.emplace_back(
+                    //const auto& doc = (*this->chunks_list)[i];
+                    //std::cout << doc.page_content << std::endl;,
+                    (*this->m_chunks_list)[i].page_content,
+                    sim,
+                    i
+                );
+            }
+        }
+        #pragma omp critical
+        scored_hits.insert(
+            scored_hits.end(),
+            local_hits.begin(),
+            local_hits.end()
+        );
     }
 
-    initialized_ = true;
-    return m_chunk_embedding;
-}
+    // ordena decrescentemente por similaridade (get<1>)
+    std::sort(
+        scored_hits.begin(),
+        scored_hits.end(),
+        [](auto &a, auto &b) {
+            return std::get<1>(a) > std::get<1>(b);
+        }
+    );
 
-
-void Chunk::ChunkQuery::printVD(int limit) {
-    if (m_chunks_list.empty()) {
-        #ifdef DEBUG
-        std::cerr << "The chunklist is empty\n";
-        #endif
-        return;
-    }
-    limit = std::min<int>(limit, static_cast<int>(m_chunks_list.size()));
-
-    for (int i = 0; i < limit; ++i) {
-        std::cout << "Chunk[" << i << "]: "
-                  << m_chunks_list[i].page_content
-                  << "\nEmbedding: m_chunk_embedding[i]"
-                  << m_chunk_embedding[i]
-                  << "\nEmbedding: m_chunks_list[i].embedding.value()"
-                  << m_chunks_list[i].embedding.value()
-                  << "\n\n";
-    }
-}
-
-
-std::ostream& operator<<(std::ostream& os, const std::vector<float>& vec){
-    os << "[";
-    for (size_t i = 0; i < vec.size(); ++i) {
-        os << vec[i];
-        if (i < vec.size() - 1) os << ", ";
-    }
-    os << "]";
-    return os;
-}
-
-std::vector<std::tuple<std::string, float, int>> Chunk::ChunkQuery::getRetrieveList() const {
+    // atualiza estado e retorna
+    m_retrieve_list   = std::move(scored_hits);
+    quant_retrieve_list = int(m_retrieve_list.size()); //int quant_retrieve_list = static_cast<int>(m_retrieve_list.size());
     return m_retrieve_list;
 }
+
+// Formated P ===========================================================================================
 
 std::string Chunk::ChunkQuery::StrQ(int index) {
     if (index == -1) {
@@ -248,76 +304,37 @@ std::string Chunk::ChunkQuery::StrQ(int index) {
 
     return ss.str();
 }
+//========================================================================================================
 
-RAGLibrary::Document Chunk::ChunkQuery::getQuery() const {
-    return m_query_doc;
+// Getters ===============================================================================================
+RAGLibrary::Document Chunk::ChunkQuery::getQuery(void) const {
+    return this->m_query_doc;
 }
 
-std::pair<Chunk::EmbeddingModel, std::string> Chunk::ChunkQuery::getPar() const {
-    return { m_embedding_model, m_model };
-}
-
-std::vector<RAGLibrary::Document> Chunk::ChunkQuery::getChunksList() const {
-    if (m_chunks_list.empty()) {
-        throw std::invalid_argument("Empty chunks list.");
+const std::vector<RAGLibrary::Document>& Chunk::ChunkQuery::getChunksList() const {
+    if (m_chunks_list == nullptr) {
+        throw std::runtime_error("Chunks list not initialized.");
     }
-    return m_chunks_list;
+    return *m_chunks_list;
 }
 
-std::vector<std::tuple<std::string, float, int>> Chunk::ChunkQuery::Retrieve(float threshold) {
-    if (m_emb_query.empty()) throw std::runtime_error("Query not yet initialized.");
-    if (threshold < -1.0f || threshold > 1.0f) throw std::invalid_argument("Threshold out of bound [-1,1].");
-    if (m_chunk_embedding.empty() || m_emb_query.empty()) throw std::runtime_error("Embeddings not found.");
-
-    std::vector<std::tuple<std::string, float, int>> scored_hits;
-    torch::Tensor()
-    auto query_tensor = torch::from_blob(
-        const_cast<float*>(m_emb_query.data()),
-        {int64_t(m_emb_query.size())}, torch::kFloat32
-    );
-
-    float norm_q = torch::norm(query_tensor).item<float>();
-
-    #pragma omp parallel
-    {
-        std::vector<std::tuple<std::string, float, int>> local_hits;
-        #pragma omp for nowait
-        for (int i = 0; i < int(m_chunk_embedding.size()); ++i) {
-            auto& emb = m_chunk_embedding[i];
-            auto chunk_tensor = torch::from_blob(
-                const_cast<float*>(emb.data()),
-                {int64_t(emb.size())}, torch::kFloat32
-            );
-
-            float norm_c = torch::norm(chunk_tensor).item<float>();
-            float dot_p = torch::dot(query_tensor, chunk_tensor).item<float>();
-            float sim = dot_p / (norm_q * norm_c);
-
-            if (sim >= threshold) {
-                local_hits.emplace_back(
-                    m_chunks_list[i].page_content,
-                    sim,
-                    i
-                );
-            }
-        }
-        #pragma omp critical
-        scored_hits.insert(
-            scored_hits.end(),
-            local_hits.begin(),
-            local_hits.end()
-        );
-    }
-
-    std::sort(
-        scored_hits.begin(),
-        scored_hits.end(),
-        [](auto &a, auto &b) {
-            return std::get<1>(a) > std::get<1>(b);
-        }
-    );
-
-    m_retrieve_list   = std::move(scored_hits);
-    quant_retrieve_list = int(m_retrieve_list.size()); //int quant_retrieve_list = static_cast<int>(m_retrieve_list.size());
-    return m_retrieve_list;
+// Retorna o par (modelo de embedding, nome do modelo) usados na instância
+std::string Chunk::ChunkQuery::getMod(void) const {
+    return { this->m_vdb->model };
 }
+
+std::tuple<size_t, size_t, size_t> Chunk::ChunkQuery::getPar(void) const {
+    return { this->m_n, this->m_dim, this->m_n_chunk };
+}
+
+std::vector<float> Chunk::ChunkQuery::getEmbedQuery(void) const {
+    return m_emb_query;
+}
+
+std::vector<std::tuple<std::string, float, int>> Chunk::ChunkQuery::getRetrieveList(void) const {
+    if(this->m_retrieve_list.size() == 0)
+        std::cout<<"Empty Retrive List\n";
+        return {};
+    return this->m_retrieve_list;
+}
+//======================================================================================================

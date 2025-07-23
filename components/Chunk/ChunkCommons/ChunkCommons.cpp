@@ -18,8 +18,49 @@
 
 using namespace Chunk;
 
+std::vector<RAGLibrary::Document> Chunk::Embeddings(const std::vector<RAGLibrary::Document>& list, std::string model)
+{     
+    std::vector<RAGLibrary::Document> emb;
+
+    std::optional<std::string> vendor_opt = Chunk::resolve_vendor_from_model(model);
+    if (!vendor_opt.has_value()) {
+        throw std::invalid_argument("Model not supported.");
+    }
+    std::string vendor = vendor_opt.value();
+
+    if (vendor == "openai") {
+        int count = 0;
+        Chunk::InitAPIKey();
+        do {
+            try {
+                auto client = std::make_unique<EmbeddingOpenAI::EmbeddingOpenAI>();
+                emb = client->GenerateEmbeddings(list, model);
+            } catch (const std::exception& e) {
+                std::cerr << "[OpenAI::GenerateEmbeddings exception] "
+                          << e.what() << " (attempt " << count + 1 << ")\n";
+            }
+            count++;
+        } while (!Chunk::allChunksHaveEmbeddings(emb) && count < 3);
+
+        if (!Chunk::allChunksHaveEmbeddings(emb)) {
+            throw std::runtime_error("Failed to generate valid embeddings after 3 attempts.");
+        }
+
+        return emb;
+    }
+
+    // futuros vendors podem entrar aqui
+    //else if (vendor == "huggingface") {
+        //auto client = std::make_unique<EmbeddingHF::EmbeddingHF>();
+        //emb = client->GenerateEmbeddings(list, m_model);
+        //return emb;
+    //}
+
+    throw std::runtime_error("Vendor handler for '" + vendor + "' not implemented.");
+}
+
 namespace RAGLibrary
-{
+{   
     static std::string FileReader(const std::string &filePath)
     {
         std::shared_ptr<std::ifstream> filePtr(new std::ifstream, [](std::ifstream *fil)
@@ -47,6 +88,10 @@ inline Ort::Value CreateTensorOrt(Ort::AllocatorWithDefaultOptions &allocator,
 {
     return Ort::Value::CreateTensor<T>(allocator.GetInfo(), data.data(), data.size(), shape.data(), shape.size());
 }
+
+
+//=================================================================================================================================================
+
 
 std::vector<float> Chunk::MeanPooling(const std::vector<float> &token_embeddings, const std::vector<int64_t> &attention_mask, size_t embedding_size)
 {
