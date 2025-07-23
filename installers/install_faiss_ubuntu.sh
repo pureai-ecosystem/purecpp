@@ -4,6 +4,14 @@
 # Compatible with Ubuntu/Debian-based systems using apt
 # It clones FAISS into libs/faiss/ and builds it with CMake
 
+if [ "$(id -u)" -ne 0 ]; then
+    echo "🔒 Not running as root — using  sudo..."
+    SUDO= sudo
+else
+    echo "🧙 Running as root —  sudo not needed."
+    SUDO=""
+fi
+
 set -e  # Exit immediately if a command fails
 
 # Project root is assumed to be the current directory
@@ -16,11 +24,11 @@ echo "Creating libs/faiss/ directory inside the project..."
 mkdir -p "$FAISS_DIR"
 
 echo "Updating system packages..."
-sudo apt update
+ $SUDO apt update
 
 echo "Installing required development packages..."
-sudo apt install libgflags-dev -y
-sudo apt install -y cmake g++ libopenblas-dev python3-dev build-essential git
+ $SUDO apt install libgflags-dev -y
+ $SUDO apt install -y cmake g++ libopenblas-dev python3-dev build-essential git
 
 echo "Removing all files in repository $FAISS_DIR..."
 rm -fr "$FAISS_DIR"
