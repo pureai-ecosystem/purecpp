@@ -73,7 +73,7 @@ sudo apt upgrade -y && \
 sudo apt install -y  build-essential nano wget \
     curl ninja-build cmake libopenblas-dev \
     libgflags-dev python3-dev libprotobuf-dev \
-    protobuf-compiler uzip
+    protobuf-compiler unzip
 ````
 
 ---
@@ -277,7 +277,7 @@ chmod +x ./module_cmake.sh
 ./all_cmake.sh
 ```
 
-## Compile one at time
+## Compile one at a time
 ```
 ./module_cmake.sh <module>
 ```
