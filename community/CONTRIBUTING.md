@@ -10,7 +10,7 @@ Want to contribute? Whether you're creating new integrations, improving performa
 
 ## ✨ Steps to Contribute
 
-Make sure you have the following packages installed:
+Make sure you have the following:
 - ***GCC/G++ 13.1***
 - ***CMake 3.22+***
 - ***Conan 2***
