@@ -8,10 +8,10 @@ Want to contribute? Whether you're creating new integrations, improving performa
 
 ---
 
-## 💪🏽 Quick Start Guide
+## ✨ Steps to Contribute
 
-Make sure you have the following packages installed:***
-- GCC/G++ 13.1***
+Make sure you have the following packages installed:
+- ***GCC/G++ 13.1***
 - ***CMake 3.22+***
 - ***Conan 2***
 - ***Rust***
@@ -25,16 +25,19 @@ Ready to jump in? Follow this quick setup guide to get started smoothly:
 
 3. [How to build](./README.md#how-to-build)
 
-All set! Now it's time to build something powerful. If you need more details, check out the [Development Guidelines](#-Development-Guidelines).
+4. **Work on your feature or bugfix**, ensuring you have unit tests covering your code.
+5. **Commit** your changes, then push them to your fork.
+   ```bash
+   git push origin your-feature-branch
+   ````
+6. **Open a pull request** on GitHub.
+
+All set! Now it's time to **build something powerful**.
 
 ---
 ---
-## Community Discord
-Join our community [Discord](https://discord.gg/8eF9v78Ndv) to ask questions, get support, and collaborate with fellow contributors and users.
 
----
----
-## ⚡ What Can You Contribute To?  
+## ⚡ What to Contribute?  
 
 There are many ways to contribute to **PureCPP**—whether you're a **C++ expert** or just starting out with **high-performance computing**. Here, we focus on **performance, efficiency, and scalability**. Your contributions are always welcome!  
 
@@ -74,8 +77,6 @@ If you’ve used **PureCPP** in an innovative way, share your examples and contr
 
 Got a different idea? We’re open to tests and new approaches—experiment and submit a PR!  
 
-
-
 ---
 
 ## 🚀 **Next Steps: What Are We Planning?**  
@@ -97,26 +98,6 @@ We are always evolving! Here are the next steps to make our pipelines even more 
 💡 **Got an idea?** Your contribution is more than welcome! Join us and help take this project even further. 🚀  
 
 ---
-
-
-## ✨ Steps to Contribute
-
-1. **Fork & Clone**
-
-2. **Create a branch** for your work.
-   ```bash
-   git checkout -b your-feature-branch
-   ````
-
-3. **Set up your environment**
-   
-4. **Work on your feature or bugfix**, ensuring you have unit tests covering your code.
-5. **Commit** your changes, then push them to your fork.
-   ```bash
-   git push origin your-feature-branch
-   ````
-6. **Open a pull request** on GitHub.
-
 ---
 
 ## ⚡ **Acknowledgements: Built with Pure Performance**  
@@ -132,3 +113,11 @@ Keep coding at full speed! 🏎️💻
 ---
 
 Thank You! Gracias! 謝謝! 감사해요! ありがとう! Спасибо! Obrigado!
+
+---
+
+## Community Discord
+Join our community [Discord](https://discord.gg/8eF9v78Ndv) to ask questions, get support, and collaborate with fellow contributors and users.
+
+---
+---
