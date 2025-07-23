@@ -13,7 +13,7 @@ This repository provides detailed guidance on how to set up the environment, con
 - [Using Pre-trained Models](#use-pre-trained-models)
 - [Build Instructions](#how-to-build)
   - [Compile All Modules](#compile-all-at-once)
-  - [Compile Individually](#compile-one-at-time)
+  - [Compile Individually](#compile-one-at-a-time)
 - [Next Steps](#-next-steps)
 
 ---
