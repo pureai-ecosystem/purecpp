@@ -32,7 +32,7 @@ Ready to jump in? Follow this quick setup guide to get started smoothly:
    ````
 6. **Open a pull request** on GitHub.
 
-All set! Now it's time to **build something powerful**.
+All set, now! It is time to **build something powerful**.
 
 ---
 ---
