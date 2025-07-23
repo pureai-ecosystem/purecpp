@@ -41,33 +41,6 @@ Chunk::ChunkQuery::ChunkQuery(
     else if (!query_doc.page_content.empty()) {
         Query(query_doc);
     }
-    else if (!query.empty() && query_doc.page_content.empty()){   
-        m_query = query;
-        std::vector<RAGLibrary::Document> list = { RAGLibrary::Document({}, query) };
-        auto docs = this->Embeddings(list);
-        m_query_doc = docs[0];
-        m_emb_query = docs[0].embedding.value();
-    }
-    else if (query.empty() && !query_doc.page_content.empty()) {
-        m_query = query_doc.page_content;
-    
-        if (!query_doc.embedding.has_value() || query_doc.embedding->empty()) {
-            auto docs = this->Embeddings({ query_doc });
-            m_query_doc = docs[0];
-            m_emb_query = docs[0].embedding.value();
-        }
-        else {
-            m_query_doc = query_doc;
-            m_emb_query = query_doc.embedding.value();
-        }
-    }
-    else {
-        m_query = "";
-        m_query_doc = RAGLibrary::Document({}, query);
-        m_emb_query.clear();
-    }
-
-    if (!chunks_list.empty()) this->CreateVD(chunks_list);
 }
 
 void Chunk::ChunkQuery::setChunks(const Chunk::ChunkDefault& chunks, size_t pos) {

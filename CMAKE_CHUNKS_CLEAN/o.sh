@@ -9,6 +9,7 @@ conan lock create conanfile.py --build=missing
 conan install . --build=missing
 
 cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DBUILD_SHARED_LIBS=OFF \
     -D_GLIBCXX_USE_CXX11_ABI=1 \
     -DSPM_USE_BUILTIN_PROTOBUF=OFF \

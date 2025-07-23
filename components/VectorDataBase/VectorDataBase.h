@@ -26,29 +26,29 @@
 
 namespace VectorDataBase {
 
-    struct vdb_data {
-        std::vector<float> flatVD;
-        std::string vendor;
-        std::string model;
-        size_t dim = 0;
-        size_t n = 0;
+    // struct vdb_data {
+    //     std::vector<float> flatVD;
+    //     std::string vendor;
+    //     std::string model;
+    //     size_t dim = 0;
+    //     size_t n = 0;
 
-        inline const std::tuple<size_t, size_t> getPar(void) const {
-            return {n, dim};
-        }
+    //     inline const std::tuple<size_t, size_t> getPar(void) const {
+    //         return {n, dim};
+    //     }
 
-        inline std::pair<std::string, std::string> getEmbPar(void) const {
-            return {vendor, model};
-        }
+    //     inline std::pair<std::string, std::string> getEmbPar(void) const {
+    //         return {vendor, model};
+    //     }
 
-        inline const float* getVDpointer(void) const {
-            if (flatVD.empty()) {
-                std::cout << "[Info] Empty Vector Data Base\n";
-                return {};
-            }
-            return flatVD.data();
-        }
-    };
+    //     inline const float* getVDpointer(void) const {
+    //         if (flatVD.empty()) {
+    //             std::cout << "[Info] Empty Vector Data Base\n";
+    //             return {};
+    //         }
+    //         return flatVD.data();
+    //     }
+    // };
 
     struct PureResult {
         std::vector<faiss::idx_t> indices;
