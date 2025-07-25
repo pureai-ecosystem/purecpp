@@ -18,8 +18,49 @@
 
 using namespace Chunk;
 
+std::vector<RAGLibrary::Document> Chunk::Embeddings(const std::vector<RAGLibrary::Document>& list, std::string model)
+{     
+    std::vector<RAGLibrary::Document> emb;
+
+    std::optional<std::string> vendor_opt = Chunk::resolve_vendor_from_model(model);
+    if (!vendor_opt.has_value()) {
+        throw std::invalid_argument("Model not supported.");
+    }
+    std::string vendor = vendor_opt.value();
+
+    if (vendor == "openai") {
+        int count = 0;
+        Chunk::InitAPIKey();
+        do {
+            try {
+                auto client = std::make_unique<EmbeddingOpenAI::EmbeddingOpenAI>();
+                emb = client->GenerateEmbeddings(list, model);
+            } catch (const std::exception& e) {
+                std::cerr << "[OpenAI::GenerateEmbeddings exception] "
+                          << e.what() << " (attempt " << count + 1 << ")\n";
+            }
+            count++;
+        } while (!Chunk::allChunksHaveEmbeddings(emb) && count < 3);
+
+        if (!Chunk::allChunksHaveEmbeddings(emb)) {
+            throw std::runtime_error("Failed to generate valid embeddings after 3 attempts.");
+        }
+
+        return emb;
+    }
+
+    // futuros vendors podem entrar aqui
+    //else if (vendor == "huggingface") {
+        //auto client = std::make_unique<EmbeddingHF::EmbeddingHF>();
+        //emb = client->GenerateEmbeddings(list, m_model);
+        //return emb;
+    //}
+
+    throw std::runtime_error("Vendor handler for '" + vendor + "' not implemented.");
+}
+
 namespace RAGLibrary
-{
+{   
     static std::string FileReader(const std::string &filePath)
     {
         std::shared_ptr<std::ifstream> filePtr(new std::ifstream, [](std::ifstream *fil)
@@ -47,6 +88,10 @@ inline Ort::Value CreateTensorOrt(Ort::AllocatorWithDefaultOptions &allocator,
 {
     return Ort::Value::CreateTensor<T>(allocator.GetInfo(), data.data(), data.size(), shape.data(), shape.size());
 }
+
+
+//=================================================================================================================================================
+
 
 std::vector<float> Chunk::MeanPooling(const std::vector<float> &token_embeddings, const std::vector<int64_t> &attention_mask, size_t embedding_size)
 {
@@ -190,90 +235,26 @@ at::Tensor Chunk::toTensor(std::vector<std::vector<float>> &vect)
     return tensor;
 }
 
-// Helper to find the start of a UTF-8 character backwards from a given index
-static size_t find_prev_char_boundary(const std::string &s, size_t index)
+std::vector<std::string> Chunk::SplitText(std::string inputs, const int overlap, const int chunk_size)
 {
-    if (index == 0)
-        return 0;
+    size_t step = size_t(chunk_size - overlap);
+    size_t chunk_sizes = (size_t)std::ceil((long double)inputs.size() / (long double)(step));
 
-    size_t i = index;
-    while (i > 0 && (s[i] & 0xC0) == 0x80)
+    std::vector<std::string> chunks(chunk_sizes);
+    for (size_t i = 0; i < chunk_sizes; ++i)
     {
-        i--;
-    }
-
-    // If we stopped at a valid start byte, we are good.
-    // Otherwise, we might be in an invalid sequence. For simplicity, we return the original index.
-    // Valid start bytes are 0xxxxxxx, 110xxxxx, 1110xxxx, 11110xxx.
-    if ((s[i] & 0xC0) == 0xC0 || (s[i] & 0x80) == 0)
-    {
-        return i;
-    }
-    return index;
-}
-
-std::vector<std::string> Chunk::SplitText(const std::string &text, int chunk_size, int overlap)
-{
-    if (chunk_size <= 0)
-    {
-        return {};
-    }
-
-    std::vector<std::string> chunks;
-    if (text.length() <= chunk_size)
-    {
-        chunks.push_back(text);
-        return chunks;
-    }
-
-    size_t start = 0;
-    while (start < text.length())
-    {
-        size_t end = std::min(start + chunk_size, text.length());
-
-        if (end < text.length())
+        size_t start_index = i * step;
+        size_t end_index = start_index + chunk_size;
+        if (end_index >= inputs.size())
         {
-            end = find_prev_char_boundary(text, end);
+            end_index = inputs.size();
         }
-
-        if (end <= start)
-        {
-            end = std::min(start + chunk_size, text.length());
-            size_t next_boundary = start + 1;
-            while (next_boundary < text.length() && (text[next_boundary] & 0xC0) == 0x80) {
-                next_boundary++;
-            }
-            end = std::min(start + chunk_size, next_boundary);
-        }
-
-        chunks.push_back(text.substr(start, end - start));
-
-        if (end == text.length())
-        {
-            break;
-        }
-
-        size_t next_start = end > overlap ? end - overlap : 0;
-
-        if (next_start > start)
-        {
-            next_start = find_prev_char_boundary(text, next_start);
-        }
-
-        if (next_start <= start)
-        {
-            size_t next_char = start + 1;
-            while(next_char < text.length() && (text[next_char] & 0xC0) == 0x80) {
-                next_char++;
-            }
-            start = next_char;
-        } else {
-            start = next_start;
-        }
+        chunks[i] = inputs.substr(start_index, end_index - start_index);
     }
 
     return chunks;
 }
+
 std::vector<std::string> Chunk::SplitTextByCount(const std::string &input, int overlap, int count_threshold, const std::shared_ptr<re2::RE2> regex)
 {
     std::vector<std::string> chunks;

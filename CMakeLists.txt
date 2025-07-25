@@ -83,7 +83,7 @@ set(CMAKE_BUILD_RPATH
     "\$ORIGIN/"
     "\$ORIGIN/purecpp/d_libs/libtorch/cpu/lib"
 )
-set(CMAKE_INSTALL_RPATH 
+set(CMAKE_INSTALL_RPATH
     "${PYTHON_SITE_PACKAGES}/*/d_libs/libtorch/cpu/lib"
     "\$ORIGIN/purecpp.libs"
     "\$ORIGIN/d_libs/libtorch/cpu/lib"
@@ -148,6 +148,7 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/libs/CommonStructs
     ${CMAKE_SOURCE_DIR}/libs/StringUtils
     ${CMAKE_SOURCE_DIR}/libs/FileUtils
+    ${CMAKE_SOURCE_DIR}/libs/MemoryUtils
     ${TOKENIZERS_PATH}/include
     ${OPEANAI_CPP_PATH}/include
     ${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include
