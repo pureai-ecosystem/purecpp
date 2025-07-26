@@ -71,6 +71,26 @@ find_package(Torch REQUIRED)
 include_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include")
 link_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/lib")
 
+# ------------------------------------------------------------------
+# === VectorDatabase =================================================
+# (cole este bloco após a seção de find_package já existente,
+#  antes de criar/alocar alvos que precisem dele)
+# ------------------------------------------------------------------
+find_package(redis++ REQUIRED)            # hiredis vem junto
+
+file(GLOB_RECURSE VDB_SRCS
+     ${CMAKE_SOURCE_DIR}/components/VectorDatabase/src/*.cpp)
+file(GLOB_RECURSE VDB_INCS
+     ${CMAKE_SOURCE_DIR}/components/VectorDatabase/include/vectordb/*.h)
+
+add_library(VectorDatabase STATIC ${VDB_SRCS} ${VDB_INCS})
+target_include_directories(VectorDatabase PUBLIC
+    ${CMAKE_SOURCE_DIR}/components/VectorDatabase/include)
+
+#  --- o gerador do Conan expõe ‘redis++::redis++_static’
+
+
+
 set(CMAKE_BUILD_RPATH
     "${PYTHON_SITE_PACKAGES}/*/d_libs/libtorch/cpu/lib"
     "\$ORIGIN/purecpp.libs"
@@ -174,6 +194,30 @@ target_link_libraries(RagPUREAILib PUBLIC #.lib e .dll
     ${TORCH_LIBRARIES}
 )
 
+
+target_link_libraries(VectorDatabase
+    PUBLIC nlohmann_json::nlohmann_json redis++::redis++_static hiredis::hiredis)
+
 # Pybind11 Module
 pybind11_add_module(RagPUREAI ${RagPUREAI_BINDING_SRCS})
 target_link_libraries(RagPUREAI PRIVATE RagPUREAILib)
+
+pybind11_add_module(vectordb components/VectorDatabase/python/_vectordb.cpp)
+
+if (MSVC)
+    target_link_options(vectordb PRIVATE "/WHOLEARCHIVE:VectorDatabase")
+elseif(APPLE)
+    # clang/ld64
+    target_link_libraries(vectordb PRIVATE "-Wl,-force_load" VectorDatabase)
+else()
+    # gcc/clang + GNU ld or gold
+    target_link_libraries(vectordb PRIVATE -Wl,--whole-archive VectorDatabase -Wl,--no-whole-archive)
+endif()
+
+# libs extras que o módulo precisa além do VectorDatabase (se necessário)
+target_link_libraries(vectordb PRIVATE nlohmann_json::nlohmann_json redis++::redis++_static hiredis::hiredis)
+
+set_target_properties(vectordb PROPERTIES
+    OUTPUT_NAME "vectordb"
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/python
+)
