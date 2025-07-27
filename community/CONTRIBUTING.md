@@ -23,8 +23,8 @@ Ready to jump in? Follow this quick setup guide to get started smoothly:
 
 2. [Environment setup](/README.md#environment-setup-ubuntu--debian-for-c-and-python-development)
 
-3. [How to build](/README.md#how-to-build)
-
+3. [How to build](/README.md#how-to-build)\
+All set, now! It is time to **build something powerful**.
 4. **Work on your feature or bugfix**, ensuring you have unit tests covering your code.
 5. **Commit** your changes, then push them to your fork.
    ```bash
@@ -32,7 +32,7 @@ Ready to jump in? Follow this quick setup guide to get started smoothly:
    ````
 6. **Open a pull request** on GitHub.
 
-All set, now! It is time to **build something powerful**.
+
 
 ---
 ---
