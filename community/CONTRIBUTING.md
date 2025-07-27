@@ -11,15 +11,15 @@ Want to contribute? Whether you're creating new integrations, improving performa
 ## ✨ Steps to Contribute
 
 Make sure you have the following:
-- ***GCC/G++ 13.1***
+- ***GCC/G++ 13.1+***
 - ***CMake 3.22+***
-- ***Conan 2***
+- ***Conan 2+***
 - ***Rust***
 - ***Python 3.8+***
   
 Ready to jump in? Follow this quick setup guide to get started smoothly:
 
-1. **Fork** the repo and clone your fork.
+1. **Fork** the repo and **clone** your fork.
 
 2. [Environment setup](/README.md#environment-setup-ubuntu--debian-for-c-and-python-development)
 
