@@ -9,7 +9,6 @@
 
 namespace {
 
-// normaliza o nome do backend para lowercase
 std::string canonical(std::string n) {
     std::transform(n.begin(), n.end(), n.begin(),
                    [](unsigned char c){ return static_cast<char>(std::tolower(c)); });
@@ -20,13 +19,11 @@ std::string canonical(std::string n) {
 
 namespace vdb {
 
-/* ------------------- singleton (Meyers) ------------------- */
 Registry& Registry::instance() {
     static Registry inst;
     return inst;
 }
 
-/* ------------------- register_backend --------------------- */
 void Registry::register_backend(const std::string& name,
                                 Factory factory,
                                 bool allow_override) {
@@ -40,7 +37,6 @@ void Registry::register_backend(const std::string& name,
     factories_[key] = std::move(factory);
 }
 
-/* ------------------------- make --------------------------- */
 VectorBackendPtr Registry::make(const std::string& name,
                                 const nlohmann::json& cfg) const {
     const std::string key = canonical(name);
@@ -54,7 +50,6 @@ VectorBackendPtr Registry::make(const std::string& name,
     return it->second(cfg);
 }
 
-/* ------------------------- list --------------------------- */
 std::vector<std::string> Registry::list() const {
     std::scoped_lock lock(mtx_);
     std::vector<std::string> keys;

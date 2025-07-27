@@ -3,17 +3,15 @@
 
 namespace vdb {
 
-/* ----------------------------- to_json -------------------- */
 std::string Document::to_json() const {
     nlohmann::json j = {
         {"page_content", page_content},
         {"embedding",    embedding},
         {"metadata",     metadata},
     };
-    return j.dump();              // sem indent para ocupar menos espaço
+    return j.dump();              
 }
 
-/* -------------------------- from_json --------------------- */
 Document Document::from_json(std::string_view js) {
     auto j = nlohmann::json::parse(js);
 

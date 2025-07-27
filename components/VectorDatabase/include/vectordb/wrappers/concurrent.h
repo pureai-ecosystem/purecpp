@@ -34,7 +34,6 @@ public:
 
     ~ConcurrentSearchWrapper() override;
 
-    /* ---------------- VectorBackend interface ---------------- */
     [[nodiscard]] bool is_open() const noexcept override;
     void insert(std::span<const Document> docs) override;
 
@@ -43,14 +42,12 @@ public:
           std::size_t                         k,
           const std::unordered_map<std::string, std::string>* filter = nullptr) override;
 
-    /* ------------ new helper: batch execution ---------------- */
     std::vector<std::vector<QueryResult>>
     query_many(const std::vector<std::vector<float>>&            embeddings,
                std::size_t                                       k           = 5,
                const std::unordered_map<std::string, std::string>* filter    = nullptr,
                bool                                              raiseOnErr = false);
 
-    /* ---------------- lifecycle delegation ------------------- */
     void close() override;
 
 private:

@@ -2,7 +2,7 @@
 
 #include "backend.h"
 
-#include <nlohmann/json.hpp>   // <-- garante que nlohmann::json seja visível
+#include <nlohmann/json.hpp>   
 #include <functional>
 #include <map>
 #include <mutex>
@@ -41,7 +41,7 @@ struct AutoRegister {
         Registry::instance().register_backend(
             name,
             [](const nlohmann::json& cfg) {
-                return std::make_unique<Concrete>(cfg);
+                return std::make_shared<Concrete>(cfg); // <-- Use make_shared
             });
     }
 };

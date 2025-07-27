@@ -12,7 +12,6 @@ struct Document {
 
     std::size_t dim() const noexcept { return embedding.size(); }
 
-    // serialização simples (para Redis, log, etc.)
     [[nodiscard]] std::string to_json() const;
     static Document from_json(std::string_view json);
 };

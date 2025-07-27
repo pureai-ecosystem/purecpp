@@ -2,14 +2,15 @@
 /**
  * MetricsWrapper
  * --------------
- * Coleta estatísticas de uso (contagem, erros, latência) de qualquer
- * `VectorBackend`.  Tudo thread-safe.
+ * Collects usage statistics (count, errors, latency) for any
+ * `VectorBackend`. Fully thread-safe.
  *
- *  • Não adiciona dependências externas – só STL.
- *  • Exponha as métricas via `snapshot()` (C++ map) ou
- *    `snapshot_json()` (string JSON usando nlohmann/json).
- *  • Se quiser Prometheus, é fácil plugar depois (ver TODO no .cpp).
+ *  • Does not add external dependencies – only uses the STL.
+ *  • Expose metrics via `snapshot()` (C++ map) or
+ *    `snapshot_json()` (JSON string using nlohmann/json).
+ *  • If you want Prometheus support, it's easy to plug in later (see TODO in .cpp).
  */
+
 #include <chrono>
 #include <mutex>
 #include <string>
@@ -23,22 +24,19 @@ namespace vdb::wrappers {
 struct CallStats {
     std::uint64_t calls   = 0;
     std::uint64_t errors  = 0;
-    double        total   = 0.0;          // segundos acumulados
+    double        total   = 0.0;         
     double        min_t   = std::numeric_limits<double>::infinity();
     double        max_t   = 0.0;
 
     void observe(double elapsed, bool ok) noexcept;
 };
 
-/**
- * Wrapper propriamente dito.
- */
+
 class MetricsWrapper final : public VectorBackend {
 public:
     explicit MetricsWrapper(VectorBackendPtr backend,
                             std::string       namespace_ = "vdb");
 
-    /* ------------- VectorBackend interface ----------------- */
     [[nodiscard]] bool is_open() const noexcept override;
     void insert(std::span<const Document> docs) override;
     std::vector<QueryResult>
@@ -46,10 +44,8 @@ public:
           std::size_t                         k,
           const std::unordered_map<std::string,std::string>* filter = nullptr) override;
 
-    /* delega extras se o backend suportar ------------------- */
     void close() override;
 
-    /* ------------- API de métricas ------------------------ */
     [[nodiscard]]
     std::unordered_map<std::string, CallStats> snapshot() const;
 
@@ -58,14 +54,13 @@ public:
     void reset();
 
 private:
-    /* util interno que mede + propaga */
     template<typename F, typename... Args>
     auto measure(const std::string& method, F&& fn, Args&&... args);
 
     VectorBackendPtr                                       backend_;
     mutable std::mutex                                     mtx_;
     std::unordered_map<std::string, CallStats>             stats_;
-    const std::string                                      ns_;     // p/ futuramente exp-Prometheus
+    const std::string                                      ns_;     
 };
 
 }  // namespace vdb::wrappers

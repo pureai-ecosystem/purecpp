@@ -6,29 +6,26 @@
 
 namespace vdb::wrappers {
 
-/* -------------------------------------------------- ctor/dtor */
 ConcurrentSearchWrapper::ConcurrentSearchWrapper(VectorBackendPtr backend,
                                                  std::size_t      maxWorkers,
                                                  bool             threadSafe)
-    : VectorBackend(backend->dim())          // propagate expected dimension
+    : VectorBackend(backend->dim())          
     , backend_(std::move(backend))
-    , workers_(maxWorkers ? maxWorkers : 1)  // never zero
+    , workers_(maxWorkers ? maxWorkers : 1)  
     , backendThreadSafe_(threadSafe) {}
 
 ConcurrentSearchWrapper::~ConcurrentSearchWrapper() { close(); }
 
-/* -------------------------------------------------- status  */
+
 bool ConcurrentSearchWrapper::is_open() const noexcept {
     return backend_ && backend_->is_open();
 }
 
-/* -------------------------------------------------- insert  */
 void ConcurrentSearchWrapper::insert(std::span<const Document> docs) {
-    std::scoped_lock g(mtx_);        // always serialise inserts
+    std::scoped_lock g(mtx_);        
     backend_->insert(docs);
 }
 
-/* -------------------------------------------------- query  */
 std::vector<QueryResult>
 ConcurrentSearchWrapper::query(std::span<const float>               emb,
                                std::size_t                         k,
@@ -40,7 +37,6 @@ ConcurrentSearchWrapper::query(std::span<const float>               emb,
     return backend_->query(emb, k, filter);
 }
 
-/* -------------------------------------------------- query_many  */
 std::vector<std::vector<QueryResult>>
 ConcurrentSearchWrapper::query_many(const std::vector<std::vector<float>>&            embs,
                                     std::size_t                                       k,
@@ -69,7 +65,6 @@ ConcurrentSearchWrapper::query_many(const std::vector<std::vector<float>>&      
     return out;
 }
 
-/* -------------------------------------------------- close  */
 void ConcurrentSearchWrapper::close() {
     std::scoped_lock g(mtx_);
     if (backend_) {

@@ -22,12 +22,13 @@ public:
            query(std::span<const float> embedding, std::size_t k,
                  const std::unordered_map<std::string,std::string>* filter=nullptr) = 0;
 
-    // opcionais
+    
     virtual void close() {}
 protected:
     std::uint32_t dim_;
 };
 
-using VectorBackendPtr = std::unique_ptr<VectorBackend>;
+using VectorBackendPtr = std::shared_ptr<VectorBackend>;
+
 
 } // namespace vdb

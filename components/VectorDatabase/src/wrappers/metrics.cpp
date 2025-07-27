@@ -13,7 +13,6 @@ using namespace std::chrono;
 
 namespace vdb::wrappers {
 
-/* ----------------------------- CallStats ------------------- */
 void CallStats::observe(double elapsed, bool ok) noexcept {
     ++calls;
     if (!ok) ++errors;
@@ -22,16 +21,13 @@ void CallStats::observe(double elapsed, bool ok) noexcept {
     max_t  = std::max(max_t, elapsed);
 }
 
-/* ----------------------------- ctor ------------------------ */
 MetricsWrapper::MetricsWrapper(VectorBackendPtr backend, std::string ns)
     : VectorBackend(backend->dim())
     , backend_(std::move(backend))
     , ns_(std::move(ns)) {}
 
-/* ----------------------------- status ---------------------- */
 bool MetricsWrapper::is_open() const noexcept { return backend_->is_open(); }
 
-/* ----------------------------- measure() ------------------- */
 template <typename F, typename... Args>
 auto MetricsWrapper::measure(const std::string& method, F&& fn, Args&&... args) {
     const auto start = steady_clock::now();
@@ -63,12 +59,10 @@ auto MetricsWrapper::measure(const std::string& method, F&& fn, Args&&... args) 
     }
 }
 
-/* ----------------------------- insert ---------------------- */
 void MetricsWrapper::insert(std::span<const Document> docs) {
     measure("insert", &VectorBackend::insert, backend_.get(), docs);
 }
 
-/* ----------------------------- query ----------------------- */
 std::vector<QueryResult>
 MetricsWrapper::query(std::span<const float> emb,
                       std::size_t            k,
@@ -76,12 +70,10 @@ MetricsWrapper::query(std::span<const float> emb,
     return measure("query", &VectorBackend::query, backend_.get(), emb, k, filter);
 }
 
-/* ----------------------------- close ----------------------- */
 void MetricsWrapper::close() {
     measure("close", &VectorBackend::close, backend_.get());
 }
 
-/* ----------------------------- snapshot -------------------- */
 std::unordered_map<std::string, CallStats> MetricsWrapper::snapshot() const {
     std::scoped_lock g(mtx_);
     return stats_;

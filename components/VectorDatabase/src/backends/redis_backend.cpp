@@ -1,4 +1,4 @@
-// redis_backend.cpp
+// components/VectorDatabase/src/backends/redis_backend.cpp
 #include "vectordb/backend.h"
 #include "vectordb/registry.h"
 #include "vectordb/exceptions.h"
@@ -14,8 +14,9 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <cstring>   // memcpy
+#include <cstring>
 #include <stdexcept>
+#include <memory>
 
 namespace vdb {
 
@@ -35,18 +36,17 @@ public:
 
     bool is_open() const noexcept override { return static_cast<bool>(redis_); }
 
-    /* ----------------------------- insert ----------------------------- */
     void insert(std::span<const Document> docs) override {
         if (!is_open()) throw BackendClosed("Redis backend closed");
 
-        auto pipe = redis_->pipeline(false); // non-atomic for throughput
+        auto pipe = redis_->pipeline(false); // non-atomic
 
         for (const auto& d : docs) {
-            if (d.dim() != dim_) throw DimensionMismatch("Dimension mismatch on insert");
+            if (d.dim() != dim_)
+                throw DimensionMismatch("Dimension mismatch on insert");
 
             const std::string key = prefix_ + ":" + gen_uuid();
 
-            // serialize embedding
             const std::string binary(reinterpret_cast<const char*>(d.embedding.data()),
                                      d.embedding.size() * sizeof(float));
 
@@ -64,13 +64,13 @@ public:
         }
     }
 
-    /* ------------------------------ query ----------------------------- */
     std::vector<QueryResult>
     query(std::span<const float> embedding,
           std::size_t k,
           const std::unordered_map<std::string, std::string>* filter) override {
 
-        if (embedding.size() != dim_) throw DimensionMismatch("Dimension mismatch on query");
+        if (embedding.size() != dim_)
+            throw DimensionMismatch("Dimension mismatch on query");
 
         const std::string vec_bin(reinterpret_cast<const char*>(embedding.data()),
                                   embedding.size() * sizeof(float));
@@ -79,7 +79,7 @@ public:
         if (filter && !filter->empty()) {
             std::string f;
             for (const auto& [field, value] : *filter) {
-                (void)field; // metadata blob -> contains
+                (void)field; 
                 f += "@metadata:\"" + value + "\" ";
             }
             base = std::move(f);
@@ -89,13 +89,12 @@ public:
             "=>[KNN " + std::to_string(k) + " @vector $vec AS score]";
         const std::string q = base + " " + knn_clause;
 
-        // Monta argv para FT.SEARCH
         std::vector<std::string> argv = {
             "FT.SEARCH",
             index_,
             q,
             "PARAMS", "2", "vec", vec_bin,
-            "RETURN", "3", "page", "metadata", "vector",
+            "RETURN", "4", "page", "metadata", "vector", "score", 
             "DIALECT", "2",
             "SORTBY", "score", "ASC"
         };
@@ -107,9 +106,7 @@ public:
             throw QueryError(e.what());
         }
 
-        std::vector<std::string> flat;
-        flatten_reply(reply.get(), flat);
-        return parse_search_reply(flat, prefix_);
+        return parse_search_reply_tree(reply.get());
     }
 
     void close() override { redis_.reset(); }
@@ -118,40 +115,9 @@ private:
     std::shared_ptr<redis_t> redis_;
     std::string              index_, prefix_, metric_;
 
-    /* ------------------------- helpers ------------------------- */
 
-    static void flatten_reply(const redisReply* r, std::vector<std::string>& out) {
-        if (!r) return;
-        switch (r->type) {
-        case REDIS_REPLY_STRING:
-        case REDIS_REPLY_STATUS:
-        case REDIS_REPLY_ERROR:
-            out.emplace_back(r->str ? r->str : "");
-            break;
-        case REDIS_REPLY_INTEGER:
-            out.emplace_back(std::to_string(r->integer));
-            break;
-        case REDIS_REPLY_NIL:
-            out.emplace_back(""); // representa NIL como string vazia
-            break;
-        case REDIS_REPLY_ARRAY:
-            for (size_t i = 0; i < r->elements; ++i)
-                flatten_reply(r->element[i], out);
-            break;
-#if HIREDIS_MAJOR >= 1
-        case REDIS_REPLY_DOUBLE:
-            out.emplace_back(std::to_string(r->dval));
-            break;
-        case REDIS_REPLY_BOOL:
-            out.emplace_back(r->integer ? "1" : "0");
-            break;
-        case REDIS_REPLY_VERB:
-            out.emplace_back(r->str ? r->str : "");
-            break;
-#endif
-        default:
-            out.emplace_back("");
-        }
+    static std::string safe_str(const redisReply* r) {
+        return (r && r->str) ? std::string(r->str, r->len) : std::string();
     }
 
     static std::string gen_uuid() {
@@ -162,16 +128,14 @@ private:
         auto to_hex = [&](uint64_t x, int bytes) {
             std::string out;
             out.reserve(bytes * 2);
-            for (int i = bytes * 2 - 1; i >= 0; --i) {
+            for (int i = bytes * 2 - 1; i >= 0; --i)
                 out.push_back(hex[(x >> (i * 4)) & 0xF]);
-            }
             return out;
         };
 
         uint64_t a = dist(rng);
         uint64_t b = dist(rng);
 
-        // version 4 & variant bits
         a = (a & 0xFFFFFFFFFFFF0FFFULL) | 0x0000000000004000ULL;
         b = (b & 0x3FFFFFFFFFFFFFFFULL) | 0x8000000000000000ULL;
 
@@ -184,21 +148,18 @@ private:
     }
 
     void ensure_index(int capacity) {
-        // FT.INFO para checar existência
         try {
-            std::vector<std::string> info;
-            auto r = redis_->command(std::vector<std::string>{"FT.INFO", index_}.begin(),
-                                     std::vector<std::string>{"FT.INFO", index_}.end());
-            flatten_reply(r.get(), info);
-            (void)info;
-            return;
+            std::vector<std::string> info_args = {"FT.INFO", index_};
+            auto r = redis_->command(info_args.begin(), info_args.end());
+            (void)r;
+            return; 
         } catch (const sw::redis::Error&) {
-            // não existe, vamos criar
+            // create
         }
 
-        std::string dim_str = std::to_string(dim_);
-        std::string algo    = "FLAT"; // ou HNSW
-        std::string cmd_metric = metric_;
+        const std::string dim_str    = std::to_string(dim_);
+        const std::string algo       = "FLAT"; // or HNSW
+        const std::string cmd_metric = metric_;
 
         std::vector<std::string> args = {
             "FT.CREATE", index_,
@@ -226,38 +187,48 @@ private:
         }
     }
 
-    static std::vector<QueryResult>
-    parse_search_reply(const std::vector<std::string>& raw, const std::string& prefix) {
+    static std::vector<QueryResult> parse_search_reply_tree(const redisReply* root) {
         std::vector<QueryResult> out;
-        if (raw.empty()) return out;
+        if (!root || root->type != REDIS_REPLY_ARRAY || root->elements == 0)
+            return out;
 
-        std::size_t idx = 0;
-        const std::size_t total = std::stoull(raw[idx++]);
+        const redisReply* count_r = root->element[0];
+        if (!count_r) return out;
+        std::size_t total = 0;
+        if (count_r->type == REDIS_REPLY_INTEGER) {
+            total = static_cast<std::size_t>(count_r->integer);
+        } else if (count_r->type == REDIS_REPLY_STRING) {
+            total = std::stoull(safe_str(count_r));
+        } else {
+            return out;
+        }
 
-        for (std::size_t i = 0; i < total && idx < raw.size(); ++i) {
-            const std::string& key = raw[idx++];
-            (void)key;
+        std::size_t pos = 1;
+        out.reserve(total);
+
+        for (std::size_t i = 0; i < total && pos + 1 < root->elements; ++i) {
+            const redisReply* key_r  = root->element[pos++];
+            const redisReply* arr_r  = root->element[pos++];
+
+            (void)key_r; 
+
+            if (!arr_r || arr_r->type != REDIS_REPLY_ARRAY) continue;
 
             std::string page, metadata_json, vector_bin;
             float score = 0.f;
 
-            while (idx + 1 < raw.size()) {
-                const std::string& field = raw[idx++];
-                const std::string& value = raw[idx++];
+            for (size_t j = 0; j + 1 < arr_r->elements; j += 2) {
+                const redisReply* f = arr_r->element[j];
+                const redisReply* v = arr_r->element[j+1];
+                std::string field = safe_str(f);
+                std::string value = safe_str(v);
 
-                if      (field == "page")     page = value;
-                else if (field == "metadata") metadata_json = value;
-                else if (field == "vector")   vector_bin = value;
-                else if (field == "score")    score = std::stof(value);
-                else {
-                    if (field.rfind(prefix + ":", 0) == 0) { // próximo doc?
-                        idx -= 2;
-                        break;
-                    }
+                if      (field == "page")     page = std::move(value);
+                else if (field == "metadata") metadata_json = std::move(value);
+                else if (field == "vector")   vector_bin = std::move(value);
+                else if (field == "score") {
+                    try { score = std::stof(value); } catch(...) { score = 0.f; }
                 }
-
-                if (idx < raw.size() && raw[idx].rfind(prefix + ":", 0) == 0)
-                    break;
             }
 
             std::vector<float> emb;
@@ -270,11 +241,11 @@ private:
             Document doc{page, std::move(emb), std::move(meta)};
             out.push_back(QueryResult{std::move(doc), score});
         }
+
         return out;
     }
 };
 
-/* -------- auto-registro -------- */
 static AutoRegister<RedisVectorBackend> _auto_register_redis("redis");
 
 } // namespace vdb
