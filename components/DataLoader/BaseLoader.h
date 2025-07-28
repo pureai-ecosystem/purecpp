@@ -12,8 +12,6 @@ namespace DataLoader
     class BaseDataLoader : public IBaseDataLoader
     {
     protected:
-        // BaseDataLoader() = delete;
-        // BaseDataLoader(unsigned int threadsNum);
         void AddThreadsCallback(std::function<void(RAGLibrary::DataExtractRequestStruct)> callback, std::function<void()> prefix = []() {}, std::function<void()> suffix = []() {});
         void InsertWorkIntoThreads(const std::vector<RAGLibrary::DataExtractRequestStruct> &workload);
         void WaitFinishWorkload();

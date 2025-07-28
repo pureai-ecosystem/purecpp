@@ -49,13 +49,6 @@ std::vector<RAGLibrary::Document> Chunk::Embeddings(const std::vector<RAGLibrary
         return emb;
     }
 
-    // futuros vendors podem entrar aqui
-    //else if (vendor == "huggingface") {
-        //auto client = std::make_unique<EmbeddingHF::EmbeddingHF>();
-        //emb = client->GenerateEmbeddings(list, m_model);
-        //return emb;
-    //}
-
     throw std::runtime_error("Vendor handler for '" + vendor + "' not implemented.");
 }
 
@@ -88,10 +81,6 @@ inline Ort::Value CreateTensorOrt(Ort::AllocatorWithDefaultOptions &allocator,
 {
     return Ort::Value::CreateTensor<T>(allocator.GetInfo(), data.data(), data.size(), shape.data(), shape.size());
 }
-
-
-//=================================================================================================================================================
-
 
 std::vector<float> Chunk::MeanPooling(const std::vector<float> &token_embeddings, const std::vector<int64_t> &attention_mask, size_t embedding_size)
 {

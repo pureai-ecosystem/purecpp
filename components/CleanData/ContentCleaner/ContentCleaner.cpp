@@ -12,28 +12,6 @@ constexpr std::string_view extraSpaces = "\\s+";
 constexpr std::string_view nonAsciiCharacters = "[^\\x00-\\x7F]+";
 constexpr std::string_view symbolsBeginningOrEndOfLines = "^\\W+|\\W+$";
 
-// constexpr std::string extraSpaces = "\\s+";
-// constexpr std::string nonAsciiCharacters = "[^\\x00-\\x7F]+";
-// constexpr std::string symbolsBeginningOrEndOfLines = "^\\W+|\\W+$";
-
-// #if defined(__cpp_lib_string_view)
-//     #include <string_view>
-//     constexpr std::string_view extraSpaces = "\\s+";
-//     constexpr std::string_view nonAsciiCharacters = "[^\\x00-\\x7F]+";
-//     constexpr std::string_view symbolsBeginningOrEndOfLines = "^\\W+|\\W+$";
-// #else
-//     #include <string>
-//     constexpr std::string extraSpaces = "\\s+";
-//     constexpr std::string nonAsciiCharacters = "[^\\x00-\\x7F]+";
-//     constexpr std::string symbolsBeginningOrEndOfLines = "^\\W+|\\W+$";
-// #endif
-
-// #if defined(__cpp_lib_format)
-//     #include <format>
-// #else
-//     #include <fmt/core.h>
-// #endif
-
 static void trim(std::string& text)
 {
     auto isNoSpace = [](unsigned char ch)
@@ -51,12 +29,7 @@ ContentCleaner::ContentCleaner(const std::vector<std::string>& default_patterns)
 {
     if (m_default_patterns.empty())
     {
-        // m_default_patterns = {
-        //     extraSpaces,
-        //     nonAsciiCharacters,
-        //     symbolsBeginningOrEndOfLines,
-        // };
-        m_default_patterns = std::vector<std::string>{
+       m_default_patterns = std::vector<std::string>{
             std::string(extraSpaces),
             std::string(nonAsciiCharacters),
             std::string(symbolsBeginningOrEndOfLines)
@@ -73,12 +46,7 @@ void ContentCleaner::ValidatePatterns(const std::vector<std::string>& patterns)
         if(!re2.ok())
         {
             throw RAGLibrary::RagException(std::format("IsRegularPattern: {} error: {}", pattern.c_str(), re2.error().c_str()));
-            // #if defined(__cpp_lib_format)
-            //     throw RAGLibrary::RagException(std::format("IsRegularPattern: {} error: {}", pattern.c_str(), re2.error().c_str()));
-            // #else
-            //     throw RAGLibrary::RagException(fmt::format("IsRegularPattern: {} error: {}", pattern, re2.error()));
-            // #endif
-        }
+       }
     }
 }
 

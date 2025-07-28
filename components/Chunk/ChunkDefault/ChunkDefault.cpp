@@ -45,7 +45,6 @@ const Chunk::vdb_data& Chunk::ChunkDefault::CreateEmb(std::string model){
 
     if(is_this_model_used_yet(model))
         throw std::invalid_argument("There is already an element of this chunk like this.");
-    // ---------------------------------------------------------
     std::vector<RAGLibrary::Document> docs;
 
     try{
@@ -55,13 +54,11 @@ const Chunk::vdb_data& Chunk::ChunkDefault::CreateEmb(std::string model){
         std::cerr << "[Exception] " << e.what() << "\n";
         throw;
     }  
-    //============================================================
     Chunk::vdb_data vdb_element;
     
     vdb_element.dim = docs[0].embedding->size();
     vdb_element.n = this->chunks.size();
 
-    // 1. Gerar flatVD ... E apartir daqui vai...
     vdb_element.flatVD.clear();
     vdb_element.flatVD.reserve(vdb_element.n * vdb_element.dim);
     for (const auto& doc : docs) {
@@ -84,11 +81,8 @@ const Chunk::vdb_data& Chunk::ChunkDefault::CreateEmb(std::string model){
         throw std::runtime_error("Flattened vector has unexpected size.");
     }
 
-    // O objetivo é só criar uma referencia diminuindo a copia dos embeddings 
-    // resefencia (se tiver aos alem dos elementos, tb aos embeddings )
     this->elements.push_back(vdb_element);
     const auto& last = this->elements.back();
-    //RAGLibrary::print_memory();
     std::cout << "╔═════════════════════════════════════════════════════════════════════════════════════╗\n";
     std::cout << "║ ➤ Model: " << last.model << " was added to chunks                      \n";
     std::cout << "╚═════════════════════════════════════════════════════════════════════════════════════╝\n";
@@ -128,7 +122,6 @@ const std::vector<RAGLibrary::Document>& Chunk::ChunkDefault::ProcessDocuments(s
     if (!items_opt.has_value() || items_opt->empty()) {
         throw std::invalid_argument("No documents provided in items_opt.");
     }
-    // Acesso direto sem cópia
     const auto& items = *items_opt;
 
     this->metadata = items[0].metadata;
@@ -171,7 +164,6 @@ const std::vector<RAGLibrary::Document>& Chunk::ChunkDefault::ProcessDocuments(s
 
     return this->chunks;
 }
-//PRINTS======================================================================================
 void Chunk::ChunkDefault::LogEmbeddingStats(std::string model, std::string vendor , size_t dim, size_t n, size_t flatVD_size) const{
     std::cout << "╔═════════════════════════════════════════════════════════════════════════════════════╗\n";
     std::cout << "║ ➤ Model / Vendor    : " << model << " / " << vendor << "         \n";
@@ -200,7 +192,6 @@ void Chunk::ChunkDefault::printVD(void) {
         return;
     }
 }
-//GETS==========================================================================================
 
 const std::vector<RAGLibrary::Document>& Chunk::ChunkDefault::getChunks() const {
     if (this->chunks.empty()) {
@@ -215,7 +206,6 @@ const Chunk::vdb_data* Chunk::ChunkDefault::getElement(size_t pos) const{
     return nullptr;
 }
 
-//================================================================================================
 size_t Chunk::ChunkDefault::quant_of_elements(void) const {
     return this->elements.size();
 }

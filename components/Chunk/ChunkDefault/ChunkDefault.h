@@ -14,22 +14,16 @@ namespace Chunk
     public:
         ChunkDefault(const int chunk_size = 100, const int overlap = 20, std::optional<std::vector<RAGLibrary::Document>> items_opt = std::nullopt, int max_workers = 4);
         ~ChunkDefault() = default;
-        //========================================================================================
         const std::vector<RAGLibrary::Document>& ProcessDocuments(std::optional<std::vector<RAGLibrary::Document>> items_opt = std::nullopt, int max_workers = 4);
         const Chunk::vdb_data& CreateEmb(std::string model = "text-embedding-ada-002"); 
-        //========================================================================================
         void LogEmbeddingStats(std::string model, std::string vendor , size_t dim, size_t n, size_t flatVD_size) const;
         void printVD(void);
-        //========================================================================================
         const std::vector<RAGLibrary::Document>& getChunks(void) const;
         const Chunk::vdb_data* getElement(size_t pos) const;
-        //========================================================================================
         size_t quant_of_elements(void) const;
-        //--------------------------------------------
         inline bool isInitialized(void) const{
             return initialized_;
         }
-        //--------------------------------------------
         inline const std::vector<float>& getFlatVD(size_t i) const {
             if (i >= elements.size())
                 throw std::out_of_range("Invalid index.");
@@ -57,8 +51,6 @@ namespace Chunk
                 }
             );
         }
-
-
     };
 
 }
