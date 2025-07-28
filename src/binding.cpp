@@ -137,35 +137,14 @@ void bind_CommonStructs(py::module& m)
     // ----------------------------------------------------------------------
     // DataExtractRequestStruct
     // ----------------------------------------------------------------------
-    // py::class_<RAGLibrary::DataExtractRequestStruct>(m, "DataExtractRequestStruct",
-    //                                                  R"doc(
-    //         Estrutura que armazena informações sobre o caminho do arquivo (targetIdentifier)
-    //         e um limitador de conteúdo (extractContentLimit) para extração.
-    //     )doc")
-    //     .def(py::init<>(),
-    //          R"doc(
-    //              Construtor padrão, inicializa targetIdentifier como string vazia
-    //              e extractContentLimit como 0.
-    //          )doc")
-    //     .def(py::init<const std::string &, unsigned int>(),
-    //          py::arg("targetIdentifier"),
-    //          py::arg("extractContentLimit") = 0,
-    //          R"doc(
-    //              Construtor que recebe um identificador de arquivo (targetIdentifier)
-    //              e um limite opcional de conteúdo (extractContentLimit).
-    //          )doc")
-    //     .def_readwrite("targetIdentifier", &RAGLibrary::DataExtractRequestStruct::targetIdentifier,
-    //                    "Identificador do arquivo (caminho ou nome).")
-    //     .def_readwrite("extractContentLimit", &RAGLibrary::DataExtractRequestStruct::extractContentLimit,
-    //                    "Limite máximo de páginas/linhas a serem extraídas (0 = sem limite).");
-    py::class_<RAGLibrary::LoaderDataStruct>(m, "LoaderDataStruct")
+        py::class_<RAGLibrary::LoaderDataStruct>(m, "LoaderDataStruct")
         .def(py::init<const RAGLibrary::Metadata&, const std::vector<std::string> &>(),
             py::arg("metadata"), py::arg("textContent"))
         .def_readwrite("metadata", &RAGLibrary::LoaderDataStruct::metadata)
         .def_readwrite("textContent", &RAGLibrary::LoaderDataStruct::textContent)
         .def("__str__", [](const RAGLibrary::LoaderDataStruct& data)
             {  std::ostringstream o;
-                o << data; // Usa o operador << sobrecarregado
+                o << data; 
                 return o.str(); });
 
     py::class_<RAGLibrary::DataExtractRequestStruct>(m, "DataExtractRequestStruct")
@@ -177,7 +156,7 @@ void bind_CommonStructs(py::module& m)
  
  
     // ----------------------------------------------------------------------
-    // ThreadSafeQueue<DataExtractRequestStruct> e ThreadSafeQueue<std::string>
+    // ThreadSafeQueue<DataExtractRequestStruct> and ThreadSafeQueue<std::string>
     // ----------------------------------------------------------------------
     bindThreadSafeQueue<RAGLibrary::DataExtractRequestStruct>(m, "ThreadSafeQueueDataRequest");
     bindThreadSafeQueue<std::string>(m, "ThreadSafeQueueString");
@@ -187,14 +166,14 @@ void bind_CommonStructs(py::module& m)
     // ----------------------------------------------------------------------
     py::class_<RAGLibrary::ThreadStruct>(m, "ThreadStruct",
         R"doc(
-            Estrutura que representa uma 'thread' de trabalho, contendo:
-              - threadRunner: um std::future<void> gerenciado por shared_ptr.
-              - threadQueue: uma fila (ThreadSafeQueueDataRequest) associada.
-              - threadRemainingWork: contador para trabalho restante.
+            Structure that represents thread of work:
+              - threadRunner: a std::future<void> managed by a shared_ptr.
+              - threadQueue: a queue (ThreadSafeQueueDataRequest).
+              - threadRemainingWork: Shows the remaining work
         )doc")
         .def(py::init<>(),
             R"doc(
-                 Construtor padrão (inicializa ponteiros e valores default).
+                 Default constructor.
              )doc")
         .def(py::init<
             std::shared_ptr<std::future<void>>,
@@ -204,29 +183,29 @@ void bind_CommonStructs(py::module& m)
             py::arg("threadQueue"),
             py::arg("threadRemainingWork"),
             R"doc(
-                 Construtor que recebe o futuro da thread (threadRunner),
-                 a fila de dados (threadQueue) e a quantidade de trabalho
-                 restante (threadRemainingWork).
+                 Receives std::future thread(threadRunner),
+                 data queue(threadQueue) and amount of work
+                 remaining (threadRemainingWork).
              )doc")
         .def_readwrite("threadRunner", &RAGLibrary::ThreadStruct::threadRunner,
-            "std::shared_ptr<std::future<void>> para sincronizar o fim da thread.")
+            "std::shared_ptr<std::future<void>> to sync end of thread.")
         .def_readwrite("threadQueue", &RAGLibrary::ThreadStruct::threadQueue,
-            "Fila associada a essa thread.")
+            "Thread queue.")
         .def_readwrite("threadRemainingWork", &RAGLibrary::ThreadStruct::threadRemainingWork,
-            "Quantidade de trabalho restante a ser processado.");
+            "Amount of remaining work");
  
     // ----------------------------------------------------------------------
     // KeywordData
     // ----------------------------------------------------------------------
     py::class_<RAGLibrary::KeywordData>(m, "KeywordData",
         R"doc(
-            Estrutura que guarda informações de ocorrências de uma palavra-chave:
-              - occurrences: total de ocorrências
-              - position: vetor de pares (linha, offset)
+            Structure that store key-value occurences:
+              - occurences: all occurences
+              - position: vector of pairs (line, offset)
         )doc")
         .def(py::init<>(),
             R"doc(
-                 Construtor padrão, inicializa occurrences = 0 e position vazio.
+                 Default Constructor, initialize occurences = 0 and void position.
              )doc")
         .def_readwrite("occurrences", &RAGLibrary::KeywordData::occurrences,
             "Número total de ocorrências encontradas.")
@@ -257,14 +236,10 @@ void bind_CommonStructs(py::module& m)
              )doc")
         .def("__str__", [](const RAGLibrary::UpperKeywordData& data)
             {
-                // Usa o operador << friend definido na struct
                 std::ostringstream oss;
                 oss << data;
                 return oss.str(); });
  
-    // ----------------------------------------------------------------------
-    // Document (exposto como 'RAGDocument' em Python)
-    // ----------------------------------------------------------------------
     py::class_<RAGLibrary::Document>(m, "RAGDocument")
         .def(py::init<>())
         .def(py::init<RAGLibrary::Metadata, const std::string &>(),
@@ -356,7 +331,7 @@ typedef std::vector<std::pair<std::string, std::string>> test_vec_pair;
 void bind_ChunkCommons(py::module& m)
 {
     //--------------------------------------------------------------------------
-    // Binding para o enum EmbeddingModel
+    // Binding enum  for EmbeddingModel
     //--------------------------------------------------------------------------
     py::dict model_dict;
     for (const auto& [vendor, models] : Chunk::EmbeddingModel) {
@@ -388,7 +363,7 @@ void bind_ChunkCommons(py::module& m)
 
 
     //--------------------------------------------------------------------------
-    // Binding para a função MeanPooling
+    // Binding function MeanPooling
     //--------------------------------------------------------------------------
     m.def("MeanPooling", &Chunk::MeanPooling,
         py::arg("token_embeddings"), py::arg("attention_mask"), py::arg("embedding_size"),
@@ -405,7 +380,7 @@ void bind_ChunkCommons(py::module& m)
           )doc");
  
     //--------------------------------------------------------------------------
-    // Binding para a função NormalizeEmbeddings
+    // Binding function NormalizeEmbeddings
     //--------------------------------------------------------------------------
     m.def("NormalizeEmbeddings", &Chunk::NormalizeEmbeddings,
         py::arg("embeddings"),
@@ -417,7 +392,7 @@ void bind_ChunkCommons(py::module& m)
           )doc");
  
     //--------------------------------------------------------------------------
-    // Binding para a função EmbeddingModelBatch
+    // Binding function for EmbeddingModelBatch
     //--------------------------------------------------------------------------
     m.def("EmbeddingModelBatch", &Chunk::EmbeddingModelBatch,
         py::arg("chunks"), py::arg("model"), py::arg("batch_size") = 32,
@@ -434,7 +409,7 @@ void bind_ChunkCommons(py::module& m)
           )doc");
  
     //--------------------------------------------------------------------------
-    // Binding para a função EmbeddingHuggingFaceTransformers
+    // Binding function for EmbeddingHuggingFaceTransformers
     //--------------------------------------------------------------------------
     m.def("EmbeddingHuggingFaceTransformers", &Chunk::EmbeddingHuggingFaceTransformers,
         py::arg("chunks"),
@@ -449,7 +424,7 @@ void bind_ChunkCommons(py::module& m)
           )doc");
  
     //--------------------------------------------------------------------------
-    // Binding para a função EmbeddingOpeanAI
+    // Binding function for EmbeddingOpeanAI
     //--------------------------------------------------------------------------
     m.def("EmbeddingOpeanAI", &Chunk::EmbeddingOpeanAI,
         py::arg("chunks"), py::arg("openai_api_key"),
@@ -465,7 +440,7 @@ void bind_ChunkCommons(py::module& m)
           )doc");
  
     //--------------------------------------------------------------------------
-    // Binding para a função toTensor
+    // Binding function for toTensor
     //--------------------------------------------------------------------------
     m.def("toTensor", &Chunk::toTensor,
         py::arg("vect"),
@@ -480,7 +455,7 @@ void bind_ChunkCommons(py::module& m)
           )doc");
  
     //--------------------------------------------------------------------------
-    // Binding para a função SplitText
+    // Binding function for SplitText
     //--------------------------------------------------------------------------
     m.def("SplitText", &Chunk::SplitText,
         py::arg("inputs"), py::arg("overlap"), py::arg("chunk_size"),
@@ -497,7 +472,7 @@ void bind_ChunkCommons(py::module& m)
           )doc");
  
     //--------------------------------------------------------------------------
-    // Binding para a função SplitTextByCount
+    // Binding for the function SplitTextByCount
     //--------------------------------------------------------------------------
     m.def("SplitTextByCount", &Chunk::SplitTextByCount,
         py::arg("inputs"), py::arg("overlap"), py::arg("count_threshold"), py::arg("regex"),
@@ -516,7 +491,7 @@ void bind_ChunkCommons(py::module& m)
 }
  
 //--------------------------------------------------------------------------
-// Binding para ChunkDefault
+// Binding for ChunkDefault
 //--------------------------------------------------------------------------
 void bind_ChunkDefault(py::module& m)
 {
@@ -527,19 +502,16 @@ void bind_ChunkDefault(py::module& m)
              py::arg("items_opt") = std::nullopt,
              py::arg("max_workers") = 4)
 
-        // Processa documentos
         .def("ProcessDocuments", &Chunk::ChunkDefault::ProcessDocuments,
              py::arg("items_opt") = std::nullopt,
              py::arg("max_workers") = 4,
              "Processa uma lista de documentos em chunks.")
 
-        // Cria embeddings e armazena no vetor de elementos
         .def("CreateEmb", &Chunk::ChunkDefault::CreateEmb,
              py::arg("model") = "text-embedding-ada-002",
              py::return_value_policy::reference,
              "Cria e armazena embeddings para os chunks atuais.")
 
-        // Retorna flatVD como numpy array
         .def("getflatVD", [](const Chunk::ChunkDefault &self, size_t idx) {
             const auto &vec = self.getFlatVD(idx);
             const auto *elem = self.getElement(idx);
@@ -558,7 +530,6 @@ void bind_ChunkDefault(py::module& m)
         }, py::arg("idx"),
         "Retorna o vetor flatten como numpy array [n, dim].")
 
-        // Métodos utilitários
         .def("printVD", &Chunk::ChunkDefault::printVD)
         .def("clear", &Chunk::ChunkDefault::clear)
         .def("isInitialized", &Chunk::ChunkDefault::isInitialized)
@@ -567,7 +538,7 @@ void bind_ChunkDefault(py::module& m)
 }
  
 //--------------------------------------------------------------------------
-// Binding para ChunkCount
+// Binding for ChunkCount
 //--------------------------------------------------------------------------
 void bind_ChunkCount(py::module& m)
 {
@@ -583,18 +554,11 @@ void bind_ChunkCount(py::module& m)
 }
  
 // --------------------------------------------------------------------------
-// Binding para Chunk::ChunkSimilarity
+// Binding for Chunk::ChunkSimilarity
 // --------------------------------------------------------------------------
  
-/**
-* Cria o binding da classe ChunkSimilarity, responsável por dividir
-* texto em chunks e gerar embeddings para análise de similaridade.
-*/
 void bind_ChunkSimilarity(py::module& m)
 {
-    // Primeiro, criamos o binding para a enum EmbeddingModel (se ainda não foi criado).
-    // Se preferir, você pode chamar 'bind_EmbeddingModel(m);' dentro do PYBIND11_MODULE,
-    // mas aqui pode ficar junto por conveniência.
  
     py::class_<Chunk::ChunkSimilarity>(m, "ChunkSimilarity", R"doc(
         Classe para processar RAGDocument e gerar chunks e embeddings,
@@ -658,8 +622,6 @@ void bind_ChunkSimilarity(py::module& m)
 //--------------------------------------------------------------------------
 // Função de binding para o ChunkQuery
 //--------------------------------------------------------------------------
-// Precondition: Document binding must be defined before this function
-// void bind_RAGLibrary_Document(py::module &m);
 
 void bind_ChunkQuery(py::module_& m) {
     py::class_<Chunk::ChunkQuery>(m, "ChunkQuery")
@@ -718,8 +680,6 @@ void bind_ChunkQuery(py::module_& m) {
         py::arg("pos") = 0,
         "Configura a estrutura de chunks e prepara os spans para recuperação")
 
-        /*.def("get_embed_query", &Chunk::ChunkQuery::getEmbedQuery)
-        .def("get_embed_chunk", &Chunk::ChunkQuery::getEmbedChunk)*/
         ;
 }
 
@@ -740,8 +700,6 @@ void bind_ContentCleaner(py::module& m)
 //--------------------------------------------------------------------------
 // Bind para PDFLoader
 //--------------------------------------------------------------------------
-// Note: Estamos usando qualificação total para a classe PDFLoader
-// Remover o final do método InsertDataToExtract em PDFLoader.h se ainda tiver problemas.
 void bind_PDFLoader(py::module& m)
 {
     py::class_<::PDFLoader::PDFLoader, std::shared_ptr<::PDFLoader::PDFLoader>, DataLoader::BaseDataLoader>(m, "PDFLoader")
@@ -750,7 +708,6 @@ void bind_PDFLoader(py::module& m)
             py::arg("numThreads") = 1,
             "Creates a PDFLoader with a file path and an optional number of threads.");
 }
-// A função bind_DOCXLoader é similar à bind_PDFLoader
 void bind_DOCXLoader(py::module& m)
 {
     py::class_<::DOCXLoader::DOCXLoader, std::shared_ptr<::DOCXLoader::DOCXLoader>, DataLoader::BaseDataLoader>(m, "DOCXLoader")
@@ -760,7 +717,6 @@ void bind_DOCXLoader(py::module& m)
             "Creates a DOCXLoader with a file path and an optional number of threads.");
 }
  
-// Função de binding para TXTLoader
 void bind_TXTLoader(py::module& m)
 {
     py::class_<::TXTLoader::TXTLoader, std::shared_ptr<::TXTLoader::TXTLoader>, DataLoader::BaseDataLoader>(m, "TXTLoader")
@@ -770,7 +726,6 @@ void bind_TXTLoader(py::module& m)
             "Creates a TXTLoader, optionally with initial paths and a defined number of threads.");
 }
  
-// Função de binding para WebLoader
 void bind_WebLoader(py::module& m)
 {
     py::class_<::WebLoader::WebLoader, std::shared_ptr<::WebLoader::WebLoader>, DataLoader::BaseDataLoader>(m, "WebLoader")
@@ -783,7 +738,6 @@ void bind_WebLoader(py::module& m)
 // --------------------------------------------------------------------------
 // Binding for MetadataExtractor::Document
 // --------------------------------------------------------------------------
-// 1) Remove map<int, string> from the binding and use vector<pair<string, string>> instead.
 void bind_Document(py::module& m)
 {
     py::class_<::MetadataExtractor::Document>(m, "Document")
@@ -814,7 +768,6 @@ void bind_Document(py::module& m)
     bindThreadSafeQueue2<::MetadataExtractor::Document>(m, "ThreadSafeQueueDocument");
 }
 
-// Classe trampolim para IMetadataExtractor
 class PyIMetadataExtractor : public MetadataExtractor::IMetadataExtractor
 {
 public:
@@ -847,32 +800,29 @@ void bind_IMetadataExtractor(py::module& m)
 // --------------------------------------------------------------------------
 // Binding para MetadataExtractor::MetadataExtractor
 // --------------------------------------------------------------------------
-// Classe trampolim para permitir override de métodos em Python
 class PyMetadataExtractor : public MetadataExtractor::MetadataExtractor
 {
 public:
     using MetadataExtractor::MetadataExtractor::MetadataExtractor;
 
-    // Implementação em Python para método virtual puro
     ::MetadataExtractor::Document ProcessDocument(::MetadataExtractor::Document doc) override
     {
         PYBIND11_OVERRIDE_PURE(
             ::MetadataExtractor::Document,          // Return type
             ::MetadataExtractor::MetadataExtractor, // Parent class
-            ProcessDocument,                        // Nome da função
-            doc                                     // Parâmetros
+            ProcessDocument,                        // Function name
+            doc                                     // Param 
         );
     }
 
-    // Implementação em Python para método virtual
     std::vector<::MetadataExtractor::Document> ProcessDocuments(std::vector<::MetadataExtractor::Document> docs, const int& maxWorkers) override
     {
         PYBIND11_OVERRIDE(
             std::vector<::MetadataExtractor::Document>, // Return type
             ::MetadataExtractor::MetadataExtractor,     // Parent class
-            ProcessDocuments,                           // Nome da função
-            docs,                                       // Parâmetro 1
-            maxWorkers                                  // Parâmetro 2
+            ProcessDocuments,                           //Fuction name 
+            docs,                                       // param 1
+            maxWorkers                                  // param 2
         );
     }
 };
@@ -912,11 +862,9 @@ void bind_MetadataExtractor(py::module& m)
         )doc");
 }
 
-// Classe trampolim para IMetadataRegexExtractor
 class PyIMetadataRegexExtractor : public MetadataRegexExtractor::IMetadataRegexExtractor
 {
 public:
-    // Métodos virtuais puros de IMetadataRegexExtractor
     void AddPattern(const std::string& name, const std::string& pattern) override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -926,7 +874,6 @@ public:
             name, pattern);
     }
 
-    // Métodos herdados de IMetadataExtractor
     ::MetadataExtractor::Document ProcessDocument(::MetadataExtractor::Document doc) override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -956,16 +903,14 @@ void bind_IMetadataRegexExtractor(py::module& m)
 }
 
 // --------------------------------------------------------------------------
-// Binding para MetadataHFExtractor::IMetadataHFExtractor
+// Binding for MetadataHFExtractor::IMetadataHFExtractor
 // --------------------------------------------------------------------------
 
 class PyIMetadataHFExtractor : public MetadataHFExtractor::IMetadataHFExtractor
 {
 public:
-    // Usa os construtores da classe base
     using MetadataHFExtractor::IMetadataHFExtractor::IMetadataHFExtractor;
 
-    // Implementa a chamada a InitializeNERModel em Python
     void InitializeNERModel() override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -983,7 +928,6 @@ public:
             text);
     }
 
-    // O método ProcessDocument vem da classe base ::MetadataExtractor::MetadataExtractor
     ::MetadataExtractor::Document ProcessDocument(::MetadataExtractor::Document doc) override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -994,11 +938,6 @@ public:
     }
 };
 
-/**
- * Cria o binding da interface IMetadataHFExtractor. Como é uma classe
- * puramente virtual, precisamos do trampolim `PyIMetadataHFExtractor`
- * para permitir que os métodos sejam sobrescritos em Python.
- */
 
 void bind_IMetadataHFExtractor(py::module& m)
 {
@@ -1053,7 +992,7 @@ void bind_MetadataRegexExtractor(py::module& m)
 }
 
 // --------------------------------------------------------------------------
-// Binding para MetadataHFExtractor::MetadataHFExtractor
+// Binding for MetadataHFExtractor::MetadataHFExtractor
 // --------------------------------------------------------------------------
 
 void bind_MetadataHFExtractor(py::module& m)
@@ -1112,7 +1051,7 @@ void bind_MetadataHFExtractor(py::module& m)
         )doc");
 }
 // --------------------------------------------------------------------------
-// Binding para Embedding::Document
+// Binding for Embedding::Document
 // --------------------------------------------------------------------------
 
 /**
@@ -1122,7 +1061,7 @@ void bind_MetadataHFExtractor(py::module& m)
 void bind_EmbeddingDocument(py::module &m)
 {
     // ----------------------------------------------------------------------
-    // Classe Embedding::Document --> Python: EmbeddingDocument
+    // Class Embedding::Document --> Python: EmbeddingDocument
     // ----------------------------------------------------------------------
     py::class_<Embedding::Document>(
         m,
@@ -1167,9 +1106,6 @@ void bind_EmbeddingDocument(py::module &m)
         .def_readwrite("metadata", &Embedding::Document::metadata)
         .def_readwrite("embeddings", &Embedding::Document::embeddings);
 
-    // ----------------------------------------------------------------------
-    // Opcional: Binding para a ThreadSafeQueue<Embedding::Document>
-    // ----------------------------------------------------------------------
     py::class_<Embedding::ThreadSafeQueueDocument>(
         m,
         "ThreadSafeQueueEmbeddingDocument",
@@ -1183,20 +1119,14 @@ void bind_EmbeddingDocument(py::module &m)
         .def("size", &Embedding::ThreadSafeQueueDocument::size);
 }
 // --------------------------------------------------------------------------
-// Binding para Embedding::IBaseEmbedding
+// Binding for Embedding::IBaseEmbedding
 // --------------------------------------------------------------------------
 
-/**
- * Classe trampolim (wrapper em Python) para IBaseEmbedding, permitindo
- * a sobrescrita dos métodos virtuais puros em Python.
- */
 class PyIBaseEmbedding : public Embedding::IBaseEmbedding
 {
 public:
-    // Destrutor padrão
     ~PyIBaseEmbedding() = default;
 
-    // Métodos virtuais puros de IBaseEmbedding
     std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size) override
     {
         PYBIND11_OVERRIDE_PURE(
@@ -1210,12 +1140,6 @@ public:
     }
 };
 
-/**
- * Cria o binding para a interface IBaseEmbedding.
- * Observação: Como é uma interface com métodos puros,
- * não pode ser instanciada diretamente sem uma classe concreta,
- * mas podemos herdar em Python usando a classe trampolim.
- */
 void bind_IBaseEmbedding(py::module &m)
 {
     py::class_<Embedding::IBaseEmbedding, PyIBaseEmbedding, Embedding::IBaseEmbeddingPtr>(
