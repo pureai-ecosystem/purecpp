@@ -208,10 +208,10 @@ void bind_CommonStructs(py::module& m)
                  Default Constructor, initialize occurences = 0 and void position.
              )doc")
         .def_readwrite("occurrences", &RAGLibrary::KeywordData::occurrences,
-            "Número total de ocorrências encontradas.")
+            "Total number of occurrences found.")
         .def_readwrite("position", &RAGLibrary::KeywordData::position,
             R"doc(
-                 Posições de cada ocorrência como pares (linha, offset).
+                 Positions of each occurrence as (line, offset) pairs.
              )doc");
  
     // ----------------------------------------------------------------------
@@ -219,20 +219,20 @@ void bind_CommonStructs(py::module& m)
     // ----------------------------------------------------------------------
     py::class_<RAGLibrary::UpperKeywordData>(m, "UpperKeywordData",
         R"doc(
-            Estrutura que agrega as ocorrências de uma keyword em vários arquivos,
-            incluindo:
-              - totalOccurences: total geral
-              - keywordDataPerFile: map<string, KeywordData> (por arquivo)
+            Structure that aggregates keyword occurrences across multiple files,
+            including:
+              - totalOccurrences: overall total
+              - keywordDataPerFile: map<string, KeywordData> (per file)
         )doc")
         .def(py::init<>(),
             R"doc(
-                 Construtor padrão, inicializa totalOccurences = 0.
+                 Default constructor, initializes totalOccurrences = 0.
              )doc")
         .def_readwrite("totalOccurences", &RAGLibrary::UpperKeywordData::totalOccurences,
-            "Total de ocorrências da keyword em todos os arquivos.")
+            "Total occurrences of the keyword across all files.")
         .def_readwrite("keywordDataPerFile", &RAGLibrary::UpperKeywordData::keywordDataPerFile,
             R"doc(
-                 Mapeia o nome do arquivo (string) -> dados da keyword (KeywordData).
+                 Maps the filename (string) to keyword data (KeywordData).
              )doc")
         .def("__str__", [](const RAGLibrary::UpperKeywordData& data)
             {
@@ -345,14 +345,14 @@ void bind_ChunkCommons(py::module& m)
     m.def("resolve_vendor", &Chunk::resolve_vendor);
     m.def("to_lowercase", &Chunk::to_lowercase);
     py::class_<Chunk::vdb_data>(m, "VDBdata", R"doc(
-            Representa uma entrada da Vector DataBase.
+            Represents an entry in the Vector DataBase.
 
-            Atributos:
-                flatVD (List[float]): Vetor plano de embeddings.
-                vendor (str): Vendor usado.
-                model (str): Nome do modelo.
-                dim (int): Dimensão do embedding.
-                n (int): Quantidade de chunks.
+            Attributes:
+                flatVD (List[float]): Flat vector of embeddings.
+                vendor (str): Vendor used.
+                model (str): Model name.
+                dim (int): Embedding dimension.
+                n (int): Number of chunks.
         )doc")
     .def(py::init<>())
     .def_readwrite("flatVD", &Chunk::vdb_data::flatVD)
@@ -368,16 +368,16 @@ void bind_ChunkCommons(py::module& m)
     m.def("MeanPooling", &Chunk::MeanPooling,
         py::arg("token_embeddings"), py::arg("attention_mask"), py::arg("embedding_size"),
         R"doc(
-              Calcula a média das embeddings com base no attention mask.
-              
-              Parâmetros:
-                  token_embeddings (list[float]): Lista de embeddings de tokens.
-                  attention_mask (list[int]): Lista de máscaras de atenção (1 ou 0).
-                  embedding_size (int): Tamanho das embeddings.
-              
-              Retorna:
-                  list[float]: Lista de embeddings médias.
-          )doc");
+               Calculates the average of embeddings based on the attention mask.
+
+               Parameters:
+                   token_embeddings (list[float]): List of token embeddings.
+                   attention_mask (list[int]): List of attention masks (1 or 0).
+                   embedding_size (int): Size of the embeddings.
+
+               Returns:
+                   list[float]: List of mean embeddings.
+           )doc");
  
     //--------------------------------------------------------------------------
     // Binding function NormalizeEmbeddings
@@ -385,11 +385,11 @@ void bind_ChunkCommons(py::module& m)
     m.def("NormalizeEmbeddings", &Chunk::NormalizeEmbeddings,
         py::arg("embeddings"),
         R"doc(
-              Normaliza as embeddings para que tenham norma 1.
-              
-              Parâmetros:
-                  embeddings (list[float]): Lista de embeddings a serem normalizadas.
-          )doc");
+               Normalizes the embeddings to have a norm of 1.
+
+               Parameters:
+                   embeddings (list[float]): List of embeddings to be normalized.
+           )doc");
  
     //--------------------------------------------------------------------------
     // Binding function for EmbeddingModelBatch
@@ -397,16 +397,16 @@ void bind_ChunkCommons(py::module& m)
     m.def("EmbeddingModelBatch", &Chunk::EmbeddingModelBatch,
         py::arg("chunks"), py::arg("model"), py::arg("batch_size") = 32,
         R"doc(
-              Gera embeddings para um lote de chunks usando um modelo especificado.
-              
-              Parâmetros:
-                  chunks (list[str]): Lista de strings a serem embedadas.
-                  model (str): Nome do modelo a ser usado.
-                  batch_size (int, opcional): Tamanho do lote (padrão=32).
-              
-              Retorna:
-                  list[list[float]]: Lista de listas de embeddings.
-          )doc");
+               Generates embeddings for a batch of chunks using a specified model.
+
+               Parameters:
+                   chunks (list[str]): List of strings to be embedded.
+                   model (str): Name of the model to be used.
+                   batch_size (int, optional): Batch size (default=32).
+
+               Returns:
+                   list[list[float]]: List of lists of embeddings.
+           )doc");
  
     //--------------------------------------------------------------------------
     // Binding function for EmbeddingHuggingFaceTransformers
@@ -414,14 +414,14 @@ void bind_ChunkCommons(py::module& m)
     m.def("EmbeddingHuggingFaceTransformers", &Chunk::EmbeddingHuggingFaceTransformers,
         py::arg("chunks"),
         R"doc(
-              Gera embeddings usando o modelo HuggingFace 'sentence-transformers/all-MiniLM-L6-v2'.
-              
-              Parâmetros:
-                  chunks (list[str]): Lista de strings a serem embedadas.
-              
-              Retorna:
-                  list[list[float]]: Lista de listas de embeddings.
-          )doc");
+               Generates embeddings using the HuggingFace model 'sentence-transformers/all-MiniLM-L6-v2'.
+
+               Parameters:
+                   chunks (list[str]): List of strings to be embedded.
+
+               Returns:
+                   list[list[float]]: List of lists of embeddings.
+           )doc");
  
     //--------------------------------------------------------------------------
     // Binding function for EmbeddingOpeanAI
@@ -429,15 +429,15 @@ void bind_ChunkCommons(py::module& m)
     m.def("EmbeddingOpeanAI", &Chunk::EmbeddingOpeanAI,
         py::arg("chunks"), py::arg("openai_api_key"),
         R"doc(
-              Gera embeddings usando a API da OpenAI.
-              
-              Parâmetros:
-                  chunks (list[str]): Lista de strings a serem embedadas.
-                  openai_api_key (str): Chave de API da OpenAI.
-              
-              Retorna:
-                  list[list[float]]: Lista de listas de embeddings.
-          )doc");
+               Generates embeddings using the OpenAI API.
+
+               Parameters:
+                   chunks (list[str]): List of strings to be embedded.
+                   openai_api_key (str): OpenAI API key.
+
+               Returns:
+                   list[list[float]]: List of lists of embeddings.
+           )doc");
  
     //--------------------------------------------------------------------------
     // Binding function for toTensor
@@ -445,14 +445,14 @@ void bind_ChunkCommons(py::module& m)
     m.def("toTensor", &Chunk::toTensor,
         py::arg("vect"),
         R"doc(
-              Converte uma lista de listas de floats em um tensor do PyTorch.
-              
-              Parâmetros:
-                  vect (list[list[float]]): Lista de listas de floats.
-              
-              Retorna:
-                  torch.Tensor: Tensor do PyTorch.
-          )doc");
+               Converts a list of lists of floats into a PyTorch tensor.
+
+               Parameters:
+                   vect (list[list[float]]): List of lists of floats.
+
+               Returns:
+                   torch.Tensor: A PyTorch tensor.
+           )doc");
  
     //--------------------------------------------------------------------------
     // Binding function for SplitText
@@ -460,16 +460,16 @@ void bind_ChunkCommons(py::module& m)
     m.def("SplitText", &Chunk::SplitText,
         py::arg("inputs"), py::arg("overlap"), py::arg("chunk_size"),
         R"doc(
-              Divide o texto em chunks com sobreposição.
-              
-              Parâmetros:
-                  inputs (list[str]): Lista de strings de entrada.
-                  overlap (int): Número de caracteres para sobreposição.
-                  chunk_size (int): Tamanho de cada chunk.
-              
-              Retorna:
-                  list[str]: Lista de chunks resultantes.
-          )doc");
+               Splits text into chunks with overlap.
+
+               Parameters:
+                   inputs (list[str]): List of input strings.
+                   overlap (int): Number of characters for overlap.
+                   chunk_size (int): Size of each chunk.
+
+               Returns:
+                   list[str]: List of resulting chunks.
+           )doc");
  
     //--------------------------------------------------------------------------
     // Binding for the function SplitTextByCount
@@ -477,17 +477,17 @@ void bind_ChunkCommons(py::module& m)
     m.def("SplitTextByCount", &Chunk::SplitTextByCount,
         py::arg("inputs"), py::arg("overlap"), py::arg("count_threshold"), py::arg("regex"),
         R"doc(
-              Divide o texto em chunks baseado em contagem e regex.
-              
-              Parâmetros:
-                  inputs (list[str]): Lista de strings de entrada.
-                  overlap (int): Número de caracteres para sobreposição.
-                  count_threshold (int): Limite de contagem para divisão.
-                  regex (re2.RE2): Expressão regular para identificar pontos de divisão.
-              
-              Retorna:
-                  list[str]: Lista de chunks resultantes.
-          )doc");
+               Splits text into chunks based on a count and a regex.
+
+               Parameters:
+                   inputs (list[str]): List of input strings.
+                   overlap (int): Number of characters for overlap.
+                   count_threshold (int): Count limit for splitting.
+                   regex (re2.RE2): Regular expression to identify split points.
+
+               Returns:
+                   list[str]: List of resulting chunks.
+           )doc");
 }
  
 //--------------------------------------------------------------------------
@@ -505,21 +505,21 @@ void bind_ChunkDefault(py::module& m)
         .def("ProcessDocuments", &Chunk::ChunkDefault::ProcessDocuments,
              py::arg("items_opt") = std::nullopt,
              py::arg("max_workers") = 4,
-             "Processa uma lista de documentos em chunks.")
+             "Processes a list of documents into chunks.")
 
         .def("CreateEmb", &Chunk::ChunkDefault::CreateEmb,
              py::arg("model") = "text-embedding-ada-002",
              py::return_value_policy::reference,
-             "Cria e armazena embeddings para os chunks atuais.")
+             "Creates and stores embeddings for the current chunks.")
 
         .def("getflatVD", [](const Chunk::ChunkDefault &self, size_t idx) {
             const auto &vec = self.getFlatVD(idx);
             const auto *elem = self.getElement(idx);
-            if (!elem) throw std::out_of_range("Index inválido para get_flat_vd");
+            if (!elem) throw std::out_of_range("Invalid index for get_flat_vd");
 
             size_t n = elem->n;
             size_t dim = elem->dim;
-            if (vec.size() != n * dim) throw std::runtime_error("Inconsistência no vetor flatten.");
+            if (vec.size() != n * dim) throw std::runtime_error("Inconsistency in the flattened vector.");
 
             return py::array_t<float>(
                 {n, dim},
@@ -528,7 +528,7 @@ void bind_ChunkDefault(py::module& m)
                 py::cast(self)
             );
         }, py::arg("idx"),
-        "Retorna o vetor flatten como numpy array [n, dim].")
+        "Returns the flattened vector as a numpy array [n, dim].")
 
         .def("printVD", &Chunk::ChunkDefault::printVD)
         .def("clear", &Chunk::ChunkDefault::clear)
@@ -545,7 +545,7 @@ void bind_ChunkCount(py::module& m)
     py::class_<Chunk::ChunkCount>(m, "ChunkCount")
         .def(py::init<const std::string&, const int, const int>(),
             py::arg("count_unit"), py::arg("overlap") = 600, py::arg("count_threshold") = 1)
-        .def(py::init<>()) // Construtor padrão também existe
+        .def(py::init<>()) // Default constructor also exists
  
         .def("ProcessSingleDocument", &Chunk::ChunkCount::ProcessSingleDocument, py::arg("item"))
  
@@ -561,10 +561,10 @@ void bind_ChunkSimilarity(py::module& m)
 {
  
     py::class_<Chunk::ChunkSimilarity>(m, "ChunkSimilarity", R"doc(
-        Classe para processar RAGDocument e gerar chunks e embeddings,
-        permitindo avaliar a similaridade de documentos. Possui opções para
-        definir tamanho de chunk, overlap, modelo de embedding (HuggingFace ou OpenAI)
-        e chave de API para OpenAI se necessário.
+        Class to process RAGDocuments and generate chunks and embeddings,
+        allowing for document similarity assessment. It has options to
+        define chunk size, overlap, embedding model (HuggingFace or OpenAI),
+        and an API key for OpenAI if needed.
     )doc")
         .def(
             py::init<int, int, std::string, const std::string&>(),
@@ -573,31 +573,31 @@ void bind_ChunkSimilarity(py::module& m)
             py::arg("embedding_model") = "openai",
             py::arg("openai_api_key") = "",
             R"doc(
-                Construtor que inicializa a classe ChunkSimilarity.
- 
-                Parâmetros:
-                    chunk_size (int): Tamanho padrão de cada chunk de texto (default=100).
-                    overlap (int): Sobreposição entre chunks sucessivos (default=20).
-                    embedding_model (EmbeddingModel): Modelo de embedding (HuggingFace ou OpenAI).
-                    openai_api_key (str): Chave de API da OpenAI (apenas se embedding_model=OpenAI).
+                Constructor that initializes the ChunkSimilarity class.
+
+                Parameters:
+                    chunk_size (int): Default size of each text chunk (default=100).
+                    overlap (int): Overlap between successive chunks (default=20).
+                    embedding_model (EmbeddingModel): Embedding model (HuggingFace or OpenAI).
+                    openai_api_key (str): OpenAI API key (only if embedding_model=OpenAI).
             )doc")
         .def(
             "ProcessSingleDocument",
             &Chunk::ChunkSimilarity::ProcessSingleDocument,
             py::arg("item"),
             R"doc(
-                Dado um único RAGDocument, divide seu conteúdo em chunks
-                e gera embeddings de acordo com o modelo escolhido, retornando
-                um vetor de RAGLibrary::Document.
- 
-                Parâmetros:
-                    item (RAGDocument): Estrutura que contém
-                        o identificador e o conteúdo textual.
- 
-                Retorna:
-                    list[RAGDocument]: Vetor de documentos resultantes,
-                    cada um com seu conteúdo chunkado e possivelmente
-                    com embeddings associados em seu metadata.
+                Given a single RAGDocument, splits its content into chunks
+                and generates embeddings according to the chosen model, returning
+                a vector of RAGLibrary::Document.
+
+                Parameters:
+                    item (RAGDocument): Structure containing
+                        the identifier and the textual content.
+
+                Returns:
+                    list[RAGDocument]: Vector of resulting documents,
+                    each with its chunked content and possibly
+                    with associated embeddings in its metadata.
             )doc")
         .def(
             "ProcessDocuments",
@@ -605,22 +605,22 @@ void bind_ChunkSimilarity(py::module& m)
             py::arg("items"),
             py::arg("max_workers") = 4,
             R"doc(
-                Similar a ProcessSingleDocument, porém processa múltiplos
-                RAGDocument em paralelo (até max_workers).
- 
-                Parâmetros:
-                    items (list[RAGDocument]): Lista de
-                        estruturas contendo o conteúdo a ser chunkado.
-                    max_workers (int): Número máximo de threads a utilizar
-                        no processamento paralelo (default=4).
- 
-                Retorna:
-                    list[RAGDocument]: Lista concatenada de documentos
-                    resultantes do chunk para cada item.
+                Similar to ProcessSingleDocument, but processes multiple
+                RAGDocuments in parallel (up to max_workers).
+
+                Parameters:
+                    items (list[RAGDocument]): List of
+                        structures containing the content to be chunked.
+                    max_workers (int): Maximum number of threads to use
+                        in parallel processing (default=4).
+
+                Returns:
+                    list[RAGDocument]: Concatenated list of documents
+                    resulting from the chunking of each item.
             )doc");
 }
 //--------------------------------------------------------------------------
-// Função de binding para o ChunkQuery
+// Binding function for ChunkQuery
 //--------------------------------------------------------------------------
 
 void bind_ChunkQuery(py::module_& m) {
@@ -678,13 +678,13 @@ void bind_ChunkQuery(py::module_& m) {
         .def("setChunks", &Chunk::ChunkQuery::setChunks,
         py::arg("chunks"),
         py::arg("pos") = 0,
-        "Configura a estrutura de chunks e prepara os spans para recuperação")
+        "Configures the chunk structure and prepares spans for retrieval")
 
         ;
 }
 
 //--------------------------------------------------------------------------
-// Binding para ContentCleaner
+// Binding for ContentCleaner
 //--------------------------------------------------------------------------
 void bind_ContentCleaner(py::module& m)
 {
@@ -698,7 +698,7 @@ void bind_ContentCleaner(py::module& m)
 
 
 //--------------------------------------------------------------------------
-// Bind para PDFLoader
+// Binding for PDFLoader
 //--------------------------------------------------------------------------
 void bind_PDFLoader(py::module& m)
 {
@@ -748,21 +748,21 @@ void bind_Document(py::module& m)
             py::arg("pageContent"),
             py::arg("metadata") = std::vector<std::pair<std::string, std::string>>{},
             R"doc(
-                Construtor de Document.
+                Document constructor.
 
-                Parâmetros:
-                    pageContent (list[str]): lista de strings que representam o conteúdo do documento.
-                    metadata (list[tuple[str, str]]): lista de pares (chave, valor) para o metadado.
+                Parameters:
+                    pageContent (list[str]): list of strings representing the document content.
+                    metadata (list[tuple[str, str]]): list of key-value pairs for the metadata.
             )doc")
         .def_readwrite("pageContent", &::MetadataExtractor::Document::pageContent, R"doc(
-                Campo que armazena o conteúdo do documento em forma de vetor de strings.
+                Field that stores the document content as a vector of strings.
             )doc")
         .def_readwrite("metadata", &::MetadataExtractor::Document::metadata, R"doc(
-                Metadados do documento, armazenados em pares (chave, valor).
+                Document metadata, stored as key-value pairs.
             )doc")
         .def("StringRepr", &::MetadataExtractor::Document::StringRepr,
             R"doc(
-                Retorna uma string de representação que lista cada metadado contido no documento.
+                Returns a string representation that lists each metadata item contained in the document.
             )doc");
 
     bindThreadSafeQueue2<::MetadataExtractor::Document>(m, "ThreadSafeQueueDocument");
@@ -798,7 +798,7 @@ void bind_IMetadataExtractor(py::module& m)
         .def("ProcessDocuments", &MetadataExtractor::IMetadataExtractor::ProcessDocuments, py::arg("docs"), py::arg("maxWorkers"));
 }
 // --------------------------------------------------------------------------
-// Binding para MetadataExtractor::MetadataExtractor
+// Binding for MetadataExtractor::MetadataExtractor
 // --------------------------------------------------------------------------
 class PyMetadataExtractor : public MetadataExtractor::MetadataExtractor
 {
@@ -833,23 +833,23 @@ void bind_MetadataExtractor(py::module& m)
         m,
         "MetadataExtractor",
         R"doc(
-            Classe base para extração de metadados, herdada de IMetadataExtractor.
-            Possui um método virtual puro para processar um único documento, e
-            um método para processar múltiplos documentos em paralelo.
+            Base class for metadata extraction, inheriting from IMetadataExtractor.
+            It has a pure virtual method for processing a single document, and
+            a method for processing multiple documents in parallel.
         )doc")
         .def(
             py::init<>(),
             R"doc(
-            Construtor padrão para a classe MetadataExtractor.
+            Default constructor for the MetadataExtractor class.
         )doc")
         .def(
             "ProcessDocument",
             &MetadataExtractor::MetadataExtractor::ProcessDocument,
             py::arg("doc"),
             R"doc(
-            Processa metadados de um único documento.
-            Este método é virtual puro e deve ser sobrescrito
-            em classes derivadas concretas.
+            Processes metadata from a single document.
+            This method is pure virtual and must be overridden
+            in concrete derived classes.
         )doc")
         .def(
             "ProcessDocuments",
@@ -857,8 +857,8 @@ void bind_MetadataExtractor(py::module& m)
             py::arg("docs"),
             py::arg("maxWorkers") = 4,
             R"doc(
-            Processa metadados de vários documentos, com suporte a paralelismo.
-            Por padrão, usa até 4 threads (maxWorkers=4).
+            Processes metadata from multiple documents, with support for parallelism.
+            By default, it uses up to 4 threads (maxWorkers=4).
         )doc");
 }
 
@@ -948,37 +948,37 @@ void bind_IMetadataHFExtractor(py::module& m)
             m,
             "IMetadataHFExtractor",
             R"doc(
-            Interface que herda de MetadataExtractor::MetadataExtractor e adiciona
-            métodos para inicializar um modelo NER e extrair metadados.
+            Interface that inherits from MetadataExtractor::MetadataExtractor and adds
+            methods to initialize a NER model and extract metadata.
         )doc")
         .def(
             py::init<>(),
             R"doc(
-            Construtor padrão da interface IMetadataHFExtractor. 
-            Note que não pode ser instanciada sem uma subclasse concreta.
+            Default constructor for the IMetadataHFExtractor interface. 
+            Note that it cannot be instantiated without a concrete subclass.
         )doc")
         .def(
             "InitializeNERModel",
             &MetadataHFExtractor::IMetadataHFExtractor::InitializeNERModel,
             R"doc(
-            Método puro que deve ser sobrescrito para carregar e inicializar 
-            o modelo de Named Entity Recognition (NER).
+            Pure method that must be overridden to load and initialize 
+            the Named Entity Recognition (NER) model.
         )doc")
         .def(
             "ExtractMetadata",
             &MetadataHFExtractor::IMetadataHFExtractor::ExtractMetadata,
             py::arg("text"),
             R"doc(
-            Método puro para extrair metadados (entidades nomeadas) de um ou mais
-            textos. Retorna um vetor de pares (token, entidade).
+            Pure method to extract metadata (named entities) from one or more
+            texts. Returns a vector of (token, entity) pairs.
         )doc")
         .def(
             "ProcessDocument",
             &MetadataHFExtractor::IMetadataHFExtractor::ProcessDocument,
             py::arg("doc"),
             R"doc(
-            Método puro que processa metadados em um documento do tipo 
-            MetadataExtractor::Document. Pode incluir lógica de NER.
+            Pure method that processes metadata in a document of type 
+            MetadataExtractor::Document. May include NER logic.
         )doc");
 }
 
@@ -1003,51 +1003,51 @@ void bind_MetadataHFExtractor(py::module& m)
             m,
             "MetadataHFExtractor",
             R"doc(
-            Classe concreta que implementa a extração de metadados utilizando modelos
-            de NER via ONNXRuntime e bibliotecas de tokenização (HuggingFace tokenizers).
+            Concrete class that implements metadata extraction using NER models
+            via ONNXRuntime and tokenization libraries (HuggingFace tokenizers).
         )doc")
         .def(
             py::init<>(),
             R"doc(
-            Construtor padrão que configura o ambiente ONNXRuntime, sessões e 
-            tokenizers necessários para a extração de metadados.
+            Default constructor that configures the ONNXRuntime environment, sessions, and 
+            tokenizers needed for metadata extraction.
         )doc")
         .def(
             "InitializeNERModel",
             &MetadataHFExtractor::MetadataHFExtractor::InitializeNERModel,
             R"doc(
-            Inicializa o modelo de NER carregando o arquivo ONNX e preparando
-            o ambiente de inferência (sessão ONNXRuntime, CPU provider, etc.).
+            Initializes the NER model by loading the ONNX file and preparing
+            the inference environment (ONNXRuntime session, CPU provider, etc.).
         )doc")
         .def(
             "ExtractMetadata",
             &MetadataHFExtractor::MetadataHFExtractor::ExtractMetadata,
             py::arg("text"),
             R"doc(
-            Executa a extração de metadados (entidades nomeadas) em um ou mais
-            textos fornecidos. Retorna um vetor de pares (entidade, rótulo).
+            Executes metadata extraction (named entities) on one or more
+            provided texts. Returns a vector of (entity, label) pairs.
             
-            Parâmetros:
-                text (list[str]): Lista de strings que serão processadas.
+            Parameters:
+                text (list[str]): List of strings to be processed.
 
-            Retorna:
-                list[tuple[str, str]]: Cada elemento é um par (token, entidade).
+            Returns:
+                list[tuple[str, str]]: Each element is a (token, entity) pair.
         )doc")
         .def(
             "ProcessDocument",
             &MetadataHFExtractor::MetadataHFExtractor::ProcessDocument,
             py::arg("doc"),
             R"doc(
-            Processa metadados em um objeto `MetadataExtractor.Document`, incluindo
-            detecção de entidades nomeadas. Retorna o mesmo objeto `Document`, mas
-            com metadados atualizados.
+            Processes metadata in a `MetadataExtractor.Document` object, including
+            named entity detection. Returns the same `Document` object, but
+            with updated metadata.
 
-            Parâmetros:
-                doc (MetadataExtractor.Document): Documento a ser processado.
+            Parameters:
+                doc (MetadataExtractor.Document): Document to be processed.
 
-            Retorna:
-                MetadataExtractor.Document: Documento com entidades nomeadas
-                adicionadas a seu conjunto de metadados.
+            Returns:
+                MetadataExtractor.Document: Document with named entities
+                added to its metadata set.
         )doc");
 }
 // --------------------------------------------------------------------------
@@ -1067,11 +1067,11 @@ void bind_EmbeddingDocument(py::module &m)
         m,
         "EmbeddingDocument",
         R"doc(
-            Estrutura de documento para embeddings, contendo:
+            Document structure for embeddings, containing:
 
-              - pageContent: Vetor de strings representando o conteúdo.
-              - metadata: Vetor de pares (chave, valor) relacionados ao conteúdo.
-              - embeddings: Vetor de floats representando os vetores de embedding.
+              - pageContent: Vector of strings representing the content.
+              - metadata: Vector of key-value pairs related to the content.
+              - embeddings: Vector of floats representing the embedding vectors.
         )doc")
         .def(
             py::init<
@@ -1082,25 +1082,25 @@ void bind_EmbeddingDocument(py::module &m)
             py::arg("metadata") = std::vector<std::pair<std::string, std::string>>{},
             py::arg("embeddings") = std::vector<float>{},
             R"doc(
-            Construtor principal que recebe:
+            Main constructor that receives:
 
-              - pageContent (list[str]): Lista de conteúdo.
-              - metadata (list[tuple[str, str]]): Lista de pares chave-valor como metadados.
-              - embeddings (list[float]): Embeddings (vetor de floats).
+              - pageContent (list[str]): List of content.
+              - metadata (list[tuple[str, str]]): List of key-value pairs as metadata.
+              - embeddings (list[float]): Embeddings (vector of floats).
         )doc")
         .def(
             py::init<const ::MetadataExtractor::Document &>(),
             py::arg("document"),
             R"doc(
-            Construtor que converte um 'MetadataExtractor::Document'
-            em um 'EmbeddingDocument'.
+            Constructor that converts a 'MetadataExtractor::Document'
+            into an 'EmbeddingDocument'.
         )doc")
         .def(
             "StringRepr",
             &Embedding::Document::StringRepr,
             R"doc(
-            Retorna uma representação textual do documento, 
-            incluindo metadata e embeddings se existirem.
+            Returns a textual representation of the document, 
+            including metadata and embeddings if they exist.
         )doc")
         .def_readwrite("pageContent", &Embedding::Document::pageContent)
         .def_readwrite("metadata", &Embedding::Document::metadata)
@@ -1110,8 +1110,8 @@ void bind_EmbeddingDocument(py::module &m)
         m,
         "ThreadSafeQueueEmbeddingDocument",
         R"doc(
-            Fila thread-safe de EmbeddingDocument, permitindo acesso concorrente
-            em cenários com paralelismo.
+            Thread-safe queue of EmbeddingDocument, allowing concurrent access
+            in parallel scenarios.
         )doc")
         .def(py::init<>())
         .def("push", &Embedding::ThreadSafeQueueDocument::push, py::arg("value"))
@@ -1146,15 +1146,15 @@ void bind_IBaseEmbedding(py::module &m)
         m,
         "IBaseEmbedding",
         R"doc(
-            Interface base para geração de embeddings em textos ou documentos.
-            Possui métodos para gerar embeddings, processar um documento,
-            e processar vários documentos em paralelo.
+            Base interface for generating embeddings for texts or documents.
+            It has methods for generating embeddings, processing a single document,
+            and processing multiple documents in parallel.
         )doc")
         .def(
             py::init<>(),
             R"doc(
-            Construtor padrão da interface IBaseEmbedding. 
-            Não pode ser instanciada sem sobrescrever métodos em Python.
+            Default constructor for the IBaseEmbedding interface. 
+            Cannot be instantiated without overriding methods in Python.
         )doc")
         .def(
             "GenerateEmbeddings",
@@ -1163,13 +1163,13 @@ void bind_IBaseEmbedding(py::module &m)
             py::arg("model"),
             py::arg("batch_size") = 32,
             R"doc(
-            Gera embeddings para um vetor de strings.
+            Generates embeddings for a vector of strings.
             
-            Parâmetros:
-                text (list[str]): lista de textos a serem convertidos em embeddings
+            Parameters:
+                text (list[str]): list of texts to be converted into embeddings
             
-            Retorna:
-                list[float]: vetor de floats representando as embeddings concatenadas.
+            Returns:
+                list[float]: vector of floats representing the concatenated embeddings.
         )doc");
 }
 
@@ -1178,38 +1178,38 @@ void bind_IBaseEmbedding(py::module &m)
 // --------------------------------------------------------------------------
 
 /**
- * Classe trampolim (wrapper para Python) para IEmbeddingOpenAI.
- * Esta interface herda de IBaseEmbedding, que também possui métodos
- * virtuais (incluindo um puramente virtual: GenerateEmbeddings).
- * Portanto, precisamos sobrescrever:
- *  - SetAPIKey (puramente virtual em IEmbeddingOpenAI)
- *  - GenerateEmbeddings (puramente virtual em IBaseEmbedding)
- *  - ProcessDocument e ProcessDocuments (virtuais em IBaseEmbedding)
+ * Trampoline class (Python wrapper) for IEmbeddingOpenAI.
+ * This interface inherits from IBaseEmbedding, which also has virtual
+ * methods (including a pure virtual one: GenerateEmbeddings).
+ * Therefore, we need to override:
+ *  - SetAPIKey (purely virtual in IEmbeddingOpenAI)
+ *  - GenerateEmbeddings (purely virtual in IBaseEmbedding)
+ *  - ProcessDocument and ProcessDocuments (virtual in IBaseEmbedding)
  */
 class PyIEmbeddingOpenAI : public EmbeddingOpenAI::IEmbeddingOpenAI
 {
 public:
-    // Usa construtor(es) da classe base
+    // Use base class constructor(s)
     using EmbeddingOpenAI::IEmbeddingOpenAI::IEmbeddingOpenAI;
 
-    // Destrutor
+    // Destructor
     ~PyIEmbeddingOpenAI() override = default;
 
     // ----------------------------------------------------------------------
-    // Métodos puros de IEmbeddingOpenAI
+    // Pure methods from IEmbeddingOpenAI
     // ----------------------------------------------------------------------
     void SetAPIKey(const std::string &apiKey) override
     {
         PYBIND11_OVERRIDE_PURE(
-            void,                              // Tipo de retorno
-            EmbeddingOpenAI::IEmbeddingOpenAI, // Classe base
-            SetAPIKey,                         // Nome do método
-            apiKey                             // Parâmetro
+            void,                              // Return type
+            EmbeddingOpenAI::IEmbeddingOpenAI, // Base class
+            SetAPIKey,                         // Method name
+            apiKey                             // Parameter
         );
     }
 
     // ----------------------------------------------------------------------
-    // Métodos (puros ou virtuais) herdados de IBaseEmbedding
+    // Methods (pure or virtual) inherited from IBaseEmbedding
     // ----------------------------------------------------------------------
     std::vector<RAGLibrary::Document> GenerateEmbeddings(const std::vector<RAGLibrary::Document> &documents, const std::string &model, size_t batch_size) override
     {
@@ -1223,10 +1223,10 @@ public:
 };
 
 /**
- * Cria o binding para a interface IEmbeddingOpenAI.
- * Como ela herda de IBaseEmbedding (que também é abstrata) e
- * possui método(s) puramente virtual(is), não pode ser instanciada
- * diretamente em Python sem sobrescrever esses métodos.
+ * Creates the binding for the IEmbeddingOpenAI interface.
+ * Since it inherits from IBaseEmbedding (which is also abstract) and
+ * has pure virtual method(s), it cannot be instantiated
+ * directly in Python without overriding these methods.
  */
 void bind_IEmbeddingOpenAI(py::module &m)
 {
@@ -1237,28 +1237,27 @@ void bind_IEmbeddingOpenAI(py::module &m)
         m,
         "IEmbeddingOpenAI",
         R"doc(
-            Interface para a classe EmbeddingOpenAI. Herda de IBaseEmbedding,
-            o que permite que ela seja usada em qualquer lugar que espere
-            um IBaseEmbedding. O principal objetivo desta interface é permitir
-            a injeção de dependência e desacoplamento, facilitando testes
-            e manutenibilidade. Não é esperado que o usuário final precise
-            instanciar esta classe diretamente, mas sim usá-la como um tipo
-            para poder instanciar um objeto concreto.
+            Interface for the EmbeddingOpenAI class. It inherits from IBaseEmbedding,
+            which allows it to be used anywhere an IBaseEmbedding is expected.
+            The main purpose of this interface is to allow dependency injection
+            and decoupling, facilitating testing and maintainability. The end user
+            is not expected to instantiate this class directly, but rather to use it
+            as a type to instantiate a concrete object.
         )doc")
         .def(
             py::init<>(),
             R"doc(
-            Construtor padrão para a interface IEmbeddingOpenAI.
-            Como é uma interface, deve ser sobrescrita em Python 
-            para poder instanciar um objeto concreto.
+            Default constructor for the IEmbeddingOpenAI interface.
+            As it is an interface, it must be overridden in Python
+            to be able to instantiate a concrete object.
         )doc")
         .def(
             "SetAPIKey",
             &EmbeddingOpenAI::IEmbeddingOpenAI::SetAPIKey,
             py::arg("apiKey"),
             R"doc(
-            Define a chave de API a ser utilizada para gerar embeddings
-            (no caso, a chave de API da OpenAI).
+            Sets the API key to be used for generating embeddings
+            (in this case, the OpenAI API key).
         )doc")
         .def(
             "GenerateEmbeddings",
@@ -1267,8 +1266,8 @@ void bind_IEmbeddingOpenAI(py::module &m)
             py::arg("model"),
             py::arg("batch_size") = 32,
             R"doc(
-            Gera embeddings para uma lista de strings, usando 
-            o modelo configurado (OpenAI).
+            Generates embeddings for a list of strings, using
+            the configured model (OpenAI).
         )doc");
 }
 // --------------------------------------------------------------------------
@@ -1276,9 +1275,9 @@ void bind_IEmbeddingOpenAI(py::module &m)
 // --------------------------------------------------------------------------
 
 /**
- * Cria o binding para a classe concreta EmbeddingOpenAI, que herda de
- * IEmbeddingOpenAI (e portanto, de BaseEmbedding). Esta implementação
- * utiliza a API da OpenAI para gerar embeddings.
+ * Creates the binding for the concrete class EmbeddingOpenAI, which inherits from
+ * IEmbeddingOpenAI (and therefore, from IBaseEmbedding). This implementation
+ * uses the OpenAI API to generate embeddings.
  */
 void bind_EmbeddingOpenAI(py::module &m)
 {
@@ -1289,32 +1288,32 @@ void bind_EmbeddingOpenAI(py::module &m)
             m,
             "EmbeddingOpenAI",
             R"doc(
-            Classe concreta que implementa IEmbeddingOpenAI, permitindo o uso 
-            da API OpenAI para geração de embeddings. Exemplo de uso em Python:
+            Concrete class that implements IEmbeddingOpenAI, allowing the use
+            of the OpenAI API for generating embeddings. Example usage in Python:
 
                 from RagPUREAI import EmbeddingOpenAI
 
                 emb = EmbeddingOpenAI()
-                emb.SetAPIKey("sua_chave_openai")
-                embeddings = emb.GenerateEmbeddings(["texto de exemplo", "mais texto"])
+                emb.SetAPIKey("your_openai_key")
+                embeddings = emb.GenerateEmbeddings(["example text", "more text"])
 
-            ou, alternativamente, também pode aproveitar os métodos herdados
-            de BaseEmbedding, como .ProcessDocument() e .ProcessDocuments().
+            Alternatively, it can also leverage the inherited methods
+            from IBaseEmbedding, such as .ProcessDocument() and .ProcessDocuments().
         )doc");
 
     cls.def(
            py::init<>(),
            R"doc(
-            Construtor padrão da classe EmbeddingOpenAI.
+            Default constructor for the EmbeddingOpenAI class.
         )doc")
         .def(
             "SetAPIKey",
             &EmbeddingOpenAI::EmbeddingOpenAI::SetAPIKey,
             py::arg("apiKey"),
             R"doc(
-            Define a chave de API da OpenAI, necessária para utilizar
-            o endpoint de embeddings. Internamente, esta chave será 
-            configurada no cliente openai::start(apiKey).
+            Sets the OpenAI API key, which is required to use
+            the embeddings endpoint. Internally, this key will be
+            configured in the client via openai::start(apiKey).
         )doc")
         .def(
             "GenerateEmbeddings",
@@ -1323,15 +1322,15 @@ void bind_EmbeddingOpenAI(py::module &m)
             py::arg("model"),
             py::arg("batch_size") = 32,
             R"doc(
-            Gera embeddings para uma lista de strings, utilizando o 
-            modelo "text-embedding-ada-002" da OpenAI. Pode levantar 
-            RagException caso ocorra algum erro na resposta JSON.
+            Generates embeddings for a list of strings using the
+            "text-embedding-ada-002" model from OpenAI. It may raise
+            a RagException if an error occurs in the JSON response.
 
-            Parâmetros:
-                text (list[str]): lista de textos de entrada
+            Parameters:
+                text (list[str]): list of input texts
 
-            Retorna:
-                list[float]: vetor com os valores do embedding concatenados.
+            Returns:
+                list[float]: vector with the concatenated embedding values.
         )doc");
 }
 
