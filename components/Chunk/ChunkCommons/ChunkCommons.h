@@ -31,7 +31,6 @@ namespace Chunk
         }; 
     };
     
-    //===============================================================================================    
         extern inline const std::unordered_map<std::string, std::vector<std::string>> EmbeddingModel = {
             {"openai", {"text-embedding-ada-002", "text-embedding-3-small", "..."}},
             {"huggingface", {"bge-small", "bge-large"}},
@@ -82,7 +81,7 @@ namespace Chunk
 
         const size_t ref_dim = chunks_list[0].embedding->size();
 
-        // Valida todos os demais
+        // Validate all
         bool consistent = std::all_of(
             chunks_list.begin(),
             chunks_list.end(),
@@ -108,7 +107,6 @@ namespace Chunk
     }
     std::vector<RAGLibrary::Document> Embeddings(const std::vector<RAGLibrary::Document>& list, std::string model);
    
-    //===============================================================================================
     std::vector<float> MeanPooling(const std::vector<float> &token_embeddings, const std::vector<int64_t> &attention_mask, size_t embedding_size);
     void NormalizeEmbeddings(std::vector<float> &embeddings);
 
@@ -124,6 +122,4 @@ namespace Chunk
     std::vector<std::string> SplitText(std::string inputs, const int overlap, const int chunk_size);
     std::vector<std::string> SplitTextByCount(const std::string &input, int overlap, int count_threshold, const std::shared_ptr<re2::RE2> regex);
     
-    // void InitAPIKey();// Inicialização separada da chave
-    // std::vector<RAGLibrary::Document> Embeddings(const std::vector<RAGLibrary::Document>& list);
 }

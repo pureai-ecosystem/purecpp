@@ -90,32 +90,12 @@ namespace RAGLibrary
             os << data.to_json().dump(); // Retorna JSON como string
             return os;
         }
-
-        // friend std::ostream &operator<<(std::ostream &os, const DataStruct &data)
-        // {
-        //     os << "(metadata={";
-
-        //     auto it = data.metadata.begin();
-        //     while (it != data.metadata.end())
-        //     {
-        //         os << it->first << ": " << it->second;
-        //         if (++it != data.metadata.end())
-        //         {
-        //             os << ", ";
-        //         }
-        //     }
-
-        //     os << "}, textContent=\"" << data.textContent << "\")";
-        //     return os;
-        // }
     };
 
     struct ThreadStruct
     {
         ThreadStruct() = default;
         ThreadStruct(std::shared_ptr<std::future<void>> _threadRunner, ThreadSafeQueueDataRequest _threadQueue, unsigned int _threadRemainingWork) : threadRunner(std::move(_threadRunner)),
-                                                                                                                                                     threadQueue(_threadQueue),
-                                                                                                                                                     threadRemainingWork(_threadRemainingWork)
         {
         }
         ~ThreadStruct()

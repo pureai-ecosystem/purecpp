@@ -29,9 +29,6 @@ void ChunkSimilarity::ValidateModel()
 
     if(!Chunk::resolve_vendor(this->m_embedding_model)) 
         throw RAGLibrary::RagException("Invalid model.");
-    //if(this->m_embedding_model=="openai"){
-
-    //}
 
 }
 
