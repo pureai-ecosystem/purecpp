@@ -53,6 +53,12 @@
 #include "EmbeddingOpenAI/IEmbeddingOpenAI.h"
 #include "EmbeddingOpenAI/EmbeddingOpenAI.h"
 
+#include "../components/Chat/Message/BaseMessage.h"
+#include "../components/Chat/Message/HumanMessage.h"
+#include "../components/Chat/Message/AIMessage.h"
+#include "../components/Chat/Message/SystemMessage.h"
+#include "../components/Chat/ChatHistory/ChatHistory.h"
+
 namespace py = pybind11;
 using namespace RAGLibrary;
 using namespace DataLoader;
@@ -1335,6 +1341,51 @@ void bind_EmbeddingOpenAI(py::module &m)
 }
 
 
+// Trampoline class for BaseMessage
+class PyBaseMessage : public purecpp::chat::BaseMessage {
+public:
+    using purecpp::chat::BaseMessage::BaseMessage; // Inherit constructors
+
+    std::string get_type() const override {
+        PYBIND11_OVERRIDE_PURE(
+            std::string,            /* Return type */
+            purecpp::chat::BaseMessage, /* Parent class */
+            get_type               /* Name of function */
+                                    /* Arguments */
+        );
+    }
+
+    std::string get_content() const override {
+        PYBIND11_OVERRIDE_PURE(
+            std::string,
+            purecpp::chat::BaseMessage,
+            get_content
+        );
+    }
+};
+
+void bind_ChatClasses(py::module &m) {
+    py::class_<purecpp::chat::BaseMessage, PyBaseMessage, std::shared_ptr<purecpp::chat::BaseMessage>>(m, "BaseMessage")
+        .def(py::init<>())
+        .def_property_readonly("type", &purecpp::chat::BaseMessage::get_type)
+        .def_property_readonly("content", &purecpp::chat::BaseMessage::get_content);
+
+    py::class_<purecpp::chat::HumanMessage, std::shared_ptr<purecpp::chat::HumanMessage>, purecpp::chat::BaseMessage>(m, "HumanMessage")
+        .def(py::init<std::string>(), py::arg("content"));
+
+    py::class_<purecpp::chat::AIMessage, std::shared_ptr<purecpp::chat::AIMessage>, purecpp::chat::BaseMessage>(m, "AIMessage")
+        .def(py::init<std::string>(), py::arg("content"));
+
+    py::class_<purecpp::chat::SystemMessage, std::shared_ptr<purecpp::chat::SystemMessage>, purecpp::chat::BaseMessage>(m, "SystemMessage")
+        .def(py::init<std::string>(), py::arg("content"));
+
+    py::class_<purecpp::chat::ChatHistory>(m, "ChatHistory")
+        .def(py::init<>())
+        .def("add_message", &purecpp::chat::ChatHistory::add_message, py::arg("message"))
+        .def_property_readonly("messages", &purecpp::chat::ChatHistory::get_messages)
+        .def("clear", &purecpp::chat::ChatHistory::clear);
+}
+
 //--------------------------------------------------------------------------
 // Main module
 //--------------------------------------------------------------------------
@@ -1374,4 +1425,5 @@ PYBIND11_MODULE(RagPUREAI, m)
     // bind_BaseEmbedding(m); // This class was removed
     bind_IEmbeddingOpenAI(m);
     bind_EmbeddingOpenAI(m);
+    bind_ChatClasses(m);
 }

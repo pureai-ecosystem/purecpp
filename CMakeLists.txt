@@ -150,6 +150,11 @@ set(RagPUREAI_IMPL_SRCS
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkQuery/ChunkQuery.cpp
 
     ${CMAKE_SOURCE_DIR}/components/CleanData/ContentCleaner/ContentCleaner.cpp
+
+    ${CMAKE_SOURCE_DIR}/components/Chat/Message/HumanMessage.cpp
+    ${CMAKE_SOURCE_DIR}/components/Chat/Message/AIMessage.cpp
+    ${CMAKE_SOURCE_DIR}/components/Chat/Message/SystemMessage.cpp
+    ${CMAKE_SOURCE_DIR}/components/Chat/ChatHistory/ChatHistory.cpp
 )
 
 #------- RagPUREAI Library -------
@@ -164,6 +169,7 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/components/Embedding
     ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingOpenAI
     ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingModel
+    ${CMAKE_SOURCE_DIR}/components/Chat
     ${CMAKE_SOURCE_DIR}/libs/RagException
     ${CMAKE_SOURCE_DIR}/libs/ThreadSafeQueue
     ${CMAKE_SOURCE_DIR}/libs/CommonStructs
