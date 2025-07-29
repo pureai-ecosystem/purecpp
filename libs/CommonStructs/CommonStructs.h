@@ -95,7 +95,7 @@ namespace RAGLibrary
     struct ThreadStruct
     {
         ThreadStruct() = default;
-        ThreadStruct(std::shared_ptr<std::future<void>> _threadRunner, ThreadSafeQueueDataRequest _threadQueue, unsigned int _threadRemainingWork) : threadRunner(std::move(_threadRunner)),
+        ThreadStruct(std::shared_ptr<std::future<void>> _threadRunner, ThreadSafeQueueDataRequest _threadQueue, unsigned int _threadRemainingWork) : threadRunner(std::move(_threadRunner))
         {
         }
         ~ThreadStruct()
