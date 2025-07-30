@@ -3,9 +3,8 @@
 #include <string>
 #include <vector>
 #include "CommonStructs.h"
-#include "EmbeddingModel/EmbeddingModel.h"
-#include "EmbeddingOpenAI/EmbeddingOpenAI.h"
 #include "ChunkCommons/ChunkCommons.h"
+#include "ChunkDefault/ChunkDefault.h"
 
 namespace Chunk {
 
@@ -14,43 +13,51 @@ namespace Chunk {
         ChunkQuery(
             std::string query = "",
             RAGLibrary::Document query_doc = {},
-            std::vector<RAGLibrary::Document> chunks_list = {},
-            Chunk::EmbeddingModel embedding_model = Chunk::EmbeddingModel::OpenAI,
-            std::string model = "text-embedding-ada-002"
+            const Chunk::ChunkDefault* chunks = nullptr,
+            std::optional<size_t> pos = std::nullopt,
+            float threshold = -5
         );
         ~ChunkQuery() = default;     
-        RAGLibrary::Document Query(std::string query = "");
-        RAGLibrary::Document Query(RAGLibrary::Document query_doc = {}); 
-        
-        std::vector<std::vector<float>> CreateVD(std::vector<RAGLibrary::Document> chunks_list = {});
-        std::vector<std::tuple<std::string, float, int>> Retrieve(float threshold = 0.5);
-        std::string StrQ(int index = -1);
-        std::vector<std::tuple<std::string, float, int>> getRetrieveList() const;
-        RAGLibrary::Document getQuery() const;
-        std::vector<RAGLibrary::Document> getChunksList() const; 
-        std::pair<Chunk::EmbeddingModel, std::string> getPair() const;
-        void printVD(int limit);
-        
-    protected:
-        bool allChunksHaveEmbeddings(const std::vector<RAGLibrary::Document>& chunks_list);
-
+        std::vector<std::tuple<std::string, float, int>> Retrieve(float threshold = 0.5, const Chunk::ChunkDefault* temp_chunks= nullptr, std::optional<size_t> pos = std::nullopt);  
+        RAGLibrary::Document Query(RAGLibrary::Document query_doc = {}, const Chunk::ChunkDefault* temp_chunks = nullptr, std::optional<size_t> pos = std::nullopt); 
+        RAGLibrary::Document Query(std::string query = "", const Chunk::ChunkDefault* temp_chunks = nullptr, std::optional<size_t> pos = std::nullopt);
+        std::vector<std::tuple<std::string, float, int>> getRetrieveList(void) const;
+        const std::vector<RAGLibrary::Document>& getChunksList(void) const; 
+        std::tuple<size_t, size_t, size_t> getPar(void) const;
+        inline const Chunk::vdb_data* getVDB() const {
+            return m_vdb;
+        }
+        RAGLibrary::Document getQuery(void) const;
+        std::string getMod(void) const;
+        void setChunks(const Chunk::ChunkDefault& chunks, size_t pos);
+        std::vector<float> getEmbedQuery(void) const;
+        std::string StrQ(int index = -1); 
     private:
-        std::string m_query;
-        std::vector<RAGLibrary::Document> m_chunks_list;
         RAGLibrary::Document m_query_doc;
-        
         std::vector<float> m_emb_query;
-        std::vector<std::vector<float>> m_chunk_embedding;
-        std::vector<std::tuple<std::string, float, int>> m_retrieve_list;
-        int quant_retrieve_list = 0;
+        std::string m_query;
 
-        Chunk::EmbeddingModel m_embedding_model; 
-        std::string m_model;
-        std::string m_openai_api_key;
+        size_t m_n_chunk = 0;
+        size_t m_pos = 0;
+        size_t m_dim = 0;
+        size_t m_n = 0;
 
-        bool initialized_ = false;
-        void InitAPIKey();
-        std::vector<RAGLibrary::Document> Embeddings(const std::vector<RAGLibrary::Document>& list);
+        std::vector<std::tuple<std::string, float, int>> m_retrieve_list; 
+        size_t quant_retrieve_list = 0;
+
+        const std::vector<RAGLibrary::Document>* m_chunks_list = nullptr;
+        const Chunk::ChunkDefault* m_chunks = nullptr;
+        const Chunk::vdb_data* m_vdb = nullptr;
+        
+        std::vector<std::span<const float>> m_chunk_embedding;    
+        inline RAGLibrary::Document validateEmbeddingResult(const std::vector<RAGLibrary::Document>& results) {
+            if (results.empty() || !results[0].embedding.has_value()) {
+                throw std::runtime_error("Embedding not present in result.");
+            }
+            return results[0];
+        }
     };
 
 }
+
+

@@ -13,9 +13,9 @@ using namespace Chunk;
 ChunkSimilarity::ChunkSimilarity(
     const int chunk_size,
     const int overlap,
-    const EmbeddingModel embedding_model,
+    std::string embedding_model,
     const std::string &openai_api_key)
-    : m_chunk_size(chunk_size), m_overlap(overlap), m_embedding_model(embedding_model)
+    : m_chunk_size(chunk_size), m_overlap(overlap), m_embedding_model(to_lowercase(embedding_model))
 {
     ValidateModel();
 }
@@ -27,33 +27,18 @@ void ChunkSimilarity::ValidateModel()
         throw RAGLibrary::RagException("The overlap value must be smaller than the chunk size.");
     }
 
-    switch (m_embedding_model)
-    {
-    case HuggingFace:
-        break;
-    case OpenAI:
-        const auto open_api_key = std::getenv("OPENAI_API_KEY");
-        if (m_openai_api_key.empty() && (!open_api_key || std::strcmp("", open_api_key) == 0))
-        {
-            throw RAGLibrary::RagException("The OpenAI API key is required to use the 'openai' model.");
-        }
-        break;
-    }
+    if(!Chunk::resolve_vendor(this->m_embedding_model)) 
+        throw RAGLibrary::RagException("Invalid model.");
+
 }
 
 std::vector<std::vector<float>> ChunkSimilarity::GenerateEmbeddings(const std::vector<std::string> &chunks)
 {
     std::vector<std::vector<float>> results;
-    switch (this->m_embedding_model)
-    {
-    case EmbeddingModel::HuggingFace:
+    if(this->m_embedding_model=="huggingface")
         results = Chunk::EmbeddingHuggingFaceTransformers(chunks);
-        break;
-    case EmbeddingModel::OpenAI:
+    else if(this->m_embedding_model=="openai")
         results = Chunk::EmbeddingOpeanAI(chunks, m_openai_api_key);
-        break;
-    }
-
     return results;
 }
 

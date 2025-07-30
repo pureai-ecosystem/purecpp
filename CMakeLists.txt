@@ -71,6 +71,27 @@ find_package(Torch REQUIRED)
 include_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include")
 link_directories("${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/lib")
 
+# -------------------------------------------------------
+# === VectorDatabase (lib C++) ==========================
+# -------------------------------------------------------
+find_package(redis++ REQUIRED)   # hiredis vem junto
+
+file(GLOB_RECURSE VDB_SRCS  ${CMAKE_SOURCE_DIR}/components/VectorDatabase/src/*.cpp)
+file(GLOB_RECURSE VDB_INCS  ${CMAKE_SOURCE_DIR}/components/VectorDatabase/include/vectordb/*.h)
+
+add_library(VectorDatabase STATIC ${VDB_SRCS} ${VDB_INCS})
+target_include_directories(VectorDatabase PUBLIC
+    ${CMAKE_SOURCE_DIR}/components/VectorDatabase/include
+)
+target_link_libraries(VectorDatabase
+    PUBLIC
+        nlohmann_json::nlohmann_json
+        redis++::redis++_static
+        hiredis::hiredis
+)
+
+# ------------------------------------------------------------------
+
 set(CMAKE_BUILD_RPATH
     "${PYTHON_SITE_PACKAGES}/*/d_libs/libtorch/cpu/lib"
     "\$ORIGIN/purecpp.libs"
@@ -83,7 +104,7 @@ set(CMAKE_BUILD_RPATH
     "\$ORIGIN/"
     "\$ORIGIN/purecpp/d_libs/libtorch/cpu/lib"
 )
-set(CMAKE_INSTALL_RPATH 
+set(CMAKE_INSTALL_RPATH
     "${PYTHON_SITE_PACKAGES}/*/d_libs/libtorch/cpu/lib"
     "\$ORIGIN/purecpp.libs"
     "\$ORIGIN/d_libs/libtorch/cpu/lib"
@@ -148,6 +169,7 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/libs/CommonStructs
     ${CMAKE_SOURCE_DIR}/libs/StringUtils
     ${CMAKE_SOURCE_DIR}/libs/FileUtils
+    ${CMAKE_SOURCE_DIR}/libs/MemoryUtils
     ${TOKENIZERS_PATH}/include
     ${OPEANAI_CPP_PATH}/include
     ${CMAKE_SOURCE_DIR}/libs/libtorch/cpu/include
@@ -173,6 +195,31 @@ target_link_libraries(RagPUREAILib PUBLIC #.lib e .dll
     ${TORCH_LIBRARIES}
 )
 
-# Pybind11 Module
+# -------------------------------------------------------
+# === Pybind11 Modules ==================================
+# -------------------------------------------------------
+# RagPUREAI
 pybind11_add_module(RagPUREAI ${RagPUREAI_BINDING_SRCS})
 target_link_libraries(RagPUREAI PRIVATE RagPUREAILib)
+
+# vectordb  
+pybind11_add_module(vectordb components/VectorDatabase/python/_vectordb.cpp)
+target_link_libraries(vectordb PRIVATE
+    -Wl,--whole-archive
+    VectorDatabase
+    -Wl,--no-whole-archive
+)
+
+# Disables LTO/IPO in the module to avoid ODR/refcount problems.
+
+set_property(TARGET vectordb PROPERTY INTERPROCEDURAL_OPTIMIZATION FALSE)
+target_compile_options(vectordb PRIVATE -fno-lto)
+target_link_options(vectordb PRIVATE -fno-lto)
+
+# .so output
+set_target_properties(vectordb PROPERTIES
+    OUTPUT_NAME "vectordb"
+    LIBRARY_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
+    ARCHIVE_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
+    RUNTIME_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
+)

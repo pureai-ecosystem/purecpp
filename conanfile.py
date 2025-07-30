@@ -39,6 +39,8 @@ class RagPureAIConan(ConanFile):
         self.requires("onnxruntime/1.18.1")
         self.requires("nlohmann_json/3.11.3")
         self.requires("libcurl/8.10.1")
+        self.requires("redis-plus-plus/1.3.13")
+
 
     def configure(self):
         if self.options.CURL_STATIC_LINKING:
