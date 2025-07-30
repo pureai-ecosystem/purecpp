@@ -3,11 +3,16 @@
 namespace purecpp {
 namespace chat {
 
-void ChatHistory::add_message(std::shared_ptr<BaseMessage> message) {
-    messages.push_back(std::move(message));
+ChatHistory::ChatHistory(){   
+    messages.reserve(INITIAL_CAPACITY);
 }
-
-const std::vector<std::shared_ptr<BaseMessage>>& ChatHistory::get_messages() const {
+void ChatHistory::add_message(std::shared_ptr<BaseMessage> message) {
+    if (messages.size() == messages.capacity()) {
+        messages.reserve(messages.capacity() * GROWTH_FACTOR);
+    }
+    messages.emplace_back(std::move(message));
+}
+const std::vector<std::shared_ptr<BaseMessage>>& ChatHistory::get_messages() const{
     return messages;
 }
 

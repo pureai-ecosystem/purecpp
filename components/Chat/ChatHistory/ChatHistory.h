@@ -10,9 +10,12 @@ namespace chat {
 
 class ChatHistory {
 private:
+    int INITIAL_CAPACITY = 1000;
+    int GROWTH_FACTOR = 2;
     std::vector<std::shared_ptr<BaseMessage>> messages;
 
 public:
+    ChatHistory();
     void add_message(std::shared_ptr<BaseMessage> message);
     const std::vector<std::shared_ptr<BaseMessage>>& get_messages() const;
     void clear();
