@@ -1334,6 +1334,8 @@ void bind_EmbeddingOpenAI(py::module &m)
         )doc");
 }
 
+// VectorDabase
+void bind_VectorDB(pybind11::module_ &);
 
 //--------------------------------------------------------------------------
 // Main module
@@ -1362,7 +1364,6 @@ PYBIND11_MODULE(RagPUREAI, m)
     bind_MetadataRegexExtractor(m);
     bind_MetadataHFExtractor(m);
 
-    // bind_EmbeddingModel(m);
     bind_ChunkCommons(m);
     bind_ContentCleaner(m);
     bind_ChunkDefault(m);
@@ -1371,7 +1372,9 @@ PYBIND11_MODULE(RagPUREAI, m)
     bind_ChunkSimilarity(m);
     bind_EmbeddingDocument(m);
     bind_IBaseEmbedding(m);
-    // bind_BaseEmbedding(m); // This class was removed
     bind_IEmbeddingOpenAI(m);
     bind_EmbeddingOpenAI(m);
+
+    py::module_ vectorDB = m.def_submodule("vectorDB", "Bindings for vector database");
+    bind_VectorDB(vectorDB);
 }
