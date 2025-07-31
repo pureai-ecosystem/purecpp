@@ -9,6 +9,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "CommonStructs.h"
+
 using namespace std::chrono;
 
 namespace vdb::wrappers {
@@ -59,7 +61,7 @@ auto MetricsWrapper::measure(const std::string& method, F&& fn, Args&&... args) 
     }
 }
 
-void MetricsWrapper::insert(std::span<const Document> docs) {
+void MetricsWrapper::insert(std::span<const RAGLibrary::Document> docs) {
     measure("insert", &VectorBackend::insert, backend_.get(), docs);
 }
 

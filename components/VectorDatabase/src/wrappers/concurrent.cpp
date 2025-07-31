@@ -4,6 +4,8 @@
 #include <future>
 #include <utility>
 
+#include "CommonStructs.h"
+
 namespace vdb::wrappers {
 
 ConcurrentSearchWrapper::ConcurrentSearchWrapper(VectorBackendPtr backend,
@@ -21,7 +23,7 @@ bool ConcurrentSearchWrapper::is_open() const noexcept {
     return backend_ && backend_->is_open();
 }
 
-void ConcurrentSearchWrapper::insert(std::span<const Document> docs) {
+void ConcurrentSearchWrapper::insert(std::span<const RAGLibrary::Document> docs) {
     std::scoped_lock g(mtx_);        
     backend_->insert(docs);
 }

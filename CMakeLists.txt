@@ -102,6 +102,7 @@ set(RagPUREAI_BINDING_SRCS
 set(RagPUREAI_IMPL_SRCS
     ${VDB_SRCS}
     ${CMAKE_SOURCE_DIR}/libs/StringUtils/StringUtils.cpp
+    ${CMAKE_SOURCE_DIR}/libs/CommonStructs/CommonStructs.cpp
     ${CMAKE_SOURCE_DIR}/components/DataLoader/BaseLoader.cpp
     ${CMAKE_SOURCE_DIR}/components/DataLoader/PDFLoader/PDFLoader.cpp
     ${CMAKE_SOURCE_DIR}/components/DataLoader/DOCXLoader/DOCXLoader.cpp

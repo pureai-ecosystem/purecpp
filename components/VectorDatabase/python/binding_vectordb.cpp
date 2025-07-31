@@ -12,8 +12,13 @@
 namespace py = pybind11;
 namespace vdb
 {
-    void force_link_redis_backend(); // declaração
+    void force_link_redis_backend();
 }
+
+using vdb::QueryResult;
+using vdb::Registry;
+using vdb::VectorBackend;
+
 static std::vector<float> to_vecf(const py::handle &obj)
 {
     if (py::isinstance<py::array>(obj))

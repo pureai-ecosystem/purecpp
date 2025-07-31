@@ -18,6 +18,7 @@
 #include "MUtils.h"
 
 using json = nlohmann::json;
+
 namespace RAGLibrary
 {
     struct DataExtractRequestStruct;
@@ -33,9 +34,8 @@ namespace RAGLibrary
     struct DataExtractRequestStruct
     {
         DataExtractRequestStruct() = default;
-        DataExtractRequestStruct(const std::string &_targetIdentifier, const unsigned int &_extractContentLimit = 0) : targetIdentifier(_targetIdentifier),
-                                                                                                                       extractContentLimit(_extractContentLimit)
-        {}
+        DataExtractRequestStruct(const std::string &_targetIdentifier, const unsigned int &_extractContentLimit = 0)
+            : targetIdentifier(_targetIdentifier), extractContentLimit(_extractContentLimit) {}
 
         std::string targetIdentifier;
         unsigned int extractContentLimit;
@@ -43,10 +43,8 @@ namespace RAGLibrary
 
     struct LoaderDataStruct
     {
-        LoaderDataStruct(const Metadata &_metadata, const std::vector<std::string> &_textContent) : metadata(_metadata),
-                                                                                                    textContent(_textContent)
-        {
-        }
+        LoaderDataStruct(const Metadata &_metadata, const std::vector<std::string> &_textContent)
+            : metadata(_metadata), textContent(_textContent) {}
 
         LoaderDataStruct(const LoaderDataStruct &other) = default;
         LoaderDataStruct &operator=(const LoaderDataStruct &other) = default;
@@ -69,10 +67,8 @@ namespace RAGLibrary
 
     struct DataStruct
     {
-        DataStruct(const Metadata &_metadata, const std::string &_textContent) : metadata(_metadata),
-                                                                                 textContent(_textContent)
-        {
-        }
+        DataStruct(const Metadata &_metadata, const std::string &_textContent)
+            : metadata(_metadata), textContent(_textContent) {}
 
         DataStruct(const DataStruct &other) = default;
         DataStruct &operator=(const DataStruct &other) = default;
@@ -87,7 +83,7 @@ namespace RAGLibrary
 
         friend std::ostream &operator<<(std::ostream &os, const DataStruct &data)
         {
-            os << data.to_json().dump(); // Retorna JSON como string
+            os << data.to_json().dump();
             return os;
         }
     };
@@ -95,19 +91,19 @@ namespace RAGLibrary
     struct ThreadStruct
     {
         ThreadStruct() = default;
-        ThreadStruct(std::shared_ptr<std::future<void>> _threadRunner, ThreadSafeQueueDataRequest _threadQueue, unsigned int _threadRemainingWork) : threadRunner(std::move(_threadRunner))
-        {
-        }
+        ThreadStruct(std::shared_ptr<std::future<void>> _threadRunner, ThreadSafeQueueDataRequest _threadQueue, unsigned int _threadRemainingWork)
+            : threadRunner(std::move(_threadRunner)), threadQueue(std::move(_threadQueue)), threadRemainingWork(_threadRemainingWork) {}
+
         ~ThreadStruct()
         {
-            if (threadRunner != nullptr && threadRunner->valid())
+            if (threadRunner && threadRunner->valid())
             {
                 threadRunner->wait();
             }
         }
 
         ThreadStruct(const ThreadStruct &other) = default;
-        ThreadStruct &operator=(ThreadStruct &other) = default;
+        ThreadStruct &operator=(const ThreadStruct &other) = default;
 
         bool operator<(const ThreadStruct &other) const
         {
@@ -121,9 +117,7 @@ namespace RAGLibrary
 
     struct KeywordData
     {
-        KeywordData() : occurrences(0)
-        {
-        }
+        KeywordData() : occurrences(0) {}
 
         int occurrences;
         std::vector<std::pair<int, int>> position;
@@ -131,28 +125,26 @@ namespace RAGLibrary
 
     struct UpperKeywordData
     {
-        UpperKeywordData() : totalOccurences(0)
-        {
-        }
+        UpperKeywordData() : totalOccurences(0) {}
+
+        int totalOccurences;
+        std::map<std::string, KeywordData> keywordDataPerFile;
 
         friend std::ostream &operator<<(std::ostream &o, const UpperKeywordData &data)
         {
             o << "Total occurrences: " << data.totalOccurences << std::endl;
-            for (auto elem : data.keywordDataPerFile)
+            for (const auto &elem : data.keywordDataPerFile)
             {
                 o << "In File: " << elem.first << std::endl;
                 o << "  Occurrences: " << elem.second.occurrences << std::endl;
                 o << "  Positions: " << std::endl;
-                for (auto lower_index = 0; lower_index < elem.second.position.size(); ++lower_index)
+                for (const auto &[line, offset] : elem.second.position)
                 {
-                    o << "      [line: " << elem.second.position[lower_index].first << " offset: "
-                      << elem.second.position[lower_index].second << "]" << std::endl;
+                    o << "      [line: " << line << " offset: " << offset << "]" << std::endl;
                 }
             }
             return o;
         }
-        int totalOccurences;
-        std::map<std::string, KeywordData> keywordDataPerFile;
     };
 
     static std::string meta2str(const Metadata &meta)
@@ -160,17 +152,14 @@ namespace RAGLibrary
         std::stringstream ss;
         bool first = true;
         ss << "{";
-        for (auto &pair : meta)
+        for (const auto &pair : meta)
         {
-            if (first)
-                first = false;
-            else
+            if (!first)
                 ss << ",";
+            else
+                first = false;
 
-            auto key = pair.first;
-            auto value = StringUtils::any2str(pair.second);
-
-            ss << "\"" << key << "\":\"" << value << "\"";
+            ss << "\"" << pair.first << "\":\"" << StringUtils::any2str(pair.second) << "\"";
         }
         ss << "}";
         return ss.str();
@@ -178,16 +167,15 @@ namespace RAGLibrary
 
     struct Document
     {
-
         Document() = default;
-        Document(Metadata pmetadata, const std::string &ppage_content) : metadata(pmetadata), page_content(ppage_content)
-        {
-        }
+        Document(Metadata pmetadata, const std::string &ppage_content) : metadata(std::move(pmetadata)), page_content(ppage_content) {}
+        Document(Metadata pmetadata, std::string ppage_content, std::vector<float> pembedding)
+            : metadata(std::move(pmetadata)), page_content(std::move(ppage_content)), embedding(std::move(pembedding)) {}
 
-        std::string StringRepr()
+        std::string StringRepr() const
         {
             std::stringstream ss;
-            operator<<(ss, *this);
+            ss << *this;
             return ss.str();
         }
 
@@ -195,11 +183,19 @@ namespace RAGLibrary
         std::string page_content;
         std::optional<std::vector<float>> embedding;
 
+        std::size_t dim() const noexcept
+        {
+            return embedding ? embedding->size() : 0;
+        }
+
         static std::string escape_with_json(const std::string &input)
         {
-            std::string dumped = nlohmann::json(input).dump();
-            return dumped.substr(1, dumped.size() - 2); // remove aspas externas
+            std::string dumped = json(input).dump();
+            return dumped.substr(1, dumped.size() - 2);
         }
+
+        [[nodiscard]] std::string to_json() const;
+        static Document from_json(std::string_view json);
 
         friend std::ostream &operator<<(std::ostream &o, const Document &data)
         {
@@ -228,5 +224,4 @@ namespace RAGLibrary
             return o;
         }
     };
-
 }

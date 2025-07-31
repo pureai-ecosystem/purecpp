@@ -240,24 +240,28 @@ void bind_CommonStructs(py::module& m)
                 oss << data;
                 return oss.str(); });
  
-    py::class_<RAGLibrary::Document>(m, "RAGDocument")
+        py::class_<RAGLibrary::Document>(m, "RAGDocument")
         .def(py::init<>())
         .def(py::init<RAGLibrary::Metadata, const std::string &>(),
-             py::arg("metadata"), py::arg("page_content"))
+                py::arg("metadata"), py::arg("page_content"))
+        .def(py::init<RAGLibrary::Metadata, const std::string &, std::vector<float>>(),
+                py::arg("metadata"), py::arg("page_content"), py::arg("embedding"))
         .def_readwrite("metadata", &RAGLibrary::Document::metadata)
         .def_readwrite("page_content", &RAGLibrary::Document::page_content)
         .def_readwrite("embedding", &RAGLibrary::Document::embedding)
+        .def("dim", &RAGLibrary::Document::dim)
         .def("StringRepr", &RAGLibrary::Document::StringRepr)
         .def("__repr__", [](const RAGLibrary::Document &doc)
-             {
+                {
                 std::ostringstream o;
                 o << doc;
                 return o.str(); })
         .def("__str__", [](const RAGLibrary::Document &doc)
-             {
+                {
                 std::ostringstream o;
                 o << doc;
                 return o.str(); });
+            
 }
 
 //--------------------------------------------------------------------------
