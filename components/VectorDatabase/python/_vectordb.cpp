@@ -84,7 +84,6 @@ PYBIND11_MODULE(vectordb, m) {
         .def("__repr__", [](const VectorBackend&){
             return "<VectorBackend>";
         });
-
     
     m.def("make_backend",
           [](const std::string& name, const std::string& json_cfg){

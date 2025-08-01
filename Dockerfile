@@ -43,6 +43,6 @@ RUN /app/scripts/install_torch.sh
 RUN /app/scripts/install_libs.sh
 RUN /app/scripts/configure_conan_profile.sh
 
-COPY . .
+# COPY . .
 
 CMD ["/bin/bash"]

@@ -18,6 +18,8 @@
 #include <vector>
 
 #include "vectordb/backend.h"
+#include "CommonStructs.h"
+
 
 namespace vdb::wrappers {
 
@@ -35,7 +37,7 @@ public:
     ~ConcurrentSearchWrapper() override;
 
     [[nodiscard]] bool is_open() const noexcept override;
-    void insert(std::span<const Document> docs) override;
+    void insert(std::span<const RAGLibrary::Document> docs) override;
 
     std::vector<QueryResult>
     query(std::span<const float>               embedding,
