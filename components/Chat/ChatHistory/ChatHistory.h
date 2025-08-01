@@ -16,7 +16,8 @@ private:
 
 public:
     ChatHistory();
-    void add_message(std::shared_ptr<BaseMessage> message);
+    void add_message(const std::shared_ptr<BaseMessage> &message);
+    void add_message(const std::vector<std::shared_ptr<BaseMessage>> &message);
     const std::vector<std::shared_ptr<BaseMessage>>& get_messages() const;
     void clear();
 };
