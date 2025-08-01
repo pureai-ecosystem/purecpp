@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EMBEDDING_OPENAI_H
+#define EMBEDDING_OPENAI_H
 
 #include "IEmbeddingOpenAI.h"
 
@@ -19,3 +20,5 @@ namespace EmbeddingOpenAI
         std::string m_modelName;
     };
 }
+
+#endif // EMBEDDING_OPENAI_H

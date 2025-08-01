@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHUNK_COMMONS_H
+#define CHUNK_COMMONS_H
 
 #include "CommonStructs.h"
 
@@ -123,3 +124,4 @@ namespace Chunk
     std::vector<std::string> SplitTextByCount(const std::string &input, int overlap, int count_threshold, const std::shared_ptr<re2::RE2> regex);
     
 }
+#endif

@@ -884,32 +884,14 @@ public:
             name, pattern);
     }
 
-    ::MetadataExtractor::Document ProcessDocument(::MetadataExtractor::Document doc) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            ::MetadataExtractor::Document,
-            MetadataRegexExtractor::IMetadataRegexExtractor,
-            ProcessDocument,
-            doc);
-    }
 
-    std::vector<::MetadataExtractor::Document> ProcessDocuments(std::vector<::MetadataExtractor::Document> docs, const int& maxWorkers) override
-    {
-        PYBIND11_OVERRIDE_PURE(
-            std::vector<::MetadataExtractor::Document>,
-            MetadataRegexExtractor::IMetadataRegexExtractor,
-            ProcessDocuments,
-            docs, maxWorkers);
-    }
 };
 
 void bind_IMetadataRegexExtractor(py::module& m)
 {
-    py::class_<MetadataRegexExtractor::IMetadataRegexExtractor, PyIMetadataRegexExtractor, MetadataRegexExtractor::IMetadataRegexExtractorPtr, MetadataExtractor::IMetadataExtractor>(m, "IMetadataRegexExtractor")
+    py::class_<MetadataRegexExtractor::IMetadataRegexExtractor, PyIMetadataRegexExtractor, MetadataRegexExtractor::IMetadataRegexExtractorPtr>(m, "IMetadataRegexExtractor")
         .def(py::init<>())
-        .def("AddPattern", &MetadataRegexExtractor::IMetadataRegexExtractor::AddPattern, py::arg("name"), py::arg("pattern"))
-        .def("ProcessDocument", &MetadataRegexExtractor::IMetadataRegexExtractor::ProcessDocument, py::arg("doc"))
-        .def("ProcessDocuments", &MetadataRegexExtractor::IMetadataRegexExtractor::ProcessDocuments, py::arg("docs"), py::arg("maxWorkers"));
+        .def("AddPattern", &MetadataRegexExtractor::IMetadataRegexExtractor::AddPattern, py::arg("name"), py::arg("pattern"));
 }
 
 // --------------------------------------------------------------------------
@@ -994,7 +976,7 @@ void bind_IMetadataHFExtractor(py::module& m)
 
 void bind_MetadataRegexExtractor(py::module& m)
 {
-    py::class_<MetadataRegexExtractor::MetadataRegexExtractor, std::shared_ptr<MetadataRegexExtractor::MetadataRegexExtractor>, MetadataRegexExtractor::IMetadataRegexExtractor>(m, "MetadataRegexExtractor")
+    py::class_<MetadataRegexExtractor::MetadataRegexExtractor, std::shared_ptr<MetadataRegexExtractor::MetadataRegexExtractor>, ::MetadataExtractor::MetadataExtractor, MetadataRegexExtractor::IMetadataRegexExtractor>(m, "MetadataRegexExtractor")
         .def(py::init<>())
         .def("AddPattern", &MetadataRegexExtractor::MetadataRegexExtractor::AddPattern, py::arg("name"), py::arg("pattern"))
         .def("ProcessDocument", &MetadataRegexExtractor::MetadataRegexExtractor::ProcessDocument, py::arg("doc"))

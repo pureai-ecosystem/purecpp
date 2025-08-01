@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BASE_LOADER_H
+#define BASE_LOADER_H
 
 #include "IBaseLoader.h"
 #include <future>
@@ -39,3 +40,4 @@ namespace DataLoader
     };
     using BaseDataLoaderPtr = std::shared_ptr<BaseDataLoader>;
 }
+#endif

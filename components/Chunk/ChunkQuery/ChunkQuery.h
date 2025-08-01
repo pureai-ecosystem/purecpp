@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHUNK_QUERY_H
+#define CHUNK_QUERY_H
 #include <tuple>
 #include <string>
 #include <vector>
@@ -60,4 +61,4 @@ namespace Chunk {
 
 }
 
-
+#endif

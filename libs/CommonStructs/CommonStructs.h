@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef COMMON_STRUCTS_H
+#define COMMON_STRUCTS_H
 #include <memory>
 #include <string>
 #include <vector>
@@ -225,3 +225,4 @@ namespace RAGLibrary
         }
     };
 }
+#endif

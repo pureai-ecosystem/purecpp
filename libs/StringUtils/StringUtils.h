@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STRING_UTILS_H
+#define STRING_UTILS_H
 
 #include <any>
 #include <string>
@@ -20,3 +21,4 @@ namespace StringUtils
 
     std::string removeAccents(const std::string &input);
 }
+#endif

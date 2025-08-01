@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RAG_EXCEPTION_H
+#define RAG_EXCEPTION_H
 
 #include <exception>
 #include <string>
@@ -20,3 +21,4 @@ namespace RAGLibrary
         std::string m_errorMsg;
     };
 }
+#endif

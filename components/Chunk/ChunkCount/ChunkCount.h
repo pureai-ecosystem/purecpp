@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHUNK_COUNT_H
+#define CHUNK_COUNT_H
 
 #include "CommonStructs.h"
 
@@ -30,3 +31,4 @@ namespace Chunk
     };
 
 }
+#endif

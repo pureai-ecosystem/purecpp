@@ -1,6 +1,14 @@
 #include "MetadataExtractor.h"
 
 #include <algorithm>
+#include <vector>
+#include <future>
+#include <atomic>
+#include <semaphore>
+#include <mutex>
+#include <chrono>
+
+#include "Document.h"
 
 namespace MetadataExtractor
 {

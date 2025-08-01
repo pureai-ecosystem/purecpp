@@ -1,4 +1,6 @@
-#pragma once
+#ifndef DOCUMENT_H
+#define DOCUMENT_H
+
 
 #include <string>
 #include <unordered_map>
@@ -31,3 +33,4 @@ namespace MetadataExtractor
     };
     using ThreadSafeQueueDocument = RAGLibrary::ThreadSafeQueue<Document>;
 }
+#endif

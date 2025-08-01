@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHUNK_DEFAULT_H
+#define CHUNK_DEFAULT_H
 
 #include <regex>
 #include <vector>
@@ -54,3 +55,4 @@ namespace Chunk
     };
 
 }
+#endif

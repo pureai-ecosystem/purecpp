@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TXT_LOADER_H
+#define TXT_LOADER_H
 #include <mutex>
 
 #include "BaseLoader.h"
@@ -20,3 +21,4 @@ namespace TXTLoader
     };
     using TXTLoaderPtr = std::shared_ptr<TXTLoader>;
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WEB_LOADER_H
+#define WEB_LOADER_H
 
 #include <vector>
 #include <string>
@@ -29,3 +30,4 @@ namespace WebLoader
     };
     using WebLoaderPtr = std::shared_ptr<WebLoader>;
 }
+#endif

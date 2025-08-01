@@ -1,5 +1,9 @@
-#pragma once
+#ifndef METADATA_EXTRACTOR_H
+#define METADATA_EXTRACTOR_H
 
+#include <vector>
+
+#include "Document.h"
 #include "IMetadataExtractor.h"
 
 namespace MetadataExtractor
@@ -10,7 +14,8 @@ namespace MetadataExtractor
         MetadataExtractor() = default;
         virtual ~MetadataExtractor() = default;
 
-        virtual Document ProcessDocument(Document doc) = 0;
-        virtual std::vector<Document> ProcessDocuments(std::vector<Document> docs, const int& maxWorkers) override;
+        Document ProcessDocument(Document doc) override = 0;
+        std::vector<Document> ProcessDocuments(std::vector<Document> docs, const int& maxWorkers) override;
     };
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef METADATA_HFE_EXTRACTOR_H
+#define METADATA_HFE_EXTRACTOR_H
 
 #include "IMetadataHFExtractor.h"
 
@@ -36,3 +37,4 @@ namespace MetadataHFExtractor
         std::vector<std::string> ProcessLogits(float *logits, size_t seqLength, size_t numLabels, const std::map<int, std::string> &labelMap);
     };
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PDF_LOADER_H
+#define PDF_LOADER_H
 
 #include <string>
 #include <vector>
@@ -27,3 +28,4 @@ namespace PDFLoader
     };
     using PDFLoaderPtr = std::shared_ptr<PDFLoader>; 
 }
+#endif

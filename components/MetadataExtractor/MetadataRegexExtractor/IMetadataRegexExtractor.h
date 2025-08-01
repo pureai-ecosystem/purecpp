@@ -1,10 +1,13 @@
-#pragma once
+#ifndef I_METADATA_REGEX_EXTRACTOR_H
+#define I_METADATA_REGEX_EXTRACTOR_H
 
-#include "MetadataExtractor.h"
+#include <string>
+#include <memory>
+
 
 namespace MetadataRegexExtractor
 {
-    class IMetadataRegexExtractor : public ::MetadataExtractor::MetadataExtractor
+    class IMetadataRegexExtractor
     {
     public:
         virtual ~IMetadataRegexExtractor() = default;
@@ -13,3 +16,4 @@ namespace MetadataRegexExtractor
     };
     using IMetadataRegexExtractorPtr = std::shared_ptr<IMetadataRegexExtractor>;
 }
+#endif

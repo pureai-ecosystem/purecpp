@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHUNK_SIMILARITY_H
+#define CHUNK_SIMILARITY_H
 
 #include "ChunkCommons/ChunkCommons.h"
 #include "CommonStructs.h"
@@ -33,3 +34,4 @@ namespace Chunk
     };
 
 }
+#endif

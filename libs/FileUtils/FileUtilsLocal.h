@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FILE_UTILS_LOCAL_H
+#define FILE_UTILS_LOCAL_H
 
 #include <string>
 #include <syncstream>
@@ -34,3 +35,4 @@ namespace RAGLibrary
     }
 
 }
+#endif

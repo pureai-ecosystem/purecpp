@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DOCX_LOADER_H
+#define DOCX_LAODER_H
 
 #include <filesystem>
 #include <string_view>
@@ -24,3 +25,4 @@ namespace DOCXLoader
     };
     using DOCXLoaderPtr = std::shared_ptr<DOCXLoader>;
 }
+#endif

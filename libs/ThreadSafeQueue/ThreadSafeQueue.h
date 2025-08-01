@@ -1,4 +1,5 @@
-#pragma once
+#ifndef THREAD_SAFE_QUEUE_H
+#define THREAD_SAFE_QUEUE_H
 
 #include <mutex>
 #include <queue>
@@ -74,3 +75,4 @@ namespace RAGLibrary
         mutable std::queue<Type> m_queue;
     };
 }
+#endif

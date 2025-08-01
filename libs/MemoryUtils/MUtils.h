@@ -1,4 +1,5 @@
-#pragma once
+#ifndef M_UTILS_H
+#define M_UTILS_H
 
 #include <tuple>
 #include <string>
@@ -70,3 +71,4 @@ namespace RAGLibrary{
         return 0;
     }
 }
+#endif

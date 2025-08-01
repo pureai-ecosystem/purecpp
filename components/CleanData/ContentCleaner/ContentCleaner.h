@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONTENT_CLEANER_H
+#define CONTENT_CLEANER_H
 
 #include <vector>
 #include <string>
@@ -22,3 +23,4 @@ namespace CleanData
     };
 
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef I_METADATA_HFE_EXTRACTOR_H
+#define I_METADATA_HFE_EXTRACTOR_H
 
 #include "Document.h"
 #include "MetadataExtractor.h"
@@ -19,3 +20,4 @@ namespace MetadataHFExtractor
     };
     using IMetadataHFExtractorPtr = std::shared_ptr<IMetadataHFExtractor>;
 }
+#endif
