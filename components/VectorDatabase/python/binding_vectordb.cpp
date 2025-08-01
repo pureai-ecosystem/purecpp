@@ -9,6 +9,11 @@
 
 #include <cstring>
 
+namespace vdb {
+    void force_link_redis_backend();   
+    void force_link_oracle_backend();  
+}
+
 namespace py = pybind11;
 namespace vdb
 {
@@ -36,6 +41,7 @@ static std::vector<float> to_vecf(const py::handle &obj)
 void bind_VectorDB(py::module_ &m)
 {
     vdb::force_link_redis_backend();
+    vdb::force_link_oracle_backend();
 
     py::class_<QueryResult>(m, "QueryResult")
         .def_readonly("doc", &QueryResult::doc)
