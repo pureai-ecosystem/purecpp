@@ -77,3 +77,4 @@ compile_commands.json
 .cache/
 *.pdf
 *.docx
+test*

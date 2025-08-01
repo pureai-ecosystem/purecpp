@@ -1381,9 +1381,12 @@ void bind_ChatClasses(py::module &m) {
 
     py::class_<purecpp::chat::ChatHistory>(m, "ChatHistory")
         .def(py::init<>())
-        .def("add_message", &purecpp::chat::ChatHistory::add_message, py::arg("message"))
+        .def("add_message", static_cast<void (purecpp::chat::ChatHistory::*)(const std::shared_ptr<purecpp::chat::BaseMessage>&)>(&purecpp::chat::ChatHistory::add_message), py::arg("message"))
+        .def("add_messages", static_cast<void (purecpp::chat::ChatHistory::*)(const std::vector<std::shared_ptr<purecpp::chat::BaseMessage>>&)>(&purecpp::chat::ChatHistory::add_message), py::arg("messages"))
         .def_property_readonly("messages", &purecpp::chat::ChatHistory::get_messages)
-        .def("clear", &purecpp::chat::ChatHistory::clear);
+        .def("clear", &purecpp::chat::ChatHistory::clear)
+        .def("size", &purecpp::chat::ChatHistory::size)
+        .def("add_benchmark_messages_omp", &purecpp::chat::ChatHistory::add_benchmark_messages_omp, py::arg("num_messages"));
 }
 
 //--------------------------------------------------------------------------
