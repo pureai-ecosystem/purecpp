@@ -4,7 +4,7 @@
 #include "../Message/BaseMessage.h"
 #include <vector>
 #include <memory>
-
+#include <mutex>
 namespace purecpp {
 namespace chat {
 
@@ -13,6 +13,7 @@ private:
     int INITIAL_CAPACITY = 1000;
     int GROWTH_FACTOR = 2;
     std::vector<std::shared_ptr<BaseMessage>> messages;
+    std::mutex messages_mutex;
 
 public:
     ChatHistory();
@@ -20,6 +21,8 @@ public:
     void add_message(const std::vector<std::shared_ptr<BaseMessage>> &message);
     const std::vector<std::shared_ptr<BaseMessage>>& get_messages() const;
     void clear();
+
+    size_t size() const;
 };
 
 } // namespace chat
