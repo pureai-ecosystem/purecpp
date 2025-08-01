@@ -123,6 +123,12 @@ set(RagPUREAI_IMPL_SRCS
     ${CMAKE_SOURCE_DIR}/components/Chunk/ChunkQuery/ChunkQuery.cpp
 
     ${CMAKE_SOURCE_DIR}/components/CleanData/ContentCleaner/ContentCleaner.cpp
+
+    ${CMAKE_SOURCE_DIR}/components/Chat/Message/HumanMessage.cpp
+    ${CMAKE_SOURCE_DIR}/components/Chat/Message/AIMessage.cpp
+    ${CMAKE_SOURCE_DIR}/components/Chat/Message/SystemMessage.cpp
+    ${CMAKE_SOURCE_DIR}/components/Chat/ChatHistory/ChatHistory.cpp
+
 )
 
 # RagPUREAILib
@@ -136,7 +142,13 @@ target_include_directories(RagPUREAILib PUBLIC
     ${CMAKE_SOURCE_DIR}/components/Embedding
     ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingOpenAI
     ${CMAKE_SOURCE_DIR}/components/Embedding/EmbeddingModel
+
+    ${CMAKE_SOURCE_DIR}/components/Chat
+    ${CMAKE_SOURCE_DIR}/components/Chat/ChatHistory
+    ${CMAKE_SOURCE_DIR}/components/Chat/Message
+
     ${CMAKE_SOURCE_DIR}/components/VectorDatabase/include
+
     ${CMAKE_SOURCE_DIR}/libs/RagException
     ${CMAKE_SOURCE_DIR}/libs/ThreadSafeQueue
     ${CMAKE_SOURCE_DIR}/libs/CommonStructs
@@ -173,3 +185,26 @@ target_link_libraries(RagPUREAILib PUBLIC
 # Binding with Pybind11
 pybind11_add_module(RagPUREAI ${RagPUREAI_BINDING_SRCS})
 target_link_libraries(RagPUREAI PRIVATE RagPUREAILib)
+
+# vectordb
+pybind11_add_module(vectordb components/VectorDatabase/python/_vectordb.cpp)
+target_link_libraries(vectordb PRIVATE
+    -Wl,--whole-archive
+    VectorDatabase
+    -Wl,--no-whole-archive
+)
+
+# Disables LTO/IPO in the module to avoid ODR/refcount problems.
+
+set_property(TARGET vectordb PROPERTY INTERPROCEDURAL_OPTIMIZATION FALSE)
+target_compile_options(vectordb PRIVATE -fno-lto)
+target_link_options(vectordb PRIVATE -fno-lto)
+
+# .so output
+set_target_properties(vectordb PROPERTIES
+    OUTPUT_NAME "vectordb"
+    LIBRARY_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
+    ARCHIVE_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
+    RUNTIME_OUTPUT_DIRECTORY  "${PROJECT_BINARY_DIR}/python"
+)
+
