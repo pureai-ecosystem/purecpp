@@ -246,24 +246,28 @@ void bind_CommonStructs(py::module& m)
                 oss << data;
                 return oss.str(); });
  
-    py::class_<RAGLibrary::Document>(m, "RAGDocument")
+        py::class_<RAGLibrary::Document>(m, "RAGDocument")
         .def(py::init<>())
         .def(py::init<RAGLibrary::Metadata, const std::string &>(),
-             py::arg("metadata"), py::arg("page_content"))
+                py::arg("metadata"), py::arg("page_content"))
+        .def(py::init<RAGLibrary::Metadata, const std::string &, std::vector<float>>(),
+                py::arg("metadata"), py::arg("page_content"), py::arg("embedding"))
         .def_readwrite("metadata", &RAGLibrary::Document::metadata)
         .def_readwrite("page_content", &RAGLibrary::Document::page_content)
         .def_readwrite("embedding", &RAGLibrary::Document::embedding)
+        .def("dim", &RAGLibrary::Document::dim)
         .def("StringRepr", &RAGLibrary::Document::StringRepr)
         .def("__repr__", [](const RAGLibrary::Document &doc)
-             {
+                {
                 std::ostringstream o;
                 o << doc;
                 return o.str(); })
         .def("__str__", [](const RAGLibrary::Document &doc)
-             {
+                {
                 std::ostringstream o;
                 o << doc;
                 return o.str(); });
+            
 }
 
 //--------------------------------------------------------------------------
@@ -1340,6 +1344,8 @@ void bind_EmbeddingOpenAI(py::module &m)
         )doc");
 }
 
+// VectorDabase
+void bind_VectorDB(pybind11::module_ &);
 
 // Trampoline class for BaseMessage
 class PyBaseMessage : public purecpp::chat::BaseMessage {
@@ -1416,7 +1422,6 @@ PYBIND11_MODULE(RagPUREAI, m)
     bind_MetadataRegexExtractor(m);
     bind_MetadataHFExtractor(m);
 
-    // bind_EmbeddingModel(m);
     bind_ChunkCommons(m);
     bind_ContentCleaner(m);
     bind_ChunkDefault(m);
@@ -1425,8 +1430,11 @@ PYBIND11_MODULE(RagPUREAI, m)
     bind_ChunkSimilarity(m);
     bind_EmbeddingDocument(m);
     bind_IBaseEmbedding(m);
-    // bind_BaseEmbedding(m); // This class was removed
     bind_IEmbeddingOpenAI(m);
     bind_EmbeddingOpenAI(m);
+
     bind_ChatClasses(m);
+
+    py::module_ vectorDB = m.def_submodule("vectorDB", "Bindings for vector database");
+    bind_VectorDB(vectorDB);
 }

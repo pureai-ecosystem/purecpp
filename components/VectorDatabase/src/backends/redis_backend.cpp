@@ -2,7 +2,6 @@
 #include "vectordb/backend.h"
 #include "vectordb/registry.h"
 #include "vectordb/exceptions.h"
-#include "vectordb/document.h"
 
 #include <nlohmann/json.hpp>
 #include <sw/redis++/redis++.h>
@@ -17,6 +16,8 @@
 #include <cstring>
 #include <stdexcept>
 #include <memory>
+
+#include "CommonStructs.h"
 
 namespace vdb {
 
@@ -36,7 +37,7 @@ public:
 
     bool is_open() const noexcept override { return static_cast<bool>(redis_); }
 
-    void insert(std::span<const Document> docs) override {
+    void insert(std::span<const RAGLibrary::Document> docs) override {
         if (!is_open()) throw BackendClosed("Redis backend closed");
 
         auto pipe = redis_->pipeline(false); // non-atomic
@@ -44,11 +45,15 @@ public:
         for (const auto& d : docs) {
             if (d.dim() != dim_)
                 throw DimensionMismatch("Dimension mismatch on insert");
+    
+            if (!d.embedding.has_value())  // check if has embedding
+                throw InsertionError("Document missing embedding data");
 
+            const auto& embedding = *d.embedding;
             const std::string key = prefix_ + ":" + gen_uuid();
 
-            const std::string binary(reinterpret_cast<const char*>(d.embedding.data()),
-                                     d.embedding.size() * sizeof(float));
+            const std::string binary(reinterpret_cast<const char*>(embedding.data()),
+                                     embedding.size() * sizeof(float));
 
             pipe.hset(key, std::initializer_list<std::pair<std::string,std::string>>{
                 {"vector",   binary},
@@ -237,8 +242,8 @@ private:
                 std::memcpy(emb.data(), vector_bin.data(), vector_bin.size());
             }
 
-            auto meta = Document::from_json(metadata_json).metadata;
-            Document doc{page, std::move(emb), std::move(meta)};
+            auto meta = RAGLibrary::Document::from_json(metadata_json).metadata;
+            RAGLibrary::Document doc{std::move(meta), page, std::move(emb)};
             out.push_back(QueryResult{std::move(doc), score});
         }
 
@@ -248,4 +253,7 @@ private:
 
 static AutoRegister<RedisVectorBackend> _auto_register_redis("redis");
 
+void force_link_redis_backend() {
+    (void)_auto_register_redis;
+}
 } // namespace vdb
