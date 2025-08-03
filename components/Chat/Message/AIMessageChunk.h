@@ -1,20 +1,20 @@
-#ifndef PURECPP_AIMESSAGE_H
-#define PURECPP_AIMESSAGE_H
+#ifndef PURECPP_AIMESSAGE_CHUNK_H
+#define PURECPP_AIMESSAGE_CHUNK_H
 
 #include "BaseMessage.h"
+#include "AIMessage.h"
 
 namespace purecpp {
 namespace chat {
 
-class AIMessage : public BaseMessage {
+class AIMessageChunk : public BaseMessage {
 private:
     std::string content;
 public:
-    explicit AIMessage(std::string  content);
+    explicit AIMessageChunk(std::string  content);
     std::string get_type() const override;
     std::string get_content() const override;
-    
-    AIMessage operator+(const AIMessage& a) const;
+    AIMessageChunk __add__() const;
 };
 
 } // namespace chat

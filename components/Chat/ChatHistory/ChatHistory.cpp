@@ -21,6 +21,7 @@ void ChatHistory::add_message(const std::vector<std::shared_ptr<BaseMessage>> &n
     messages.insert(messages.end(), new_messages.begin(), new_messages.end());
 }
 
+
 std::vector<std::shared_ptr<BaseMessage>> ChatHistory::get_messages() const {
     std::shared_lock<std::shared_mutex> lock(messages_mutex);
     if (messages.empty()) {

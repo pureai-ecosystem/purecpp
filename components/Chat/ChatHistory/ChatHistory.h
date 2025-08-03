@@ -20,7 +20,12 @@ public:
     ChatHistory();
     void add_message(const std::shared_ptr<BaseMessage> &message);
     void add_message(const std::vector<std::shared_ptr<BaseMessage>> &messages);
+
+
     std::vector<std::shared_ptr<BaseMessage>> get_messages() const;
+    
+
+
     void clear();
 
     // Benchmark-specific method for high-performance testing

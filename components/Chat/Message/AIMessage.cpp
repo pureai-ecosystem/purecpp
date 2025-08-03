@@ -13,5 +13,9 @@ std::string AIMessage::get_content() const {
     return content;
 }
 
+inline AIMessage AIMessage::operator+(const AIMessage& a) const{
+    return AIMessage(content + a.content);
+}
+
 } // namespace chat
 } // namespace purecpp
