@@ -40,11 +40,13 @@ class RagPureAIConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
         self.requires("libcurl/8.10.1")
         self.requires("redis-plus-plus/1.3.13")
-
+        self.requires("gumbo-parser/0.10.1")
+        self.requires("spdlog/1.13.0")
 
     def configure(self):
         if self.options.CURL_STATIC_LINKING:
             self.options["libcurl"].shared = False
+        self.options["spdlog"].header_only = True
 
     def generate(self):
         env = VirtualBuildEnv(self)
