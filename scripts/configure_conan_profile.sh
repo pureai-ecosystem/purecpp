@@ -21,7 +21,7 @@ printf "$LINE_BRK$SEGMENT"
 printf "$LINE_BRK$SEGMENT"
 printf "$TAG Finding\n"
 
-PROFILE_DIR=$(find ~ -type d -wholename "*/.conan2/profiles" | head -n 1 || true)
+PROFILE_DIR=$(find . -type d -wholename "*/.conan2/profiles" | head -n 1 || true)
 [ -z "$PROFILE_DIR" ] && PROFILE_DIR="$HOME/.conan2/profiles" && mkdir -p "$PROFILE_DIR"
 
 printf "$TAG Found at $PROFILE_DIR\n"
@@ -37,9 +37,9 @@ cat << EOF > "$PROFILE_DIR/default"
 arch=x86_64
 build_type=Release
 compiler=gcc
-compiler.cppstd=17
+compiler.cppstd=20
 compiler.libcxx=libstdc++11
-compiler.version=11
+compiler.version=13
 os=Linux
 EOF
 
