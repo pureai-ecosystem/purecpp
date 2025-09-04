@@ -1,40 +1,39 @@
 ### C++ ###
 # Prerequisites
-*.d
+**/*.d
 
 # Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+**/*.slo
+**/*.lo
+**/*.o
+**/*.obj
 
 # Precompiled Headers
-*.gch
-*.pch
+**/*.gch
+**/*.pch
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+**/*.so
+**/*.dylib
+**/*.dll
 
 # Fortran module files
-*.mod
-*.smod
+**/*.mod
+**/*.smod
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+**/*.lai
+**/*.la
+**/*.a
+**/*.lib
 
 # Executables
-*.exe
-*.out
-*.app
+**/*.exe
+**/*.out
+**/*.app
 
 ### Python ###
-pycache/
-__pycache__/
+*pycache*/
 .pytest_cache/
 test_bindings.py
 .pyd
@@ -46,20 +45,18 @@ CMakeFiles/
 bkp/
 build/
 models/
-libs/libtorch
+
 !libs/tokenizers-cpp
 !libs/openai-cpp
 
 libtorch*.zip
-libtorch-cxx11-abi-shared*
-libtorch-cxx11-abi-shared-with-deps-2.5.1+cpu.zip
+libs/libtorch
 
-models
 conan.lock
 libtorch/
 extern/*
 
-openai_api_key*
+**/*openai_api_key*
 
 package/build/
 package/dist/
@@ -67,10 +64,11 @@ packer
 package/*.egg-info
 
 .env
-.venv/
-.venv*/
-.vscode/
-.vs/
+.venv/*
+.venv*/*
+.vscode/*
+.vs/*
+venv/*
 
 tests/
 compile_commands.json
