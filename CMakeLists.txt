@@ -38,13 +38,31 @@ find_package(nlohmann_json REQUIRED)
 find_package(CURL REQUIRED)
 find_package(onnxruntime REQUIRED)
 find_package(redis++ REQUIRED)
+option(VDB_WITH_ORACLE "Build Oracle AI Vector backend" ON)
 
-execute_process(
-    COMMAND "${Python3_EXECUTABLE}" -c
-        "import sysconfig; import pathlib; site_packages = sysconfig.get_paths()['purelib']; print(str(pathlib.Path(site_packages).resolve()))"
-    OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+if (VDB_WITH_ORACLE)
+    include(FetchContent)
+
+    # 1. Faz download e descompacta
+    FetchContent_Declare(
+        odpic
+        URL https://github.com/oracle/odpi/archive/refs/tags/v5.6.0.tar.gz
+        SYSTEM
+    )
+    FetchContent_Populate(odpic)      # gera odpic_SOURCE_DIR / odpic_BINARY_DIR
+
+    # 2. Compila tudo que for .c dentro de src/
+    file(GLOB_RECURSE ODPIC_SOURCES
+         ${odpic_SOURCE_DIR}/src/*.c)
+
+    add_library(odpic STATIC ${ODPIC_SOURCES})
+    target_include_directories(odpic PUBLIC
+        ${odpic_SOURCE_DIR}/include)
+
+    # 3. Alias oficial
+    add_library(ODPI-C::odpic ALIAS odpic)
+endif()
+
 
 # Protobuf
 find_package(Protobuf REQUIRED)
@@ -93,6 +111,12 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Sources
 file(GLOB_RECURSE VDB_SRCS ${CMAKE_SOURCE_DIR}/components/VectorDatabase/src/*.cpp)
+
+if(VDB_WITH_ORACLE)
+    list(APPEND VDB_SRCS
+        ${CMAKE_SOURCE_DIR}/components/VectorDatabase/src/backends/oracle_backend.cpp)
+endif()
+
 
 set(RagPUREAI_BINDING_SRCS
     ${CMAKE_SOURCE_DIR}/src/binding.cpp
@@ -180,7 +204,11 @@ target_link_libraries(RagPUREAILib PUBLIC
     CURL::libcurl
     ${Python3_LIBRARIES}
     ${TORCH_LIBRARIES}
+
 )
+if(VDB_WITH_ORACLE)
+    target_link_libraries(RagPUREAILib PUBLIC ODPI-C::odpic)
+endif()
 
 # Binding with Pybind11
 pybind11_add_module(RagPUREAI ${RagPUREAI_BINDING_SRCS})
