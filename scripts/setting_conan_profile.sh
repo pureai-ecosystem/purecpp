@@ -33,15 +33,15 @@ printf "$LINE_BRK$SEGMENT"
 printf "$TAG Writing default profile\n"
 
 
-# New Setup (old had compiler.cppstd=17 and compiler.version=11)
+# Old Setup (New was set to compiler.cppstd=20 and compiler.version=13. But was resulting in issues.)
 cat << EOF > "$PROFILE_DIR/default"
 [settings]
 arch=x86_64
 build_type=Release
 compiler=gcc
-compiler.cppstd=20
+compiler.cppstd=17
 compiler.libcxx=libstdc++11
-compiler.version=13
+compiler.version=11
 os=Linux
 EOF
 
