@@ -1,32 +1,32 @@
 # Use the official manylinux image (compatible with Python packaging standards)
 FROM quay.io/pypa/manylinux_2_28_x86_64
 
-# Add Python 3.12 binaries to PATH (provided by the manylinux image)
+# Add Python 3.12 binaries to PATH
 ENV PATH="/opt/python/cp312-cp312/bin:${PATH}"
 
 # Set working directory
 WORKDIR /app
 
-# Install GCC 13 and common development tools using YUM (not APT!)
+# Install development tools, Python deps, Rust, and cleanup to save space
 RUN yum install -y \
-    gcc gcc-c++ make cmake git curl wget \
-    ninja-build libffi-devel openssl-devel \
-    protobuf-devel gflags-devel zlib-devel \
-    unzip nano \
-    openblas-devel
+      gcc gcc-c++ make git curl wget \
+      ninja-build libffi-devel openssl-devel \
+      protobuf-devel gflags-devel zlib-devel \
+      openblas-devel unzip\
+  && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+  && yum clean all \
+  && rm -rf /var/cache/yum
 
-# Install Rust (for building Rust-based Python extensions, if needed)
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-# Add Rust binaries to PATH
+# Add Rust to PATH
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Upgrade pip and install required Python packages globally
-RUN python3 -m pip install --upgrade pip setuptools wheel && \
-    pip install build conan cmake requests twine pybind11 numpy
+# Upgrade pip & install Python build tools and ML packages
+RUN python3 -m pip install --upgrade pip setuptools wheel \
+  && pip install --no-cache-dir \
+      build conan cmake requests \
+      pybind11 numpy \
+      torch transformers \
+      onnx onnxruntime optimum
 
-# Install common ML and ONNX tooling
-RUN pip install torch transformers onnx onnxruntime optimum
-
-# Default shell for container
+# Set default shell
 CMD ["/bin/bash"]
