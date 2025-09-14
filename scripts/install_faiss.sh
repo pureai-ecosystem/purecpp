@@ -11,7 +11,20 @@
 #   FAISS_TAG=v1.8.0 ./install_faiss_cpu.sh   # pin to a tag/branch (default v1.8.0)
 # =============================================================================
 
+#-----------------------------------------
+#================= LOGGIN ================
+#-----------------------------------------
 set -euo pipefail
+
+TAG="[$(basename "${BASH_SOURCE[0]}")]"
+LINE_BRK="\n\n"
+SEGMENT="===========================================================\n"
+
+printf "$SEGMENT$SEGMENT$SEGMENT"
+printf "                   $TAG$LINE_BRK"
+printf "$SEGMENT"
+printf "$LINE_BRK"
+#-----------------------------------------
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Elevation helper: use sudo only when needed and available
@@ -123,4 +136,15 @@ FOUND_LIB="$(find "$FAISS_DIR/build/faiss" -maxdepth 1 -name 'libfaiss.*' -print
 if [[ -n "${FOUND_LIB}" && -e "${FOUND_LIB}" ]]; then
   echo "[ok] FAISS built successfully."
   echo "[out] Headers : $FAISS_DIR/faiss/"
-  echo "[out] Library : $FOUND
+  echo "[out] Library : $FOUND"
+
+  
+#-----------------------------------------
+
+#-----------------------------------------
+#================= ENDING ================
+#-----------------------------------------
+printf "$SEGMENT$SEGMENT$SEGMENT"
+printf "\n\n\n\n\n".
+#-----------------------------------------
+

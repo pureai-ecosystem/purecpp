@@ -1,17 +1,19 @@
 #!/bin/bash
 set -e
 
+#-----------------------------------------
+#================= LOGGIN ================
+#-----------------------------------------
 TAG="[$(basename "${BASH_SOURCE[0]}")]"
 LINE_BRK="\n\n"
 SEGMENT="===========================================================\n"
 
-printf "$SEGMENT"
-printf "$SEGMENT"
-printf "$SEGMENT"
-printf "                   $TAG"
+printf "$SEGMENT$SEGMENT$SEGMENT"
+printf "                   $TAG$LINE_BRK"
+#-----------------------------------------
 
 #-----------------------------------------
-printf "$LINE_BRK$SEGMENT"
+printf "$SEGMENT"
 printf "$TAG conan profile detect --force\n"
 conan profile detect --force
 #-----------------------------------------
@@ -57,5 +59,9 @@ printf "$SEGMENT\n"
 
 printf "\nHard-check with: cat < $PROFILE_DIR/default$LINE_BRK"
 
+#-----------------------------------------
+#================= ENDING ================
+#-----------------------------------------
 printf "$SEGMENT$SEGMENT$SEGMENT"
-printf "\n\n\n\n\n"
+printf "\n\n\n\n\n".
+#-----------------------------------------
