@@ -1,10 +1,9 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 #-----------------------------------------
 #================= LOGGIN ================
 #-----------------------------------------
-set -euo pipefail
 
 TAG="[$(basename "${BASH_SOURCE[0]}")]"
 LINE_BRK="\n\n"
