@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-set -e
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+set -euo pipefail
 
 #-----------------------------------------
 #================= LOGGING ===============
 #-----------------------------------------
-set -euo pipefail
-
 TAG="[$(basename "${BASH_SOURCE[0]}")]"
 LINE_BRK="\n\n"
 SEGMENT="===========================================================\n"
@@ -18,6 +15,9 @@ printf "$LINE_BRK"
 #-----------------------------------------
 
 
+#-----------------------------------------
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 pip install build conan cmake requests pybind11
 
 "$SCRIPT_DIR/setting_conan_profile.sh"
@@ -27,7 +27,7 @@ pip install build conan cmake requests pybind11
 
 
 "$SCRIPT_DIR/faiss_installer.sh"
-
+#-----------------------------------------
 
 
 #-----------------------------------------
