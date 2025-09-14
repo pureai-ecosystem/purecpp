@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+
+# =============================================================================
+# FAISS CPU Installer Script (C++ only)
+# -----------------------------------------------------------------------------
+# Works on Ubuntu/Debian (APT) and manylinux/CentOS-like (YUM) by auto-detecting
+# the package manager. It installs build deps and builds FAISS (CPU-only) into
+# ../libs/faiss relative to the current working directory.
+# -----------------------------------------------------------------------------
+# Usage (optional):
+#   FAISS_TAG=v1.8.0 ./install_faiss_cpu.sh   # pin to a tag/branch (default v1.8.0)
+# =============================================================================
+
 #-----------------------------------------
 #================= LOGGING ===============
 #-----------------------------------------
@@ -15,7 +27,10 @@ printf "$SEGMENT"
 printf "$LINE_BRK"
 #-----------------------------------------
 
-# sudo se necessário
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Elevation helper: use sudo only when needed and available
+# ─────────────────────────────────────────────────────────────────────────────
 SUDO=""
 if [[ "$(id -u)" -ne 0 ]]; then
   if command -v sudo >/dev/null 2>&1; then
@@ -27,7 +42,9 @@ if [[ "$(id -u)" -ne 0 ]]; then
   fi
 fi
 
-# Detecta gerenciador de pacotes
+# ─────────────────────────────────────────────────────────────────────────────
+# Detect package manager
+# ─────────────────────────────────────────────────────────────────────────────
 PKG_MANAGER=""
 if command -v apt-get >/dev/null 2>&1; then
   PKG_MANAGER="apt"
@@ -40,7 +57,9 @@ else
   exit 1
 fi
 
-# Dependências
+# ─────────────────────────────────────────────────────────────────────────────
+# Install dependencies
+# ─────────────────────────────────────────────────────────────────────────────
 echo "[pkg] Installing build dependencies..."
 if [[ "$PKG_MANAGER" == "apt" ]]; then
   $SUDO apt-get update -y
@@ -54,7 +73,9 @@ else
     zlib-devel unzip openblas-devel pkgconf-pkg-config binutils
 fi
 
-# Pastas / TAG
+# ─────────────────────────────────────────────────────────────────────────────
+# Prepare destination
+# ─────────────────────────────────────────────────────────────────────────────
 PROJ_DIR="$(pwd)"
 FAISS_DIR="${PROJ_DIR}/../libs/faiss"
 FAISS_TAG="${FAISS_TAG:-v1.8.0}"
@@ -63,25 +84,27 @@ echo "[fs] Preparing ${FAISS_DIR} (fresh clone)"
 rm -rf "$FAISS_DIR"
 mkdir -p "$(dirname "$FAISS_DIR")"
 
-# Clone
+# ─────────────────────────────────────────────────────────────────────────────
+# Clone & build (CPU-only)
+# ─────────────────────────────────────────────────────────────────────────────
 echo "[git] Cloning FAISS (${FAISS_TAG})..."
 git clone --branch "$FAISS_TAG" --single-branch --depth 1 \
   https://github.com/facebookresearch/faiss.git "$FAISS_DIR"
 
 cd "$FAISS_DIR"
 
-# Ninja se disponível
+# Prefer Ninja if available for faster builds
 GEN_ARGS=()
 if command -v ninja >/dev/null 2>&1; then
   GEN_ARGS+=( -G Ninja )
 fi
 
-# Toggles de build/instalação
+# Build/Install Toggles
 BUILD_SHARED="${BUILD_SHARED:-OFF}"              # export BUILD_SHARED=ON para .so
 DO_INSTALL="${DO_INSTALL:-ON}"                   # export DO_INSTALL=OFF para pular install
 INSTALL_PREFIX="${INSTALL_PREFIX:-${FAISS_DIR}/_install}"
 
-# Paralelismo com fallback
+# Parallelism with fallback
 JOBS="$( (command -v nproc >/dev/null && nproc) || getconf _NPROCESSORS_ONLN || echo 2 )"
 
 echo "[cmake] Configuring (CPU-only, Release)..."
@@ -99,13 +122,15 @@ cmake -B build "${GEN_ARGS[@]}" \
 echo "[cmake] Building (target: faiss) with ${JOBS} jobs..."
 cmake --build build --target faiss --config Release --parallel "${JOBS}"
 
-# Instalação opcional (gera include/ e lib/ e config do package)
+# Optional installation (generates include/ and lib/ and package config)
 if [[ "${DO_INSTALL}" == "ON" ]]; then
   echo "[cmake] Installing to ${INSTALL_PREFIX}..."
   cmake --install build --component faiss 2>/dev/null || cmake --install build
 fi
 
-# Localiza artefatos
+# ─────────────────────────────────────────────────────────────────────────────
+# Locate artifacts
+# ─────────────────────────────────────────────────────────────────────────────
 if [[ "${BUILD_SHARED}" == "ON" ]]; then
   PREFERRED="libfaiss.so"
   FALLBACK="libfaiss.a"
@@ -133,7 +158,7 @@ else
   exit 2
 fi
 
-# Checagens pós-build úteis
+# Useful post-build checks
 if command -v nm >/dev/null 2>&1; then
   echo "[check] nm symbols (grep faiss::IndexFlat...):"
   nm -C "${FOUND_LIB}" | grep -E 'faiss::IndexFlat' | head || true
