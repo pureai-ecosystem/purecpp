@@ -4,7 +4,11 @@ set -x
 
 # sed -i s/compiler.version=.*/compiler.version=11/g ~/.conan2/profiles/default
 
-conan install . --build=missing
+rm -fr build conan.lock
+
+conan lock create ./src --build=missing
+conan install ./src --build=missing
+
 
 cmake \
   --preset conan-release \
