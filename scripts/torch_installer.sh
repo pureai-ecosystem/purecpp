@@ -25,6 +25,7 @@ wget ${URL} -O ${ZIP}
 mkdir -p ./libs/libtorch
 unzip ${ZIP} -d ./libs/libtorch
 mv ./libs/libtorch/libtorch ./libs/libtorch/cpu
+rm -f *.zip 
 #-----------------------------------------
 
 #-----------------------------------------
