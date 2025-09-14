@@ -2,8 +2,6 @@
 set -e
 set -x 
 
-# sed -i s/compiler.version=.*/compiler.version=11/g ~/.conan2/profiles/default
-
 rm -fr build conan.lock
 
 conan lock create ./src --build=missing
@@ -18,4 +16,7 @@ cmake \
   -G "Unix Makefiles"
 
 cmake --build --preset conan-release --parallel $(nproc) --target RagPUREAI --
+
+rm -f ./Sandbox/*.so
+# cp ./src/build/Release/$MOD*.so ./Sandbox/
 
