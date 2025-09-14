@@ -20,14 +20,6 @@ RUN yum install -y \
 # Add Rust to PATH
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Upgrade pip & install Python build tools and ML packages
-# RUN python3 -m pip install --upgrade pip setuptools wheel \
-#   && pip install --no-cache-dir \
-#       build conan cmake requests \
-#       pybind11 numpy \
-#       torch transformers \
-#       onnx onnxruntime optimum
-
 # Set default shell
 CMD ["/bin/bash"]
 

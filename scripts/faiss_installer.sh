@@ -1,16 +1,5 @@
 #!/usr/bin/env bash
 
-# =============================================================================
-# FAISS CPU Installer Script (C++ only)
-# -----------------------------------------------------------------------------
-# Works on Ubuntu/Debian (APT) and manylinux/CentOS-like (YUM) by auto-detecting
-# the package manager. It installs build deps and builds FAISS (CPU-only) into
-# ../libs/faiss relative to the current working directory.
-# -----------------------------------------------------------------------------
-# Usage (optional):
-#   FAISS_TAG=v1.8.0 ./install_faiss_cpu.sh   # pin to a tag/branch (default v1.8.0)
-# =============================================================================
-
 #-----------------------------------------
 #================= LOGGIN ================
 #-----------------------------------------
@@ -26,22 +15,20 @@ printf "$SEGMENT"
 printf "$LINE_BRK"
 #-----------------------------------------
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Elevation helper: use sudo only when needed and available
-# ─────────────────────────────────────────────────────────────────────────────
+
+# sudo se necessário
 SUDO=""
 if [[ "$(id -u)" -ne 0 ]]; then
   if command -v sudo >/dev/null 2>&1; then
     SUDO="sudo"
   else
-    echo "[!] Not running as root and 'sudo' is not available.\n    Re-run as root or install sudo." >&2
+    echo "[!] Not running as root and 'sudo' is not available.
+    Re-run as root or install sudo." >&2
     exit 1
   fi
 fi
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Detect package manager
-# ─────────────────────────────────────────────────────────────────────────────
+# Detecta gerenciador de pacotes
 PKG_MANAGER=""
 if command -v apt-get >/dev/null 2>&1; then
   PKG_MANAGER="apt"
@@ -54,48 +41,21 @@ else
   exit 1
 fi
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Install dependencies
-# ─────────────────────────────────────────────────────────────────────────────
+# Dependências
 echo "[pkg] Installing build dependencies..."
 if [[ "$PKG_MANAGER" == "apt" ]]; then
   $SUDO apt-get update -y
   $SUDO apt-get install -y \
-    cmake \
-    g++ \
-    libopenblas-dev \
-    libgflags-dev \
-    build-essential \
-    python3-dev \
-    git \
-    unzip \
-    wget \
-    pkg-config \
-    ninja-build
+    cmake g++ libopenblas-dev libgflags-dev build-essential \
+    python3-dev git unzip wget pkg-config ninja-build
 else
-  # manylinux/CentOS-like
   $SUDO yum install -y \
-    gcc \
-    gcc-c++ \
-    make \
-    cmake \
-    git \
-    curl \
-    wget \
-    ninja-build \
-    libffi-devel \
-    openssl-devel \
-    protobuf-devel \
-    gflags-devel \
-    zlib-devel \
-    unzip \
-    openblas-devel \
-    pkgconf-pkg-config
+    gcc gcc-c++ make cmake git curl wget ninja-build \
+    libffi-devel openssl-devel protobuf-devel gflags-devel \
+    zlib-devel unzip openblas-devel pkgconf-pkg-config
 fi
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Prepare destination
-# ─────────────────────────────────────────────────────────────────────────────
+# Pastas / TAG
 PROJ_DIR="$(pwd)"
 FAISS_DIR="${PROJ_DIR}/../libs/faiss"
 FAISS_TAG="${FAISS_TAG:-v1.8.0}"
@@ -104,15 +64,14 @@ echo "[fs] Preparing ${FAISS_DIR} (fresh clone)"
 rm -rf "$FAISS_DIR"
 mkdir -p "$(dirname "$FAISS_DIR")"
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Clone & build (CPU-only)
-# ─────────────────────────────────────────────────────────────────────────────
+# Clone
 echo "[git] Cloning FAISS (${FAISS_TAG})..."
-git clone --branch "$FAISS_TAG" --depth 1 https://github.com/facebookresearch/faiss.git "$FAISS_DIR"
+git clone --branch "$FAISS_TAG" --single-branch --depth 1 \
+  https://github.com/facebookresearch/faiss.git "$FAISS_DIR"
 
 cd "$FAISS_DIR"
 
-# Prefer Ninja if available for faster builds
+# Ninja se disponível
 GEN_ARGS=()
 if command -v ninja >/dev/null 2>&1; then
   GEN_ARGS+=( -G Ninja )
@@ -122,29 +81,29 @@ echo "[cmake] Configuring (CPU-only, Release)..."
 cmake -B build "${GEN_ARGS[@]}" \
   -DFAISS_ENABLE_GPU=OFF \
   -DFAISS_ENABLE_PYTHON=OFF \
-  -DFAISS_ENABLE_TESTS=OFF \
-  -DCMAKE_BUILD_TYPE=Release
+  -DBUILD_TESTING=OFF \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_CXX_STANDARD=17 \
+  -DCMAKE_POLICY_DEFAULT_CMP0135=NEW
 
-echo "[cmake] Building..."
-cmake --build build --config Release --parallel "$(nproc)"
+echo "[cmake] Building (target: faiss)..."
+cmake --build build --target faiss --config Release --parallel "$(nproc)"
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Locate artifacts
-# ─────────────────────────────────────────────────────────────────────────────
+# Localiza artefatos
 FOUND_LIB="$(find "$FAISS_DIR/build/faiss" -maxdepth 1 -name 'libfaiss.*' -print -quit 2>/dev/null || true)"
 
 if [[ -n "${FOUND_LIB}" && -e "${FOUND_LIB}" ]]; then
   echo "[ok] FAISS built successfully."
   echo "[out] Headers : $FAISS_DIR/faiss/"
-  echo "[out] Library : $FOUND"
-
-  
-#-----------------------------------------
+  echo "[out] Library : $FOUND_LIB"
+else
+  echo "[x] Build finished but libfaiss was not found under build/faiss/" >&2
+  exit 2
+fi
 
 #-----------------------------------------
 #================= ENDING ================
 #-----------------------------------------
 printf "$SEGMENT$SEGMENT$SEGMENT"
-printf "\n\n\n\n\n".
+printf "\n\n\n\n\n"
 #-----------------------------------------
-
