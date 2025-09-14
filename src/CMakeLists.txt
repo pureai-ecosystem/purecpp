@@ -76,6 +76,7 @@ set(CMAKE_BUILD_RPATH
     "\$ORIGIN/"
     "\$ORIGIN/purecpp/d_libs/libtorch/cpu/lib"
 )
+
 set(CMAKE_INSTALL_RPATH
     "${PYTHON_SITE_PACKAGES}/*/d_libs/libtorch/cpu/lib"
     "\$ORIGIN/purecpp.libs"
@@ -88,6 +89,7 @@ set(CMAKE_INSTALL_RPATH
     "\$ORIGIN/"
     "\$ORIGIN/purecpp/d_libs/libtorch/cpu/lib"
 )
+
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-new-dtags")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -95,7 +97,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 file(GLOB_RECURSE VDB_SRCS ${CMAKE_SOURCE_DIR}/components/VectorDatabase/src/*.cpp)
 
 set(RagPUREAI_BINDING_SRCS
-    ${CMAKE_SOURCE_DIR}/src/binding.cpp
+    ${CMAKE_SOURCE_DIR}/binding.cpp
     ${CMAKE_SOURCE_DIR}/components/VectorDatabase/python/binding_vectordb.cpp
 )
 
