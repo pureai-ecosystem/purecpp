@@ -1,12 +1,54 @@
 #!/bin/bash
 set -e
 set -x 
+set -euo pipefail
 
-rm -fr build conan.lock
+#-----------------------------------------
+#================= LOGGING ===============
+#-----------------------------------------
+TAG="[$(basename "${BASH_SOURCE[0]}")]"
+LINE_BRK="\n\n"
+SEGMENT="===========================================================\n"
+#-----------------------------------------
+
+#-----------------------------------------
+printf "$SEGMENT$SEGMENT$SEGMENT"
+printf "              Begin $TAG$LINE_BRK"
+printf "$SEGMENT"
+printf "$LINE_BRK"
+#-----------------------------------------
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Conan
+# ─────────────────────────────────────────────────────────────────────────────
+#-----------------------------------------
+printf "              Begin [CONAN]$LINE_BRK"
+printf "$SEGMENT"
+printf "$LINE_BRK"
+#-----------------------------------------
+
+rm -fr ./src/build ./src/conan.lock
 
 conan lock create ./src --build=missing
 conan install ./src --build=missing
 
+#-----------------------------------------
+#================= ENDING ================
+#-----------------------------------------
+printf "$SEGMENT"
+printf "             Finish [CONAN]\n"
+printf "$SEGMENT$SEGMENT$SEGMENT\n"
+#-----------------------------------------
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Build
+# ─────────────────────────────────────────────────────────────────────────────
+#-----------------------------------------
+printf "              Begin [Build]$LINE_BRK"
+printf "$SEGMENT"
+printf "$LINE_BRK"
+#-----------------------------------------
+cd src/
 
 cmake \
   --preset conan-release \
@@ -16,7 +58,27 @@ cmake \
   -G "Unix Makefiles"
 
 cmake --build --preset conan-release --parallel $(nproc) --target RagPUREAI --
+#-----------------------------------------
+#================= ENDING ================
+#-----------------------------------------
+printf "$SEGMENT"
+printf "             Finish [Build]\n"
+printf "$SEGMENT$SEGMENT$SEGMENT\n"
+#-----------------------------------------
 
-rm -f ./Sandbox/*.so
-# cp ./src/build/Release/$MOD*.so ./Sandbox/
+# ─────────────────────────────────────────────────────────────────────────────
+# Sending to Sandbox
+# ─────────────────────────────────────────────────────────────────────────────
+printf "[Last Step] Sending to Sandbox \n"
 
+rm -f ../Sandbox/*.so
+
+# cp ./src/build/Release/.so ../Sandbox/
+
+#-----------------------------------------
+#================= ENDING ================
+#-----------------------------------------
+printf "$SEGMENT"
+printf "             Finish $TAG\n"
+printf "$SEGMENT$SEGMENT$SEGMENT\n"
+#-----------------------------------------

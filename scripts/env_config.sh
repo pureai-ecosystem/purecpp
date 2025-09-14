@@ -34,5 +34,5 @@ pip install build conan cmake requests pybind11
 #================= ENDING ================
 #-----------------------------------------
 printf "                   END\n"
-printf "$SEGMENT$SEGMENT$SEGMENT\n".
+printf "$SEGMENT$SEGMENT$SEGMENT\n"
 #-----------------------------------------
