@@ -32,6 +32,8 @@ printf "$LINE_BRK$SEGMENT"
 printf "$LINE_BRK$SEGMENT"
 printf "$TAG Writing default profile\n"
 
+
+# New Setup (old had compiler.cppstd=17 and compiler.version=11)
 cat << EOF > "$PROFILE_DIR/default"
 [settings]
 arch=x86_64
@@ -47,7 +49,15 @@ printf "$LINE_BRK$SEGMENT"
 #-----------------------------------------
 
 printf "$TAG Profile created in: $PROFILE_DIR/default\n"
-printf "\nHard-check with: cat < $PROFILE_DIR/default\n\n"
+printf "$TAG Checking: cat < $PROFILE_DIR/default $LINE_BRK"
+
+cat < $PROFILE_DIR/default
+printf "$LINE_BRK"
+
+printf "$SEGMENT\n"
+
+printf "\nHard-check with: cat < $PROFILE_DIR/default$LINE_BRK"
+
 printf "$SEGMENT"
 printf "$SEGMENT"
 printf "$SEGMENT"
