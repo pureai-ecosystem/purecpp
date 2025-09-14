@@ -43,16 +43,13 @@ CMakeUserPresets.json
 CMakeFiles/
 
 bkp/
-build/
+**/build/
 
 # Ignore everything in the models folder
 models/*
 # But DO NOT ignore these two files
 !models/hf_extract_model.py
 !models/hf_model_to_onnx.py
-
-!libs/tokenizers-cpp
-!libs/openai-cpp
 
 libtorch*.zip
 libs/libtorch
@@ -63,21 +60,19 @@ extern/*
 
 **/*openai_api_key*
 
-package/build/
-package/dist/
+**/build/*
+**/dist/*
 packer
-package/*.egg-info
+**/*.egg-info
 
 .env
 .venv/*
 .venv*/*
 .vscode/*
 .vs/*
-venv/*
+venv
 
-tests/
 compile_commands.json
 .cache/
-*.pdf
-*.docx
-test*
+**/*.pdf
+**/*.docx
