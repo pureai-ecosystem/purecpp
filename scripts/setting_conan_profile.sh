@@ -14,7 +14,6 @@ printf "                   $TAG"
 printf "$LINE_BRK$SEGMENT"
 printf "$TAG conan profile detect --force\n"
 conan profile detect --force
-printf "$LINE_BRK$SEGMENT"
 #-----------------------------------------
 
 #-----------------------------------------
@@ -25,12 +24,12 @@ PROFILE_DIR=$(find . -type d -wholename "*/.conan2/profiles" | head -n 1 || true
 [ -z "$PROFILE_DIR" ] && PROFILE_DIR="$HOME/.conan2/profiles" && mkdir -p "$PROFILE_DIR"
 
 printf "$TAG Found at $PROFILE_DIR\n"
-printf "$LINE_BRK$SEGMENT"
+
 #-----------------------------------------
 
 #-----------------------------------------
 printf "$LINE_BRK$SEGMENT"
-printf "$TAG Writing default profile\n"
+printf "$TAG Writing default profile$LINE_BRK"
 
 
 # Old Setup (New was set to compiler.cppstd=20 and compiler.version=13. But was resulting in issues.)
@@ -58,6 +57,5 @@ printf "$SEGMENT\n"
 
 printf "\nHard-check with: cat < $PROFILE_DIR/default$LINE_BRK"
 
-printf "$SEGMENT"
-printf "$SEGMENT"
-printf "$SEGMENT"
+printf "$SEGMENT$SEGMENT$SEGMENT"
+printf "\n\n\n\n\n"

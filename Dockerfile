@@ -5,7 +5,7 @@ FROM quay.io/pypa/manylinux_2_28_x86_64
 ENV PATH="/opt/python/cp312-cp312/bin:${PATH}"
 
 # Set working directory
-WORKDIR /app
+WORKDIR /home
 
 # Install development tools, Python deps, Rust, and cleanup to save space
 RUN yum install -y \
