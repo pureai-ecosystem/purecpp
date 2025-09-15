@@ -1,4 +1,4 @@
-#include <faiss_backend/faiss_backend.h>
+#include <FAISSBackend/faiss_backend.h>
 
 std::optional<faiss_backend::PureResult>
 faiss_backend::PureL2(std::string query, const Chunk::ChunkDefault& chunks, size_t pos, int k) {
