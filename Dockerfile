@@ -1,9 +1,6 @@
 # Use the official manylinux image (compatible with Python packaging standards)
 FROM quay.io/pypa/manylinux_2_28_x86_64
 
-# Add Python 3.12 binaries to PATH
-ENV PATH="/opt/python/cp312-cp312/bin:${PATH}"
-
 # Set working directory
 WORKDIR /home
 
@@ -17,8 +14,8 @@ RUN yum install -y \
   && yum clean all \
   && rm -rf /var/cache/yum
 
-# Add Rust to PATH
-ENV PATH="/root/.cargo/bin:${PATH}"
+# Add Rust to PATH and Python 3.12 binaries to PATH
+ENV PATH="/root/.cargo/bin:/opt/python/cp312-cp312/bin:${PATH}"
 
 # Set default shell
 CMD ["/bin/bash"]
