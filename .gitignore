@@ -53,7 +53,7 @@ models/*
 
 libtorch*.zip
 libs/libtorch
-libs/faiss/
+libs/faiss/*
 
 conan.lock
 libtorch/
