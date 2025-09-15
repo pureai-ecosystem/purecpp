@@ -12,7 +12,7 @@ set(CMAKE_BUILD_TYPE "Release")
 # ─────────────────────────────────────────────────────────────────────────────
 #------- Caminhos para FAISS -------
 # ─────────────────────────────────────────────────────────────────────────────
-set(FAISS_ROOT "${CMAKE_BINARY_DIR}../libs/faiss")
+set(FAISS_ROOT "${CMAKE_BINARY_DIR}/../../../libs/faiss")
 set(FAISS_INCLUDE_DIR "${FAISS_ROOT}/faiss")
 set(FAISS_LIB_DIR "${FAISS_ROOT}/build/faiss") # Must contain libfaiss.a
 

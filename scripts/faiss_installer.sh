@@ -113,6 +113,7 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 # BUILD: Configure and compile FAISS (CPU-only)
 # ─────────────────────────────────────────────────────────────────────────────
+cd "$FAISS_DIR"
 
 echo "Configuring CMake for CPU-only FAISS build..."
 cmake -B build \
@@ -125,6 +126,8 @@ echo "Building FAISS..."
 
 cmake --build build --parallel 3
 # cmake --build build -j$(nproc)
+
+cd "$PROJ_DIR"
 
 echo "FAISS has been successfully built."
 
