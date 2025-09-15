@@ -241,7 +241,7 @@ set(RagPUREAI_IMPL_SRCS
     ${CMAKE_SOURCE_DIR}/../components/Chunk/ChunkQuery/ChunkQuery.cpp
     
     ${CMAKE_SOURCE_DIR}/../components/CleanData/ContentCleaner/ContentCleaner.cpp
-    ${CMAKE_SOURCE_DIR}/../components/FAISSVectorSearch/FAISSVectorSearch.cpp
+    ${CMAKE_SOURCE_DIR}/../components/FAISSBackend/faiss_backend.cpp
 )
 
 
@@ -273,7 +273,7 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/../components/CleanData/ContentCleaner
     ${CMAKE_SOURCE_DIR}/../components/Embedding/EmbeddingOpenAI
     ${CMAKE_SOURCE_DIR}/../components/Embedding
-    ${CMAKE_SOURCE_DIR}/../components/FAISSVectorSearch
+    ${CMAKE_SOURCE_DIR}/../components/FAISSBackend
     ${CMAKE_SOURCE_DIR}/../libs/faiss/
 )
 

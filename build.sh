@@ -80,12 +80,12 @@ printf "$SEGMENT$SEGMENT$SEGMENT\n"
 # ─────────────────────────────────────────────────────────────────────────────
 # Sending to Sandbox
 # ─────────────────────────────────────────────────────────────────────────────
-sleep 1
+
 printf "[Last Step] Sending to Sandbox \n"
-sleep 1
+
 rm -f ../Sandbox/*.so
-sleep 1
-cp ./src/build/Release/RagPUREAI.cpython*.so ../Sandbox/
+
+cp ./build/Release/RagPUREAI.cpython*.so ../Sandbox/
 
 #-----------------------------------------
 #================= ENDING ================

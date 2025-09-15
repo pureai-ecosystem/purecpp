@@ -1,7 +1,7 @@
-#include <FAISSVectorSearch/FAISSVectorSearch.h>
+#include <faiss_backend/faiss_backend.h>
 
-std::optional<FAISSVectorSearch::PureResult>
-FAISSVectorSearch::PureL2(std::string query, const Chunk::ChunkDefault& chunks, size_t pos, int k) {
+std::optional<faiss_backend::PureResult>
+faiss_backend::PureL2(std::string query, const Chunk::ChunkDefault& chunks, size_t pos, int k) {
     Chunk::ChunkQuery cq(query, {}, &chunks, pos);
     size_t nq, d, ndb;
     std::tie(nq, d, ndb) = cq.getPar();
@@ -36,13 +36,13 @@ FAISSVectorSearch::PureL2(std::string query, const Chunk::ChunkDefault& chunks, 
     if (D.size() > 0) {
         std::cout << "Nearest index: " << I[0] << std::endl;
         std::cout << "Distance: " << D[0] << std::endl;
-        return FAISSVectorSearch::PureResult{I, D};
+        return faiss_backend::PureResult{I, D};
     }
     return {};
 }
 
-std::optional<FAISSVectorSearch::PureResult>
-FAISSVectorSearch::PureIP(std::string query, const Chunk::ChunkDefault& chunks, size_t pos, int k) {
+std::optional<faiss_backend::PureResult>
+faiss_backend::PureIP(std::string query, const Chunk::ChunkDefault& chunks, size_t pos, int k) {
     Chunk::ChunkQuery cq(query, {}, &chunks, pos);
     size_t nq, d, ndb;
     std::tie(nq, d, ndb) = cq.getPar();
@@ -77,13 +77,13 @@ FAISSVectorSearch::PureIP(std::string query, const Chunk::ChunkDefault& chunks, 
     if (D.size() > 0) {
         std::cout << "Most similar index: " << I[0] << std::endl;
         std::cout << "Similarity score: " << D[0] << std::endl;
-        return FAISSVectorSearch::PureResult{I, D};
+        return faiss_backend::PureResult{I, D};
     }
     return {};
 }
 
-std::optional<FAISSVectorSearch::PureResult>
-FAISSVectorSearch::PureCosine(std::string query, const Chunk::ChunkDefault& chunks, size_t pos, int k) {
+std::optional<faiss_backend::PureResult>
+faiss_backend::PureCosine(std::string query, const Chunk::ChunkDefault& chunks, size_t pos, int k) {
     Chunk::ChunkQuery cq(query, {}, &chunks, pos);
     size_t nq, d, ndb;
     std::tie(nq, d, ndb) = cq.getPar();
@@ -118,12 +118,12 @@ FAISSVectorSearch::PureCosine(std::string query, const Chunk::ChunkDefault& chun
     index.search(nq, normalized_query.data(), k, D.data(), I.data());
 
     if (D.size() > 0) {
-        return FAISSVectorSearch::PureResult{I, D};
+        return faiss_backend::PureResult{I, D};
     }
     return {};
 }
 
-void FAISSVectorSearch::normalize_vector(float* vec, size_t d) {
+void faiss_backend::normalize_vector(float* vec, size_t d) {
     float norm = 0.0f;
     for (size_t i = 0; i < d; ++i) {
         norm += vec[i] * vec[i];
