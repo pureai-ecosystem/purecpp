@@ -84,7 +84,7 @@ printf "[Last Step] Sending to Sandbox \n"
 
 rm -f ../Sandbox/*.so
 
-# cp ./src/build/Release/.so ../Sandbox/
+cp ./src/build/Release/RagPUREAI.cpython*.so ../Sandbox/
 
 #-----------------------------------------
 #================= ENDING ================
