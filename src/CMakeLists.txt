@@ -123,17 +123,17 @@ endif()
 #------- Find other dependencies -------
 # ─────────────────────────────────────────────────────────────────────────────
 find_package(pybind11 REQUIRED)
-find_package(pdfium REQUIRED)          # Biblioteca para manipulação de PDFs
-find_package(OpenMP REQUIRED)          # OpenMP primeiro, pois pode ser usado por outros pacotes
-find_package(ICU REQUIRED)             # Biblioteca de internacionalização
-find_package(miniz REQUIRED)           # Biblioteca de compressão
-find_package(rapidxml REQUIRED)        # Parser XML
-find_package(beauty REQUIRED)          # HTTP Server (geralmente independente)
-find_package(lexbor REQUIRED)          # Biblioteca de parsing HTML
-find_package(re2 REQUIRED)             # Biblioteca de regex eficiente
-find_package(nlohmann_json REQUIRED)   # Biblioteca de JSON (não tem dependências)
-#find_package(fmt REQUIRED)            # Biblioteca de formatação de strings em casos aonde n tem format em compiladores mais antigos
-find_package(CURL REQUIRED)            # Biblioteca para requisições HTTP
+find_package(pdfium REQUIRED)         
+find_package(OpenMP REQUIRED)         
+find_package(ICU REQUIRED)            
+find_package(miniz REQUIRED)           
+find_package(rapidxml REQUIRED)       
+find_package(beauty REQUIRED)          
+find_package(lexbor REQUIRED)         
+find_package(re2 REQUIRED)            
+find_package(nlohmann_json REQUIRED)  
+#find_package(fmt REQUIRED)            
+find_package(CURL REQUIRED)            
 find_package(Threads REQUIRED)         
 
 # ─────────────────────────────────────────────────────────────────────────────
