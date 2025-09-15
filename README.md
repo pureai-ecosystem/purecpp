@@ -3,8 +3,9 @@
 [![Status](https://img.shields.io/badge/status-stable-brightgreen?style=flat-square)]()
 
 **PureCPP is a powerful C++ backend architecture for RAG systems.**\
-Designed for maximum performance and scalability, it integrates vector search, ONNX models, and CPU/CUDA acceleration into a seamless, python integrated framework.\
-This repository provides detailed guidance on how to set up the environment, configure dependencies with Conan, and compile the project using CMake — going beyond a simple build, it shows how to prepare a robust development pipeline.
+Designed for maximum performance and scalability, it integrates vector search, ONNX models, and CPU/CUDA acceleration into a seamless, python integrated framework.
+
+This repository provides detailed guidance on how to set up the environment, configure dependencies and building the project.
 
 ## 📚 Table of Contents
 - [1. Docker Environment Setup](#docker-environment-setup)
