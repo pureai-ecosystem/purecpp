@@ -111,20 +111,6 @@ fi
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CLONE: Download FAISS repository
-# ─────────────────────────────────────────────────────────────────────────────
-
-echo "Removing all files in repository $FAISS_DIR..."
-rm -fr "$FAISS_DIR"
-
-echo "Cloning FAISS repository into $FAISS_DIR..."
-git clone https://github.com/facebookresearch/faiss.git "$FAISS_DIR"
-
-cd "$FAISS_DIR"
-
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 # BUILD: Configure and compile FAISS (CPU-only)
 # ─────────────────────────────────────────────────────────────────────────────
 
