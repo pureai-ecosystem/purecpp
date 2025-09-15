@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+# Script to install and build FAISS (CPU-only) for C++ usage
+# Compatible with CentOS/RHEL systems using yum
+# It clones FAISS into libs/faiss/ and builds it with CMake
 
-# =============================================================================
-# FAISS CPU Installer Script (C++ only)
-# -----------------------------------------------------------------------------
-# Works on Ubuntu/Debian (APT) and manylinux/CentOS-like (YUM) by auto-detecting
-# the package manager. It installs build deps and builds FAISS (CPU-only) into
-# ../libs/faiss relative to the current working directory.
-# -----------------------------------------------------------------------------
-# Usage (optional):
-#   FAISS_TAG=v1.8.0 ./install_faiss_cpu.sh   # pin to a tag/branch (default v1.8.0)
-# =============================================================================
+set -euo pipefail
 
 #-----------------------------------------
 #================= LOGGING ===============
@@ -27,7 +20,6 @@ printf "$SEGMENT"
 printf "$LINE_BRK"
 #-----------------------------------------
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Elevation helper: use sudo only when needed and available
 # ─────────────────────────────────────────────────────────────────────────────
@@ -41,6 +33,8 @@ if [[ "$(id -u)" -ne 0 ]]; then
     exit 1
   fi
 fi
+
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Detect package manager
@@ -57,116 +51,125 @@ else
   exit 1
 fi
 
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-# Install dependencies
+# SETUP: Define directories
 # ─────────────────────────────────────────────────────────────────────────────
-echo "[pkg] Installing build dependencies..."
+
+# Assume the current directory is the project root
+PROJ_DIR=$(pwd)
+
+# Destination directory for FAISS
+FAISS_DIR="${PROJ_DIR}/libs/faiss"
+
+echo "Creating libs/faiss/ directory inside the project..."
+mkdir -p "$FAISS_DIR"
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SYSTEM: Update packages and install dependencies
+# ─────────────────────────────────────────────────────────────────────────────
+
+echo "Updating system packages..."
+
+
+echo "[pkg] Installing required development packages..."
 if [[ "$PKG_MANAGER" == "apt" ]]; then
   $SUDO apt-get update -y
-  $SUDO apt-get install -y \
-    cmake g++ libopenblas-dev libgflags-dev build-essential \
-    python3-dev git unzip wget pkg-config ninja-build binutils
+  $SUDO apt install libgflags-dev -y
+  $SUDO apt install -y cmake g++ libopenblas-dev python3-dev build-essential git
+#   $SUDO apt-get install -y \
+#     cmake g++ libopenblas-dev libgflags-dev build-essential \
+#     python3-dev git unzip wget pkg-config ninja-build binutils
+    
 else
-  $SUDO yum install -y \
-    gcc gcc-c++ make cmake git curl wget ninja-build \
-    libffi-devel openssl-devel protobuf-devel gflags-devel \
-    zlib-devel unzip openblas-devel pkgconf-pkg-config binutils
+    echo "Checking if EPEL is installed..."
+    if ! rpm -q epel-release >/dev/null 2>&1; then
+        echo "Installing EPEL repository..."
+        yum install -y epel-release
+    fi
+
+    $SUDO yum update -y
+    $SUDO yum groupinstall -y "Development Tools"
+    $SUDO yum install -y cmake3 gcc-c++ openblas-devel python3-devel git
+    $SUDO yum install gflags-devel -y
+#   $SUDO yum install -y \
+#     gcc gcc-c++ cmake3 make cmake git curl wget ninja-build \
+#     libffi-devel openssl-devel protobuf-devel gflags-devel \
+#     zlib-devel unzip openblas-devel pkgconf-pkg-config binutils
 fi
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Prepare destination
-# ─────────────────────────────────────────────────────────────────────────────
-PROJ_DIR="$(pwd)"
-FAISS_DIR="${PROJ_DIR}/../libs/faiss"
-FAISS_TAG="${FAISS_TAG:-v1.8.0}"
 
-echo "[fs] Preparing ${FAISS_DIR} (fresh clone)"
-rm -rf "$FAISS_DIR"
-mkdir -p "$(dirname "$FAISS_DIR")"
+# Ensure `cmake` command exists, link it to `cmake3` if missing
+if ! command -v cmake >/dev/null && command -v cmake3 >/dev/null; then
+    echo "Linking cmake3 to cmake..."
+    ln -s /usr/bin/cmake3 /usr/bin/cmake
+fi
+
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Clone & build (CPU-only)
+# CLONE: Download FAISS repository
 # ─────────────────────────────────────────────────────────────────────────────
-echo "[git] Cloning FAISS (${FAISS_TAG})..."
-git clone --branch "$FAISS_TAG" --single-branch --depth 1 \
-  https://github.com/facebookresearch/faiss.git "$FAISS_DIR"
+
+echo "Removing all files in repository $FAISS_DIR..."
+rm -fr "$FAISS_DIR"
+
+echo "Cloning FAISS repository into $FAISS_DIR..."
+git clone https://github.com/facebookresearch/faiss.git "$FAISS_DIR"
 
 cd "$FAISS_DIR"
 
-# Prefer Ninja if available for faster builds
-GEN_ARGS=()
-if command -v ninja >/dev/null 2>&1; then
-  GEN_ARGS+=( -G Ninja )
-fi
 
-# Build/Install Toggles
-BUILD_SHARED="${BUILD_SHARED:-OFF}"              # export BUILD_SHARED=ON para .so
-DO_INSTALL="${DO_INSTALL:-ON}"                   # export DO_INSTALL=OFF para pular install
-INSTALL_PREFIX="${INSTALL_PREFIX:-${FAISS_DIR}/_install}"
-
-# Parallelism with fallback
-JOBS="$( (command -v nproc >/dev/null && nproc) || getconf _NPROCESSORS_ONLN || echo 2 )"
-
-echo "[cmake] Configuring (CPU-only, Release)..."
-cmake -B build "${GEN_ARGS[@]}" \
-  -DBUILD_SHARED_LIBS="${BUILD_SHARED}" \
-  -DFAISS_ENABLE_GPU=OFF \
-  -DFAISS_ENABLE_PYTHON=OFF \
-  -DBUILD_TESTING=OFF \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-  -DCMAKE_CXX_STANDARD=17 \
-  -DCMAKE_POLICY_DEFAULT_CMP0135=NEW \
-  -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
-
-echo "[cmake] Building (target: faiss) with ${JOBS} jobs..."
-cmake --build build --target faiss --config Release --parallel "${JOBS}"
-
-# Optional installation (generates include/ and lib/ and package config)
-if [[ "${DO_INSTALL}" == "ON" ]]; then
-  echo "[cmake] Installing to ${INSTALL_PREFIX}..."
-  cmake --install build --component faiss 2>/dev/null || cmake --install build
-fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Locate artifacts
+# BUILD: Configure and compile FAISS (CPU-only)
 # ─────────────────────────────────────────────────────────────────────────────
-if [[ "${BUILD_SHARED}" == "ON" ]]; then
-  PREFERRED="libfaiss.so"
-  FALLBACK="libfaiss.a"
+
+echo "Configuring CMake for CPU-only FAISS build..."
+cmake -B build \
+    -DFAISS_ENABLE_GPU=OFF \
+    -DFAISS_ENABLE_PYTHON=OFF \
+    -DFAISS_ENABLE_TESTS=OFF \
+    -DCMAKE_BUILD_TYPE=Release
+
+echo "Building FAISS..."
+
+cmake --build build --parallel 3
+# cmake --build build -j$(nproc)
+
+echo "FAISS has been successfully built."
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VERIFY: Locate compiled library and headers
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Find the libfaiss library (static or shared)
+FOUND_LIB=$(find "$FAISS_DIR/build/faiss" -name "libfaiss.*" | head -n 1)
+
+if [ -f "$FOUND_LIB" ]; then
+    echo "Header files located at: $FAISS_DIR/faiss/"
+    echo "Library file found at:   $FOUND_LIB"
 else
-  PREFERRED="libfaiss.a"
-  FALLBACK="libfaiss.so"
+    echo "Warning: libfaiss was not found in the expected directory."
 fi
 
-FOUND_LIB="$(find "$FAISS_DIR/build/faiss" -maxdepth 1 -name "${PREFERRED}" -print -quit 2>/dev/null || true)"
-if [[ -z "${FOUND_LIB}" ]]; then
-  FOUND_LIB="$(find "$FAISS_DIR/build/faiss" -maxdepth 1 -name "${FALLBACK}" -print -quit 2>/dev/null || true)"
-fi
 
-if [[ -n "${FOUND_LIB}" && -e "${FOUND_LIB}" ]]; then
-  echo "[ok] FAISS built successfully."
-  echo "[out] Headers : $FAISS_DIR/faiss/"
-  echo "[out] Library : $FOUND_LIB"
-  if [[ "${DO_INSTALL}" == "ON" ]]; then
-    echo "[out] Install  : ${INSTALL_PREFIX}"
-    echo "       include : ${INSTALL_PREFIX}/include"
-    echo "       lib     : ${INSTALL_PREFIX}/lib"
-  fi
-else
-  echo "[x] Build finished but libfaiss was not found under build/faiss/" >&2
-  exit 2
-fi
 
-# Useful post-build checks
-if command -v nm >/dev/null 2>&1; then
-  echo "[check] nm symbols (grep faiss::IndexFlat...):"
-  nm -C "${FOUND_LIB}" | grep -E 'faiss::IndexFlat' | head || true
-fi
-if [[ "${FOUND_LIB##*.}" == "so" ]] && command -v ldd >/dev/null 2>&1; then
-  echo "[check] ldd on shared library:"
-  ldd "${FOUND_LIB}" || true
-fi
+# ─────────────────────────────────────────────────────────────────────────────
+# INFO: How to link FAISS in your C++ CMake project
+# ─────────────────────────────────────────────────────────────────────────────
+
+echo ""
+echo "You can now link FAISS in your C++ project using:"
+echo ""
+echo '  include_directories(${CMAKE_SOURCE_DIR}/libs/faiss/faiss)'
+echo '  link_directories(${CMAKE_SOURCE_DIR}/libs/faiss/build/faiss)'
+echo '  target_link_libraries(your_target PRIVATE faiss)'
 
 #-----------------------------------------
 #================= ENDING ================
