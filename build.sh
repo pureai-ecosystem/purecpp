@@ -17,6 +17,8 @@ printf "$SEGMENT"
 printf "$LINE_BRK"
 #-----------------------------------------
 
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Conan
 # ─────────────────────────────────────────────────────────────────────────────
@@ -39,6 +41,8 @@ printf "             Finish [CONAN]\n"
 printf "$SEGMENT$SEGMENT$SEGMENT\n"
 #-----------------------------------------
 
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Build
 # ─────────────────────────────────────────────────────────────────────────────
@@ -49,14 +53,20 @@ printf "$LINE_BRK"
 #-----------------------------------------
 cd src/
 
-cmake \
-  --preset conan-release \
-  -DCMAKE_POLICY_DEFAULT_CMP0091=NEW \
-  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-  -DSPM_USE_BUILTIN_PROTOBUF=OFF \
-  -G "Unix Makefiles"
+cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DBUILD_SHARED_LIBS=OFF \
+    -D_GLIBCXX_USE_CXX11_ABI=1 \
+    -DSPM_USE_BUILTIN_PROTOBUF=OFF \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake \
+    -S "$(pwd)" \
+    -B "$(pwd)/build/Release" \
+    -G "Unix Makefiles"
 
-cmake --build --preset conan-release --parallel $(nproc) --target RagPUREAI --
+cmake --build "$(pwd)/build/Release" --parallel $(nproc)
+# cmake --build --preset conan-release --parallel $(nproc) --target RagPUREAI 
+
 #-----------------------------------------
 #================= ENDING ================
 #-----------------------------------------
@@ -64,6 +74,8 @@ printf "$SEGMENT"
 printf "             Finish [Build]\n"
 printf "$SEGMENT$SEGMENT$SEGMENT\n"
 #-----------------------------------------
+
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Sending to Sandbox
