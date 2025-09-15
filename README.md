@@ -186,7 +186,7 @@ chmod +x build.sh
 ---
 ---
 
-##### Build Note:
+## Testing Locally
 
 > This is a development version with an automatic pipline build system. Optimizing the process, making it easy to compile and test all five modules automatically in this development version.
 > To compile and build, just use the provided scripts — no manual setup needed.
@@ -198,6 +198,7 @@ Sandbox/
 └── ...
 ```
 
+---
 
 # Use pre-trained models
 
@@ -249,17 +250,6 @@ python3 models/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -
 ---
 ---
 
-## Testing Locally
-
-To test the Python bindings:
-
-```python
-from RagPUREAI import SomeExposedFunction 
-```
-
-Ensure `RagPUREAI*.so` is placed in the same folder as your Python project.
-
----
 
 ## Publishing to PyPI
 
