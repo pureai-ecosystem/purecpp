@@ -39,6 +39,8 @@
 #include "ChunkCommons/ChunkCommons.h"
 #include "ChunkQuery/ChunkQuery.h"
 
+#include "FAISSVectorSearch/FAISSVectorSearch.h"
+
 #include "../components/MetadataExtractor/Document.h"
 #include "IMetadataExtractor.h"
 #include "MetadataExtractor.h"
@@ -53,11 +55,11 @@
 #include "EmbeddingOpenAI/IEmbeddingOpenAI.h"
 #include "EmbeddingOpenAI/EmbeddingOpenAI.h"
 
-#include "../components/Chat/Message/BaseMessage.h"
-#include "../components/Chat/Message/HumanMessage.h"
-#include "../components/Chat/Message/AIMessage.h"
-#include "../components/Chat/Message/SystemMessage.h"
-#include "../components/Chat/ChatHistory/ChatHistory.h"
+// #include "../components/Chat/Message/BaseMessage.h"
+// #include "../components/Chat/Message/HumanMessage.h"
+// #include "../components/Chat/Message/AIMessage.h"
+// #include "../components/Chat/Message/SystemMessage.h"
+// #include "../components/Chat/ChatHistory/ChatHistory.h"
 
 namespace py = pybind11;
 using namespace RAGLibrary;
@@ -1326,56 +1328,100 @@ void bind_EmbeddingOpenAI(py::module &m)
         )doc");
 }
 
-// VectorDabase
-void bind_VectorDB(pybind11::module_ &);
+void bind_FAISSVectorSearch(py::module& m) {
+    py::class_<FAISSVectorSearch::PureResult>(m, "PureResult")
+        .def_readonly("index", &FAISSVectorSearch::PureResult::indices)  // user-friendly alias
+        .def_readonly("distances", &FAISSVectorSearch::PureResult::distances)
+        .def("__repr__", [](const FAISSVectorSearch::PureResult& self) {
+            std::ostringstream oss;
+            oss << "PureResult(index=";
+            oss << py::repr(py::cast(self.indices));
+            oss << ", distances=";
+            oss << py::repr(py::cast(self.distances));
+            oss << ")";
+            return oss.str();
+        });
 
-// Trampoline class for BaseMessage
-class PyBaseMessage : public purecpp::chat::BaseMessage {
-public:
-    using purecpp::chat::BaseMessage::BaseMessage; // Inherit constructors
+    m.def("PureL2", &FAISSVectorSearch::PureL2,
+          py::arg("query"),
+          py::arg("chunks"),
+          py::arg("pos"),
+          py::arg("k") = 1,
+          R"pbdoc(
+            Performs an exact L2 (Euclidean) similarity search using FAISS.
+            Returns the top-k most similar vectors from the database.
+        )pbdoc");
 
-    std::string get_type() const override {
-        PYBIND11_OVERRIDE_PURE(
-            std::string,            /* Return type */
-            purecpp::chat::BaseMessage, /* Parent class */
-            get_type               /* Name of function */
-                                    /* Arguments */
-        );
-    }
+    m.def("PureIP", &FAISSVectorSearch::PureIP,
+          py::arg("query"),
+          py::arg("chunks"),
+          py::arg("pos"),
+          py::arg("k") = 1,
+          R"pbdoc(
+            Performs a dot product similarity search using FAISS.
+            Suitable when the magnitude of vectors is meaningful.
+        )pbdoc");
 
-    std::string get_content() const override {
-        PYBIND11_OVERRIDE_PURE(
-            std::string,
-            purecpp::chat::BaseMessage,
-            get_content
-        );
-    }
-};
-
-void bind_ChatClasses(py::module &m) {
-    py::class_<purecpp::chat::BaseMessage, PyBaseMessage, std::shared_ptr<purecpp::chat::BaseMessage>>(m, "BaseMessage")
-        .def(py::init<>())
-        .def_property_readonly("type", &purecpp::chat::BaseMessage::get_type)
-        .def_property_readonly("content", &purecpp::chat::BaseMessage::get_content);
-
-    py::class_<purecpp::chat::HumanMessage, std::shared_ptr<purecpp::chat::HumanMessage>, purecpp::chat::BaseMessage>(m, "HumanMessage")
-        .def(py::init<std::string>(), py::arg("content"));
-
-    py::class_<purecpp::chat::AIMessage, std::shared_ptr<purecpp::chat::AIMessage>, purecpp::chat::BaseMessage>(m, "AIMessage")
-        .def(py::init<std::string>(), py::arg("content"));
-
-    py::class_<purecpp::chat::SystemMessage, std::shared_ptr<purecpp::chat::SystemMessage>, purecpp::chat::BaseMessage>(m, "SystemMessage")
-        .def(py::init<std::string>(), py::arg("content"));
-
-    py::class_<purecpp::chat::ChatHistory>(m, "ChatHistory")
-        .def(py::init<>())
-        .def("add_message", static_cast<void (purecpp::chat::ChatHistory::*)(const std::shared_ptr<purecpp::chat::BaseMessage>&)>(&purecpp::chat::ChatHistory::add_message), py::arg("message"))
-        .def("add_messages", static_cast<void (purecpp::chat::ChatHistory::*)(const std::vector<std::shared_ptr<purecpp::chat::BaseMessage>>&)>(&purecpp::chat::ChatHistory::add_message), py::arg("messages"))
-        .def_property_readonly("messages", &purecpp::chat::ChatHistory::get_messages)
-        .def("clear", &purecpp::chat::ChatHistory::clear)
-        .def("size", &purecpp::chat::ChatHistory::size)
-        .def("add_benchmark_messages_omp", &purecpp::chat::ChatHistory::add_benchmark_messages_omp, py::arg("num_messages"));
+    m.def("PureCosine", &FAISSVectorSearch::PureCosine,
+          py::arg("query"),
+          py::arg("chunks"),
+          py::arg("pos"),
+          py::arg("k") = 1,
+          R"pbdoc(
+            Performs a cosine similarity search using FAISS.
+            Internally normalizes all vectors and then uses inner product search.
+        )pbdoc");
 }
+// // VectorDabase
+// void bind_VectorDB(pybind11::module_ &);
+
+// // Trampoline class for BaseMessage
+// class PyBaseMessage : public purecpp::chat::BaseMessage {
+// public:
+//     using purecpp::chat::BaseMessage::BaseMessage; // Inherit constructors
+
+//     std::string get_type() const override {
+//         PYBIND11_OVERRIDE_PURE(
+//             std::string,            /* Return type */
+//             purecpp::chat::BaseMessage, /* Parent class */
+//             get_type               /* Name of function */
+//                                     /* Arguments */
+//         );
+//     }
+
+//     std::string get_content() const override {
+//         PYBIND11_OVERRIDE_PURE(
+//             std::string,
+//             purecpp::chat::BaseMessage,
+//             get_content
+//         );
+//     }
+// };
+
+// void bind_ChatClasses(py::module &m) {
+//     py::class_<purecpp::chat::BaseMessage, PyBaseMessage, std::shared_ptr<purecpp::chat::BaseMessage>>(m, "BaseMessage")
+//         .def(py::init<>())
+//         .def_property_readonly("type", &purecpp::chat::BaseMessage::get_type)
+//         .def_property_readonly("content", &purecpp::chat::BaseMessage::get_content);
+
+//     py::class_<purecpp::chat::HumanMessage, std::shared_ptr<purecpp::chat::HumanMessage>, purecpp::chat::BaseMessage>(m, "HumanMessage")
+//         .def(py::init<std::string>(), py::arg("content"));
+
+//     py::class_<purecpp::chat::AIMessage, std::shared_ptr<purecpp::chat::AIMessage>, purecpp::chat::BaseMessage>(m, "AIMessage")
+//         .def(py::init<std::string>(), py::arg("content"));
+
+//     py::class_<purecpp::chat::SystemMessage, std::shared_ptr<purecpp::chat::SystemMessage>, purecpp::chat::BaseMessage>(m, "SystemMessage")
+//         .def(py::init<std::string>(), py::arg("content"));
+
+//     py::class_<purecpp::chat::ChatHistory>(m, "ChatHistory")
+//         .def(py::init<>())
+//         .def("add_message", static_cast<void (purecpp::chat::ChatHistory::*)(const std::shared_ptr<purecpp::chat::BaseMessage>&)>(&purecpp::chat::ChatHistory::add_message), py::arg("message"))
+//         .def("add_messages", static_cast<void (purecpp::chat::ChatHistory::*)(const std::vector<std::shared_ptr<purecpp::chat::BaseMessage>>&)>(&purecpp::chat::ChatHistory::add_message), py::arg("messages"))
+//         .def_property_readonly("messages", &purecpp::chat::ChatHistory::get_messages)
+//         .def("clear", &purecpp::chat::ChatHistory::clear)
+//         .def("size", &purecpp::chat::ChatHistory::size)
+//         .def("add_benchmark_messages_omp", &purecpp::chat::ChatHistory::add_benchmark_messages_omp, py::arg("num_messages"));
+// }
 
 //--------------------------------------------------------------------------
 // Main module
@@ -1415,8 +1461,7 @@ PYBIND11_MODULE(RagPUREAI, m)
     bind_IEmbeddingOpenAI(m);
     bind_EmbeddingOpenAI(m);
 
-    bind_ChatClasses(m);
-
-    py::module_ vectorDB = m.def_submodule("vectorDB", "Bindings for vector database");
-    bind_VectorDB(vectorDB);
+    // bind_ChatClasses(m);
+    // py::module_ vectorDB = m.def_submodule("vectorDB", "Bindings for vector database");
+    // bind_VectorDB(vectorDB);
 }
