@@ -7,8 +7,8 @@ Designed for maximum performance and scalability, it integrates vector search, O
 This repository provides detailed guidance on how to set up the environment, configure dependencies with Conan, and compile the project using CMake — going beyond a simple build, it shows how to prepare a robust development pipeline.
 
 ## 📚 Table of Contents
-- [1. Local Environment Setup](#local-environment-setup)
-- [2. Docker Environment Setup](#docker-environment-setup)
+- [1. Docker Environment Setup](#docker-environment-setup)
+- [2. Local Environment Setup](#local-environment-setup)
 - [3. Using Pre-trained Models](#use-pre-trained-models)
   
 ---
@@ -72,10 +72,9 @@ git clone --recursive https://github.com/bbzaffari/purecpp
 cd purecpp
 ```
 
-* 3. `docker build -t pure_faiss .`
+* 3. Build a Docker image from the current directory and tag it as 'pure_faiss'
 
 ```bash
-# Build a Docker image from the current directory and tag it as 'pure_faiss'
 docker build -t pure_faiss .
 ```
 
