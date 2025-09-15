@@ -12,7 +12,7 @@ set(CMAKE_BUILD_TYPE "Release")
 # ─────────────────────────────────────────────────────────────────────────────
 #------- Caminhos para FAISS -------
 # ─────────────────────────────────────────────────────────────────────────────
-set(FAISS_ROOT "${CMAKE_BINARY_DIR}/../../../libs/faiss")
+set(FAISS_ROOT "${CMAKE_BINARY_DIR}../libs/faiss")
 set(FAISS_INCLUDE_DIR "${FAISS_ROOT}/faiss")
 set(FAISS_LIB_DIR "${FAISS_ROOT}/build/faiss") # Must contain libfaiss.a
 
@@ -22,6 +22,24 @@ set_target_properties(faiss PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${FAISS_INCLUDE_DIR}"
 )
 
+
+# # ── FAISS (robusto a layout de build)
+# set(FAISS_ROOT "${CMAKE_SOURCE_DIR}/../libs/faiss")
+# set(FAISS_INCLUDE_DIR "${FAISS_ROOT}/faiss")
+# set(FAISS_LIB_DIR "${FAISS_ROOT}/build/faiss")
+
+# # Aceita tanto .a quanto .so
+# find_library(FAISS_LIB NAMES faiss PATHS "${FAISS_LIB_DIR}" NO_DEFAULT_PATH)
+
+# if(NOT FAISS_LIB)
+#   message(FATAL_ERROR "FAISS não encontrado em ${FAISS_LIB_DIR}. Construa o FAISS ou ajuste o caminho.")
+# endif()
+
+# add_library(faiss UNKNOWN IMPORTED)
+# set_target_properties(faiss PROPERTIES
+#   IMPORTED_LOCATION "${FAISS_LIB}"
+#   INTERFACE_INCLUDE_DIRECTORIES "${FAISS_INCLUDE_DIR}"
+# )
 
 # ─────────────────────────────────────────────────────────────────────────────
 #------- Compiler Specific flags -------
@@ -296,4 +314,4 @@ target_link_libraries(RagPUREAI PRIVATE RagPUREAILib)
 # ─────────────────────────────────────────────────────────────────────────────
 #---------------- DEBUG MESSAGES
 # ─────────────────────────────────────────────────────────────────────────────
-# ...
+#${CMAKE_SOURCE_DIR})

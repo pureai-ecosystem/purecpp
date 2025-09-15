@@ -31,7 +31,7 @@
 #include "TXTLoader/TXTLoader.h"
 #include "WebLoader/WebLoader.h"
 
-#include "ContentCleaner/ContentCleaner.h"
+#include "ContentCleaner.h"
 
 #include "ChunkDefault/ChunkDefault.h"
 #include "ChunkCount/ChunkCount.h"
@@ -41,7 +41,7 @@
 
 #include "FAISSVectorSearch/FAISSVectorSearch.h"
 
-#include "../components/MetadataExtractor/Document.h"
+#include "MetadataExtractor/Document.h"
 #include "IMetadataExtractor.h"
 #include "MetadataExtractor.h"
 #include "MetadataRegexExtractor/IMetadataRegexExtractor.h"
@@ -49,17 +49,17 @@
 #include "MetadataRegexExtractor/MetadataRegexExtractor.h"
 #include "MetadataHFExtractor/MetadataHFExtractor.h"
 
-#include "../components/Embedding/Document.h"
+#include "Embedding/Document.h"
 #include "IBaseEmbedding.h"
 
 #include "EmbeddingOpenAI/IEmbeddingOpenAI.h"
 #include "EmbeddingOpenAI/EmbeddingOpenAI.h"
 
-// #include "../components/Chat/Message/BaseMessage.h"
-// #include "../components/Chat/Message/HumanMessage.h"
-// #include "../components/Chat/Message/AIMessage.h"
-// #include "../components/Chat/Message/SystemMessage.h"
-// #include "../components/Chat/ChatHistory/ChatHistory.h"
+// #include "Chat/Message/BaseMessage.h"
+// #include "Chat/Message/HumanMessage.h"
+// #include "Chat/Message/AIMessage.h"
+// #include "Chat/Message/SystemMessage.h"
+// #include "Chat/ChatHistory/ChatHistory.h"
 
 namespace py = pybind11;
 using namespace RAGLibrary;
