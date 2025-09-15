@@ -64,7 +64,7 @@ pip install purecpp
 * 1. Clone the repository along with all its submodules (recursively)
 
 ```bash
-git clone --recursive https://github.com/bbzaffari/purecpp
+git clone --recursive https://github.com/pureai-ecosystem/purecpp
 ```
 
 * 2. Navigate into the cloned repository folder
@@ -106,7 +106,7 @@ chmod +x build.sh
 ### 1. Clone the Repository
 
 ```bash
-git clone --recursive https://github.com/pureai-ecosystem/purecpp.git
+git clone --recursive https://github.com/pureai-ecosystem/purecpp
 cd purecpp
 ````
 
