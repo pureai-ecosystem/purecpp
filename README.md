@@ -43,6 +43,12 @@ We welcome contributions to **PureCPP**!
 **If you would like to contribute, please read our contribution guide before opening an issue or submitting a pull request:** 
 👉 [**Contribution Guide**](/community/CONTRIBUTING.md)
 
+### Requirements
+
+- ***GCC/G++** >= 13.1*
+- ***CMake**   >= 3.22*
+- ***Python** >= 3.8*
+  
 ## Quick Start with PIP
 
 To install the package via `pip` **(for end-users)**:
