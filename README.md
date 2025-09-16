@@ -40,9 +40,8 @@ For detailed explanation of features, please refer to our 🔗 [official documen
 
 We welcome contributions to **PureCPP**!
 
-**If you would like to contribute, please read our contribution guide before opening an issue or submitting a pull request:**
-
-👉 [Contribution Guide](/community/CONTRIBUTING.md)
+**If you would like to contribute, please read our contribution guide before opening an issue or submitting a pull request:** 
+👉 [**Contribution Guide**](/community/CONTRIBUTING.md)
 
 ## Quick Start with PIP
 
