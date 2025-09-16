@@ -5,7 +5,7 @@
 **PureCPP is a powerful C++ backend architecture for RAG systems.**\
 Designed for maximum performance and scalability, it integrates vector search, ONNX models, and CPU/CUDA acceleration into a seamless, python integrated framework.
 
-This repository provides detailed guidance on how to set up the environment, configure dependencies and building the project.
+*This repository provides detailed guidance on how to set up the environment, configure dependencies and building the project.*
 
 ## 📚 Table of Contents
 - [1. Docker Environment Setup](#docker-environment-setup)
@@ -14,35 +14,33 @@ This repository provides detailed guidance on how to set up the environment, con
   
 ---
 
-
 ## Project Structure
 
 ```
-.
 ├── scripts/                 # Shell utilities and setup scripts
 ├── package/                 # Python package
 │   └── purecpp/             # Contains the compiled .so
 ├── libs/                    # Dependencies
 ├── src/                     # source files and CMake entry
-    ├── build/               # Generated build files
-    └── CMakeLists.txt       # Main build config
+│   ├── build/               # Generated build files
+│   └── CMakeLists.txt       # Main build config
 ├── models/
-    ├── hf_extract_model.py
-    ├── hf_model_to_onnx.py
-    └── <Model>.onnx
+│   ├── hf_extract_model.py
+│   ├── hf_model_to_onnx.py
+│   └── <Model>.onnx
 ├── Dockerfile               # Build environment
 └── README.md
-```
+````
 
-## 📖 Documentation
-For detailed installation and setup instructions, please refer to our official documentation:
+### Documentation
 
-🔗 [PureCPP Documentation](https://docs.puredocs.org/setup)
+For detailed explanation of features, please refer to our 🔗 [official documentation](https://docs.puredocs.org/setup).
 
+### Contributing to PureCPP
 
-## 🚀 Contributing to PureCPP
+We welcome contributions to **PureCPP**!
 
-We welcome contributions to **PureCPP**! If you would like to contribute, please read our contribution guide before opening an issue or submitting a pull request:
+**If you would like to contribute, please read our contribution guide before opening an issue or submitting a pull request:**
 
 👉 [Contribution Guide](/community/CONTRIBUTING.md)
 
@@ -54,51 +52,51 @@ To install the package via `pip` **(for end-users)**:
 pip install purecpp
 ```
 
-
+---
 ---
 # Build Options
 ---
 
 # Docker Environment Setup 
 
-* 1. Clone the repository along with all its submodules (recursively)
+* **1. Clone the repository along with all its submodules (recursively)**
 
 ```bash
 git clone --recursive https://github.com/pureai-ecosystem/purecpp
 ```
 
-* 2. Navigate into the cloned repository folder
+* **2. Navigate into the cloned repository folder**
 
 ```bash
 cd purecpp
 ```
 
-* 3. Build a Docker image from the current directory and tag it as 'pure_faiss'
+* **3. Build a Docker image from the current directory and tag it as 'pure_faiss'**
 
 ```bash
 docker build -t pure_faiss .
 ```
 
-* 4. Start a Docker container named 'env' from the 'pure_faiss' image, mounting current dir to /home
+* **4. Start a Docker container named 'env' from the 'pure_faiss' image, mounting current dir to /home**
 
 ```bash
 docker run -it --name env -v "$PWD":/home pure_faiss
 ```
 
-* 5. Make all shell scripts in the scripts/ folder executable & Run the environment configuration script to set up variables, paths, or dependencies
+* **5. Execute the `env_config.sh`** **(in order to install FAISS, torch, configure conan)**
 
 ```bash
 chmod +x -R scripts/*.sh
 ./scripts/env_config.sh
 ```
 
-* 6. Make the build.sh script executable \ and Run the 'build' command or script (ensure it's defined in PATH or as a function/alias)
+* **6. Make the build.sh script executable and build it**
 
 ```bash
 chmod +x build.sh
-./build.sh all
+./build.sh
 ```
-
+---
 ---
 
 # Local Environment Setup 
@@ -132,6 +130,7 @@ sudo apt install -y \
   libgflags-dev python3-dev libprotobuf-dev \
   protobuf-compiler unzip libssl-dev zlib1g-dev
 ````
+
 - **RedHat**
 ```bash
 yum update && 
@@ -161,20 +160,23 @@ Steps below to create and activate the virtual environment:
 pip install build conan cmake requests pybind11
 ````
 
-### 4. Execute the `env_config.sh` **(in order to install FAISS, torch, configure conan)**
 
-```bash
-chmod +x  -R ./scripts/*.sh
-./scripts/env_config.sh
-````
-
-### 5. Install Rust via rustup
+### 4. Install Rust via rustup
 
 *Run rustup installer non-interactively (-y). This places cargo and rustc in /root/.cargo & activate Rust Environment:*
+
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source ~/.cargo/env
 ````
+
+### 5. Execute the `env_config.sh` **(in order to install FAISS, torch, configure conan)**
+
+```bash
+chmod +x  -R ./installers/*.sh
+./installers/env_config.sh
+````
+
 
 ### 6. Make the build.sh script executable \ and Run the 'build' command or script (ensure it's defined in PATH or as a function/alias)
 
@@ -184,13 +186,12 @@ chmod +x build.sh
 ```
 
 ---
----
 
 ## Testing Locally
 
-> This is a development version with an automatic pipline build system. Optimizing the process, making it easy to compile and test all five modules automatically in this development version.
-> To compile and build, just use the provided scripts — no manual setup needed.
-> The resulting libraries will be placed inside [`Sandbox dir`](/Sandbox) 
+> This is a development version with an automatic pipline build system. Optimizing the process, making it easy to compile and test all five modules automatically in this development version. \
+> To compile and build, just use the provided scripts — no manual setup needed.\
+> The resulting libraries will be placed inside [`Sandbox dir`](/Sandbox)
 
 ```SourceTree
 Sandbox/
@@ -198,6 +199,7 @@ Sandbox/
 └── ...
 ```
 
+---
 ---
 
 # Use pre-trained models
@@ -214,15 +216,12 @@ It automatically creates a `models` directory (in the parent folder of the scrip
 
 - Requirements
   
-  Before running the script, make sure you have the following Python packages installed:  
+ *Before running the script, make sure you have the following Python packages installed:*  
   ```bash
   pip install torch transformers onnx onnxruntime optimum
   ```
 
-## Examples
-
-> **In ./models/ run:**
-
+### Examples
 
 ```bash
 python3 models/hf_model_to_onnx.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-large-cased-finetuned-conll03-english"
@@ -232,24 +231,23 @@ python3 models/hf_model_to_onnx.py -m="dbmdz/bert-large-cased-finetuned-conll03-
 python3 models/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence-transformers/all-MiniLM-L6-v2"
 ```
 
-## Output
+### Output
 
 ```
-/models/
-  ├── hf_extract_model.py
-  ├── hf_model_to_onnx.py
-  ├── sentence-transformers/all-MiniLM-L6-v2/ 
-  │    ├── model.onnx (via optimum)
-  │    └── tokenizer/ 
-  └── dslim/bert-base-NER/  
-       ├── model.onnx  
-       ├── label_map.json  
-       └── tokenizer/ 
+./models/
+    ├── hf_extract_model.py
+    ├── hf_model_to_onnx.py
+    ├── sentence-transformers/all-MiniLM-L6-v2/ 
+    │    ├── model.onnx (via optimum)
+    │    └── tokenizer/ 
+    └── dslim/bert-base-NER/  
+        ├── model.onnx  
+        ├── label_map.json  
+        └── tokenizer/ 
 ```
 
 ---
 ---
-
 
 ## Publishing to PyPI
 
