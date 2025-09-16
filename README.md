@@ -82,6 +82,21 @@ docker build -t pure_faiss .
 ```bash
 docker run -it --name env -v "$PWD":/home pure_faiss
 ```
+> ## Note
+> Once you've created the container using `docker run`, ***you don't need to recreate it again.***
+> Instead, follow these two simple commands to ***reuse*** the container:
+
+> ```bash
+> docker start env
+> ````
+> **This command **starts an existing container** that has already been created earlier using `docker run`.**
+
+
+> ```bash
+> docker exec -it env bash
+> ```
+> **This command **attaches a terminal to the running container**, allowing you to interact with it just like you would with a regular Linux shell.**
+
 
 * **5. Execute the `env_config.sh`** **(in order to install FAISS, torch, configure conan)**
 
@@ -96,6 +111,7 @@ chmod +x -R scripts/*.sh
 chmod +x build.sh
 ./build.sh
 ```
+
 ---
 ---
 
@@ -191,7 +207,7 @@ chmod +x build.sh
 
 > This is a development version with an automatic pipline build system. Optimizing the process, making it easy to compile and test all five modules automatically in this development version. \
 > To compile and build, just use the provided scripts — no manual setup needed.\
-> The resulting libraries will be placed inside [`Sandbox dir`](/Sandbox)
+> The resulting libraries will be placed inside [`Sandbox/`](/Sandbox)
 
 ```SourceTree
 Sandbox/
@@ -214,7 +230,7 @@ This scripts handles two main use cases:
 
 It automatically creates a `models` directory (in the parent folder of the script) to store the exported ONNX models and related assets.
 
-- Requirements
+### Requirements
   
  *Before running the script, make sure you have the following Python packages installed:*  
   ```bash
