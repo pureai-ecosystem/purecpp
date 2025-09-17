@@ -89,11 +89,12 @@ docker run -it --name env -v "$PWD":/home pure_faiss
 > ## Note
 > Once you've created the container using `docker run`, ***you don't need to recreate it again.***
 > Instead, follow these two simple commands to ***reuse*** the container:
->
+
 > ```bash
 > docker start env
 > ````
 > **This command **starts an existing container** that has already been created earlier using `docker run`.**
+
 > ```bash
 > docker exec -it env bash
 > ```
