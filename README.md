@@ -40,8 +40,7 @@ For detailed explanation of features, please refer to our 🔗 [official documen
 
 We welcome contributions to **PureCPP**!
 
-**If you would like to contribute, please read our contribution guide before opening an issue or submitting a pull request:** 
-👉 [**Contribution Guide**](/community/CONTRIBUTING.md)
+**If you would like to contribute, please read our 👉 [contribution guide](/community/CONTRIBUTING.md).**
 
 ### Requirements
 
@@ -62,7 +61,7 @@ pip install purecpp
 # Build Options
 ---
 
-# Docker Environment Setup 
+## Docker Environment Setup 
 
 * **1. Clone the repository along with all its submodules (recursively)**
 
@@ -120,7 +119,7 @@ chmod +x build.sh
 ---
 ---
 
-# Local Environment Setup 
+## Local Environment Setup 
 
 ### 1. Clone the Repository
 
@@ -199,24 +198,24 @@ chmod +x  -R ./installers/*.sh
 ````
 
 
-### 6. Make the build.sh script executable \ and Run the 'build' command or script (ensure it's defined in PATH or as a function/alias)
+### 6. Make the `build.sh` script executable & Run it
 
 ```bash
 chmod +x build.sh
-./build.sh all
+./build.sh
 ```
 
 ---
 
 ## Testing Locally
 
-> This is a development version with an automatic pipline build system. Optimizing the process, making it easy to compile and test all five modules automatically in this development version. \
+> This is a development version with an automatic pipline build system. Optimizing the process, making it easy to compile and test all modules automatically in this development version. \
 > To compile and build, just use the provided scripts — no manual setup needed.\
 > The resulting libraries will be placed inside [`Sandbox/`](/Sandbox)
 
 ```SourceTree
 Sandbox/
-├── RagPURE.cpython-312-x86_64-linux-gnu.so
+├── RagPUREAI.cpython-312-x86_64-linux-gnu.so
 └── ...
 ```
 
