@@ -24,7 +24,7 @@
 #include "Chunk/ChunkDefault/ChunkDefault.h"
 #include "Chunk/ChunkQuery/ChunkQuery.h"
 
-namespace FAISSVectorSearch {
+namespace faiss_backend {
 
     // struct vdb_data {
     //     std::vector<float> flatVD;
