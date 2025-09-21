@@ -32,13 +32,13 @@ namespace Chunk
         }; 
     };
     
-        extern inline const std::unordered_map<std::string, std::vector<std::string>> EmbeddingModel = {
+    extern inline const std::unordered_map<std::string, std::vector<std::string>> EmbeddingModel = {
             {"openai", {"text-embedding-ada-002", "text-embedding-3-small", "..."}},
             {"huggingface", {"bge-small", "bge-large"}},
             {"cohere", {"embed-english-light-v3.0"}}
         };
  
-        inline void PrintEmbeddingModels() {
+    inline void PrintEmbeddingModels() {
         std::cout << "╔══════════════════════════════════════════════════════════╗\n";
         std::cout << "║               📦 Available Embedding Models              \n";
         std::cout << "╠══════════════════════════════════════════════════════════╣\n";

@@ -16,7 +16,7 @@ args = parser.parse_args()
 model_name = args.model_name
 config = AutoConfig.from_pretrained(model_name)
 label_map = config.id2label
-dir_path= os.path.join(os.path.dirname(__file__), "..", "models", model_name)
+dir_path= os.path.join(os.path.dirname(__file__), ".", "models", model_name)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 
