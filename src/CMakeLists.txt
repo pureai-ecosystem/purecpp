@@ -10,7 +10,7 @@ set(CMAKE_BUILD_TYPE "Release")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#------- Caminhos para FAISS -------
+#------- Path to FAISS -------
 # ─────────────────────────────────────────────────────────────────────────────
 set(FAISS_ROOT "${CMAKE_BINARY_DIR}/../../../libs/faiss")
 set(FAISS_INCLUDE_DIR "${FAISS_ROOT}/faiss")
@@ -22,24 +22,6 @@ set_target_properties(faiss PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${FAISS_INCLUDE_DIR}"
 )
 
-
-# # ── FAISS (robusto a layout de build)
-# set(FAISS_ROOT "${CMAKE_SOURCE_DIR}/../libs/faiss")
-# set(FAISS_INCLUDE_DIR "${FAISS_ROOT}/faiss")
-# set(FAISS_LIB_DIR "${FAISS_ROOT}/build/faiss")
-
-# # Aceita tanto .a quanto .so
-# find_library(FAISS_LIB NAMES faiss PATHS "${FAISS_LIB_DIR}" NO_DEFAULT_PATH)
-
-# if(NOT FAISS_LIB)
-#   message(FATAL_ERROR "FAISS não encontrado em ${FAISS_LIB_DIR}. Construa o FAISS ou ajuste o caminho.")
-# endif()
-
-# add_library(faiss UNKNOWN IMPORTED)
-# set_target_properties(faiss PROPERTIES
-#   IMPORTED_LOCATION "${FAISS_LIB}"
-#   INTERFACE_INCLUDE_DIRECTORIES "${FAISS_INCLUDE_DIR}"
-# )
 
 # ─────────────────────────────────────────────────────────────────────────────
 #------- Compiler Specific flags -------
@@ -123,17 +105,17 @@ endif()
 #------- Find other dependencies -------
 # ─────────────────────────────────────────────────────────────────────────────
 find_package(pybind11 REQUIRED)
-find_package(pdfium REQUIRED)          # Biblioteca para manipulação de PDFs
-find_package(OpenMP REQUIRED)          # OpenMP primeiro, pois pode ser usado por outros pacotes
-find_package(ICU REQUIRED)             # Biblioteca de internacionalização
-find_package(miniz REQUIRED)           # Biblioteca de compressão
-find_package(rapidxml REQUIRED)        # Parser XML
-find_package(beauty REQUIRED)          # HTTP Server (geralmente independente)
-find_package(lexbor REQUIRED)          # Biblioteca de parsing HTML
-find_package(re2 REQUIRED)             # Biblioteca de regex eficiente
-find_package(nlohmann_json REQUIRED)   # Biblioteca de JSON (não tem dependências)
-#find_package(fmt REQUIRED)            # Biblioteca de formatação de strings em casos aonde n tem format em compiladores mais antigos
-find_package(CURL REQUIRED)            # Biblioteca para requisições HTTP
+find_package(pdfium REQUIRED)         
+find_package(OpenMP REQUIRED)         
+find_package(ICU REQUIRED)            
+find_package(miniz REQUIRED)           
+find_package(rapidxml REQUIRED)       
+find_package(beauty REQUIRED)          
+find_package(lexbor REQUIRED)         
+find_package(re2 REQUIRED)            
+find_package(nlohmann_json REQUIRED)  
+#find_package(fmt REQUIRED)            
+find_package(CURL REQUIRED)            
 find_package(Threads REQUIRED)         
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -191,6 +173,9 @@ set(CMAKE_BUILD_RPATH
     "/usr/lib64"
     "\$ORIGIN/"
     "\$ORIGIN/purecpp/d_libs/libtorch/cpu/lib"
+
+    "${CMAKE_SOURCE_DIR}/../libs/libtorch/cpu/lib"
+    "\$ORIGIN/../libs/libtorch/cpu/lib"
 )
 
 set(CMAKE_INSTALL_RPATH
@@ -204,11 +189,13 @@ set(CMAKE_INSTALL_RPATH
     "/usr/lib64"
     "\$ORIGIN/"
     "\$ORIGIN/purecpp/d_libs/libtorch/cpu/lib"
+
+    "${CMAKE_SOURCE_DIR}/../libs/libtorch/cpu/lib"
+    "\$ORIGIN/../libs/libtorch/cpu/lib"
 )
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-new-dtags")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -222,14 +209,19 @@ add_subdirectory(${TOKENIZERS_PATH} tokenizers EXCLUDE_FROM_ALL)
 # ─────────────────────────────────────────────────────────────────────────────
 set(OPENAI_CPP_PATH "${CMAKE_SOURCE_DIR}/../libs/openai-cpp")
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # ----- Project sources -----
 # ─────────────────────────────────────────────────────────────────────────────
-set(RagPUREAI_BINDING_SRCS  "${CMAKE_SOURCE_DIR}/binding.cpp") 
+
+set(RagPUREAI_BINDING_SRCS  binding.cpp) 
 
 set(RagPUREAI_IMPL_SRCS
     ${CMAKE_SOURCE_DIR}/../libs/StringUtils/StringUtils.cpp
+    ${CMAKE_SOURCE_DIR}/../components/DataLoader/BaseLoader.cpp
+    ${CMAKE_SOURCE_DIR}/../components/DataLoader/PDFLoader/PDFLoader.cpp
+    ${CMAKE_SOURCE_DIR}/../components/DataLoader/DOCXLoader/DOCXLoader.cpp
+    ${CMAKE_SOURCE_DIR}/../components/DataLoader/WebLoader/WebLoader.cpp
+    ${CMAKE_SOURCE_DIR}/../components/DataLoader/TXTLoader/TXTLoader.cpp
 
     ${CMAKE_SOURCE_DIR}/../components/Embedding/BaseEmbedding.cpp
     ${CMAKE_SOURCE_DIR}/../components/Embedding/EmbeddingOpenAI/EmbeddingOpenAI.cpp
@@ -240,8 +232,13 @@ set(RagPUREAI_IMPL_SRCS
     ${CMAKE_SOURCE_DIR}/../components/Chunk/ChunkSimilarity/ChunkSimilarity.cpp
     ${CMAKE_SOURCE_DIR}/../components/Chunk/ChunkQuery/ChunkQuery.cpp
     
+    ${CMAKE_SOURCE_DIR}/../components/MetadataExtractor/MetadataExtractor.cpp
+    ${CMAKE_SOURCE_DIR}/../components/MetadataExtractor/MetadataRegexExtractor/MetadataRegexExtractor.cpp
+    ${CMAKE_SOURCE_DIR}/../components/MetadataExtractor/MetadataHFExtractor/MetadataHFExtractor.cpp
+
     ${CMAKE_SOURCE_DIR}/../components/CleanData/ContentCleaner/ContentCleaner.cpp
-    ${CMAKE_SOURCE_DIR}/../components/FAISSVectorSearch/FAISSVectorSearch.cpp
+    
+    ${CMAKE_SOURCE_DIR}/../components/FAISSBackend/faiss_backend.cpp
 )
 
 
@@ -258,6 +255,7 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/../libs/StringUtils
     ${CMAKE_SOURCE_DIR}/../libs/FileUtils
     ${CMAKE_SOURCE_DIR}/../libs/MemoryUtils
+
     #C:/vcpkg/packages/protobuf_x64-windows/include
     ${CURL_INCLUDE_DIRS}
     ${OPENAI_CPP_PATH}/include
@@ -273,15 +271,16 @@ target_include_directories(RagPUREAILib PUBLIC #.h
     ${CMAKE_SOURCE_DIR}/../components/CleanData/ContentCleaner
     ${CMAKE_SOURCE_DIR}/../components/Embedding/EmbeddingOpenAI
     ${CMAKE_SOURCE_DIR}/../components/Embedding
-    ${CMAKE_SOURCE_DIR}/../components/FAISSVectorSearch
+    ${CMAKE_SOURCE_DIR}/../components/FAISSBackend
     ${CMAKE_SOURCE_DIR}/../libs/faiss/
 )
 
-link_directories(${FAISS_LIB_DIR})
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Link libraries with RagPUREAILib
 # ─────────────────────────────────────────────────────────────────────────────
+link_directories(${FAISS_LIB_DIR})
+
 target_link_libraries(RagPUREAILib PUBLIC
     pdfium::pdfium
     icu::icu
@@ -301,7 +300,9 @@ target_link_libraries(RagPUREAILib PUBLIC
     ${TORCH_LIBRARIES}        
     tokenizers_cpp
     faiss
+    # ${FAISS_LIB_DIR}/libfaiss.a
 )
+
 # ─────────────────────────────────────────────────────────────────────────────
 #---------------- Pybind11 Module
 # ─────────────────────────────────────────────────────────────────────────────
