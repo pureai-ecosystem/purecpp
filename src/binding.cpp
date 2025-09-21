@@ -39,7 +39,7 @@
 #include "ChunkCommons/ChunkCommons.h"
 #include "ChunkQuery/ChunkQuery.h"
 
-#include "FAISSVectorSearch/FAISSVectorSearch.h"
+#include "FAISSBackend/faiss_backend.h"
 
 #include "MetadataExtractor/Document.h"
 #include "IMetadataExtractor.h"
@@ -1328,11 +1328,11 @@ void bind_EmbeddingOpenAI(py::module &m)
         )doc");
 }
 
-void bind_FAISSVectorSearch(py::module& m) {
-    py::class_<FAISSVectorSearch::PureResult>(m, "PureResult")
-        .def_readonly("index", &FAISSVectorSearch::PureResult::indices)  // user-friendly alias
-        .def_readonly("distances", &FAISSVectorSearch::PureResult::distances)
-        .def("__repr__", [](const FAISSVectorSearch::PureResult& self) {
+void bind_faiss_backend(py::module& m) {
+    py::class_<faiss_backend::PureResult>(m, "PureResult")
+        .def_readonly("index", &faiss_backend::PureResult::indices)  // user-friendly alias
+        .def_readonly("distances", &faiss_backend::PureResult::distances)
+        .def("__repr__", [](const faiss_backend::PureResult& self) {
             std::ostringstream oss;
             oss << "PureResult(index=";
             oss << py::repr(py::cast(self.indices));
@@ -1342,7 +1342,7 @@ void bind_FAISSVectorSearch(py::module& m) {
             return oss.str();
         });
 
-    m.def("PureL2", &FAISSVectorSearch::PureL2,
+    m.def("PureL2", &faiss_backend::PureL2,
           py::arg("query"),
           py::arg("chunks"),
           py::arg("pos"),
@@ -1352,7 +1352,7 @@ void bind_FAISSVectorSearch(py::module& m) {
             Returns the top-k most similar vectors from the database.
         )pbdoc");
 
-    m.def("PureIP", &FAISSVectorSearch::PureIP,
+    m.def("PureIP", &faiss_backend::PureIP,
           py::arg("query"),
           py::arg("chunks"),
           py::arg("pos"),
@@ -1362,7 +1362,7 @@ void bind_FAISSVectorSearch(py::module& m) {
             Suitable when the magnitude of vectors is meaningful.
         )pbdoc");
 
-    m.def("PureCosine", &FAISSVectorSearch::PureCosine,
+    m.def("PureCosine", &faiss_backend::PureCosine,
           py::arg("query"),
           py::arg("chunks"),
           py::arg("pos"),
