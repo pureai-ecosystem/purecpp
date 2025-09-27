@@ -1,4 +1,3 @@
-### C++ ###
 # Prerequisites
 **/*.d
 
@@ -47,9 +46,9 @@ bkp/
 
 # Ignore everything in the models folder
 models/*
-# But DO NOT ignore these two files
 !models/hf_extract_model.py
 !models/hf_model_to_onnx.py
+!models/README.md
 
 libtorch*.zip
 libs/libtorch
