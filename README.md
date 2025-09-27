@@ -11,8 +11,8 @@ Designed for maximum performance and scalability, it integrates vector search, O
 * **1.** [Environment Setup](#environment-setup)
   - [Docker](#docker)
   - [Local](#local)
-* **2.** [Build](#build)
-* **3.** [Using Pre-trained Models](#use-pre-trained-models)
+* **2.** [Build & Testing](#build)
+* **3.** [Publishing to PyPI](#publishing-to-pypi)
   
 ---
 
@@ -35,23 +35,9 @@ Designed for maximum performance and scalability, it integrates vector search, O
 └── README.md
 ````
 
-### Documentation
-
-For a detailed explanation of the features, please refer to our 🔗 [official documentation](https://docs.puredocs.org/setup).
-
-### Contributing to PureCPP
-
-We welcome contributions to **PureCPP**!
-
-**If you would like to contribute, please read our 👉 [contribution guide](/community/CONTRIBUTING.md).**
-  
-## Quick Start with PIP
-
-To install the package via `pip` **(for end-users)**:
-
-```bash
-pip install purecpp
-```
+- **[Quick Start ↗](https://docs.puredocs.org/setup)**
+- **[Contributing to PureCPP ↗](docs/CONTRIBUTING.md)**
+- **[Download Pre-trained Models ↗](./models/README.md)**
 
 ---
 
@@ -98,7 +84,7 @@ cd purecpp
   ./scripts/env_config.sh
   ```
 
-  *This install python essential package, libtorch, FAISS, and configure Conan*
+  *This script install python essential package, libtorch, FAISS, and configure Conan*
 
 > [!CAUTION]
 >
@@ -123,7 +109,6 @@ cd purecpp
 >
 > * **Python** ≥ 3.8
 > * **CMake** ≥ 3.22
-> * **Rust**
 > * **GCC/G++** ≥ 13
 
 #### 1. Installing dependencies
@@ -159,6 +144,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ```bash
 source ~/.cargo/env
 ```
+
 *This places cargo and rustc in /root/.cargo & activate Rust Environment*
 
 #### 3. Execute the `env_config.sh`
@@ -176,15 +162,16 @@ source ~/.cargo/env
     ```bash
     source venv/bin/activate
     ```
+  *This practice minimizes conflicts between global packages and project-specific requirements.*
 
-  This practice minimizes conflicts between global packages and project-specific requirements. Use the steps below to create and activate the virtual environment.
+**Then run `env_config.sh` script**
 
 ```bash
 chmod +x scripts/*.sh
 ./scripts/env_config.sh
 ```
 
-*This install python essential package, libtorch, FAISS, and configure Conan*
+*This script install python essential package, libtorch, FAISS, and configure Conan*
 
 ---
 
@@ -202,9 +189,7 @@ chmod +x build.sh
 - Compiles the code
 - Sends the `RagPUREAI.*.so` output to[`Sandbox/`](/Sandbox)
 
----
-
-## Testing Locally
+## **Testing**
 
 The `build.sh` script will place the resulting libraries inside [`Sandbox/`](/Sandbox)
 
@@ -219,53 +204,6 @@ To test the Python bindings:
   ```python
   from RagPUREAI import SomeExposedFunction 
   ```
-
----
----
-
-# Use pre-trained models
-
-### 🛠️ Hugging Face to **ONNX** Converter 
-
-These Python scripts convert Hugging Face models into the ONNX format for optimized inference.
-
-These scripts handle two primary use cases:
-1. **Feature extraction models** (e.g., `sentence-transformers`).
-2. **Token classification models** (e.g., Named Entity Recognition - NER).
-
-It automatically creates a `models` directory (in the parent folder of the script) to store the exported ONNX models and related assets.
-
-### Requirements
-  
- *Before running the script, make sure you have the following Python packages installed:*  
-  ```bash
-  pip install torch transformers onnx onnxruntime optimum
-  ```
-
-### Examples
-
-```bash
-python3 models/hf_model_to_onnx.py -m="dbmdz/bert-large-cased-finetuned-conll03-english" -o="bert-large-cased-finetuned-conll03-english"
-```
-
-```bash
-python3 models/hf_model_to_onnx.py -m="sentence-transformers/all-MiniLM-L6-v2" -o="sentence-transformers/all-MiniLM-L6-v2"
-```
-
-### Output
-
-```
-./models/
-    ├── hf_extract_model.py
-    ├── hf_model_to_onnx.py
-    ├── sentence-transformers/all-MiniLM-L6-v2/ 
-    │    ├── model.onnx (via optimum)
-    │    └── tokenizer/ 
-    └── dslim/bert-base-NER/  
-        ├── model.onnx  
-        ├── label_map.json  
-        └── tokenizer/ 
-```
 
 ---
 ---
