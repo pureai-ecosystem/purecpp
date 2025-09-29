@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     model_name = args.model_name
 
-    dir_path= os.path.join(os.path.dirname(__file__), "..", "models", model_name)
+    dir_path= os.path.join(os.path.dirname(__file__), ".", "models", model_name)
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
