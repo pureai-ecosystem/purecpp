@@ -84,7 +84,7 @@ cd purecpp
   ./scripts/env_config.sh
   ```
 
-  *This script install python essential package, libtorch, FAISS, and configure Conan*
+  *This script automates the setup of Python essentials, including LibTorch, FAISS, and configures Conan for dependency management.*
 
 > [!CAUTION]
 >
@@ -171,7 +171,7 @@ chmod +x scripts/*.sh
 ./scripts/env_config.sh
 ```
 
-*This script install python essential package, libtorch, FAISS, and configure Conan*
+*This script automates the setup of Python essentials, including LibTorch, FAISS, and configures Conan for dependency management.*
 
 ---
 
