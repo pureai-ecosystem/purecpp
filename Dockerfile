@@ -1,48 +1,22 @@
+# Use the official manylinux image (compatible with Python packaging standards)
+FROM quay.io/pypa/manylinux_2_28_x86_64
 
-FROM python:3.12-slim AS builder
-WORKDIR /app
+# Set working directory
+WORKDIR /home
 
-# Install GCC 13 and other dependencies
-RUN apt-get update && \
-    apt-get install -y \
-      gcc-13 \
-      g++-13 \
-      libstdc++-13-dev \
-      git \
-      curl \
-      wget \
-      cmake \
-      nano \
-      unzip \
-      ninja-build \
-      pkg-config \
-      libffi-dev \
-      libprotobuf-dev \
-      protobuf-compiler \
-      libgflags-dev \
-      libssl-dev \
-      sudo \
-      build-essential \
-      gnupg \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 100
+# Install development tools, Python deps, Rust, and cleanup to save space
+RUN yum install -y \
+      gcc gcc-c++ make git curl wget \
+      ninja-build libffi-devel openssl-devel \
+      protobuf-devel gflags-devel zlib-devel \
+      openblas-devel unzip\
+  && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+  && yum clean all \
+  && rm -rf /var/cache/yum
 
-COPY .git .git
-COPY .gitmodules .gitmodules
-COPY scripts/ ./scripts/
-RUN chmod +x -R /app/scripts
-RUN mkdir -p /app/libs/openai-cpp /app/libs/tokenizers-cpp
+# Add Rust to PATH and Python 3.12 binaries to PATH
+ENV PATH="/root/.cargo/bin:/opt/python/cp312-cp312/bin:${PATH}"
 
-# Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Run your scripts
-RUN /app/scripts/install_python_dependencies.sh
-RUN /app/scripts/install_torch.sh
-RUN /app/scripts/install_libs.sh
-RUN /app/scripts/configure_conan_profile.sh
-
-# COPY . .
+# Set default shell
 CMD ["/bin/bash"]
+
